@@ -1,0 +1,4 @@
+sectionName,sectionDescription,sectionDisplayOrder,questionDisplayOrder,questionText,questionImageUrl,questionType,difficulty,marks,negativeMarks,explanation,explanationImageUrl,optionA,optionB,optionC,optionD,correctOptions
+Quantitative Aptitude,Basic arithmetic and algebra,1,1,What is 12 + 13?,,MCQ,EASY,1,0.25,Sum of two integers,,22,23,24,25,B
+Quantitative Aptitude,Basic arithmetic and algebra,1,2,Solve for x: 2x + 6 = 14,,NUMERICAL,MEDIUM,2,0.5,Move 6 to RHS and divide by 2,,8,,,,,8
+Logical Reasoning,True/False basics,2,1,The statement "All squares are rectangles" is true.,,TRUE_FALSE,EASY,1,0,By definition of rectangles and squares,,True,False,,, ,True

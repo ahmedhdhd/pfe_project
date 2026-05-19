@@ -1,0 +1,17 @@
+/* Video player full height styling */
+.video-js {
+  width: 100% !important;
+  height: 100% !important;
+  padding-top: 0 !important;
+}
+
+.video-js .vjs-tech {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+}
+
+.video-js.vjs-fluid {
+  padding-top: 0 !important;
+}
+

@@ -1,0 +1,21 @@
+import { Router } from 'express';
+import * as c from '../controllers/misc.controller';
+import { authenticate, requireTeacher } from '../middleware/auth';
+
+const r = Router();
+r.use(authenticate, requireTeacher);
+r.post('/', c.createSchedule);
+r.get('/', c.listSchedules);
+r.get('/batch/:batchId', c.getSchedulesByBatch);
+r.get('/topic/:topicId', c.getSchedulesByTopic);
+r.get('/:id/join-token', c.getScheduleJoinToken);
+r.get('/:id/whiteboard', c.getScheduleWhiteboard);
+r.patch('/:id/whiteboard', c.updateScheduleWhiteboard);
+r.put('/:id/whiteboard', c.updateScheduleWhiteboard);
+r.get('/:id', c.getSchedule);
+r.put('/:id', c.updateSchedule);
+r.patch('/:id', c.updateSchedule);
+r.put('/:id/status', c.updateScheduleStatus);
+r.patch('/:id/status', c.updateScheduleStatus);
+r.delete('/:id', c.deleteSchedule);
+export default r;

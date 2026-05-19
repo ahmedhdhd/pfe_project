@@ -1,0 +1,1067 @@
+
+// TeslaAcademy LMS - Prisma Schema
+// Generated from frontend source analysis
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================
+// ORGANIZATIONS & TENANTS
+// ============================================================
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  subdomain String   @unique
+  domain    String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  config    OrganizationConfig?
+  users     User[]
+  batches   Batch[]
+  assignments Assignment[]
+  categories Category[]
+  testSeries TestSeries[]
+  teachers  Teacher[]
+  orders    Order[]
+  announcements Announcement[]
+  schedules Schedule[]
+  scheduleWhiteboards ScheduleWhiteboard[]
+
+  @@map("organizations")
+}
+
+model OrganizationConfig {
+  id             String  @id @default(cuid())
+  organizationId String  @unique
+  name           String
+  slug           String
+  domain         String?
+  contactEmail   String?
+  contactPhone   String?
+
+  // Payment
+  razorpayKeyId     String?
+  razorpayKeySecret String?
+  konnectApiKey     String?
+  konnectWalletId   String?
+  paymentGateway    String?  @default("konnect")
+  paymeeApiToken    String?
+  paymeeVendor      String?
+  paymentMode       String?  @default("per_course")
+  subscriptionPrice Float?   @default(0)
+  subscriptionType  String?  @default("onetime")
+  currency          String? @default("TND")
+  taxPercentage     String?
+  invoicePrefix     String?
+
+  // Branding
+  logoUrl    String?
+  faviconUrl String?
+  bannerUrls String[] @default([])
+  motto      String?
+  description String?
+  customCSS  String?
+  customJS   String?
+
+  // Theme (stored as JSON)
+  themeJson  Json?    // { primaryColor, secondaryColor, fontFamily }
+
+  // Landing page content
+  heroTitle    String?
+  heroSubtitle String?
+  ctaText      String?
+  ctaUrl       String?
+
+  // JSON arrays
+  featuresJson      Json? @default("[]")    // OrganizationConfigFeature[]
+  testimonialsJson  Json? @default("[]")    // OrganizationConfigTestimonial[]
+  faqJson           Json? @default("[]")    // OrganizationConfigFAQ[]
+  socialLinksJson   Json? @default("{}")    // Record<string, string>
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  ogImage         String?
+
+  // SMTP (stored encrypted or as JSON)
+  smtpConfigJson  Json?
+
+  // AI (OpenRouter only — chat + embeddings via OPENROUTER_EMBEDDING_MODEL)
+  openRouterApiKey String?
+
+  // Settings
+  supportEmail     String?
+  featuresEnabled  Json? @default("{}")    // Record<string, boolean>
+  maintenanceMode  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("organization_configs")
+}
+
+// ============================================================
+// USERS & AUTH
+// ============================================================
+
+enum UserRole {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+model User {
+  id             String   @id @default(cuid())
+  organizationId String
+  email          String?
+  phoneNumber    String?
+  countryCode    String?
+  username       String
+  passwordHash   String?
+  role           UserRole
+  isVerified     Boolean  @default(false)
+  profileImg     String?
+  gender         String?  // "Male" | "Female" | "Other"
+
+  // Address
+  addressCity    String?
+  addressState   String?
+  addressPincode String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  emailTokens      EmailToken[]
+  refreshTokens    RefreshToken[]
+  contentProgress  ContentProgress[]
+  testAttempts     TestAttempt[]
+  topicQuizAttempts TopicQuizAttempt[]
+  createdAssignments Assignment[] @relation("AssignmentCreator")
+  assignmentSubmissions AssignmentSubmission[]
+  enrollments      BatchEnrollment[]
+  testSeriesEnrollments TestSeriesEnrollment[]
+  orders           Order[]
+  batchReviews     BatchReview[]
+  issuedCertificates BatchCertificateIssue[]
+  sentAnnouncements Announcement[]
+  createdBatches   Batch[]        @relation("BatchCreator")
+  batchNotes       BatchNote[]
+  batchQuestions   BatchQuestion[]
+  batchQuestionResponses BatchQuestionResponse[]
+
+  @@unique([email, organizationId])
+  @@unique([phoneNumber, countryCode, organizationId])
+  @@map("users")
+}
+
+model EmailToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  type      String   // "VERIFY_EMAIL" | "INVITE" | "RESET_PASSWORD"
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("email_tokens")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+// ============================================================
+// TEACHERS (separate profile model — Teacher != User)
+// ============================================================
+
+model Teacher {
+  id             String  @id @default(cuid())
+  organizationId String
+  userId         String? @unique  // Optional link to a User account
+  name           String
+  highlightsJson Json?   @default("{}")  // { bio, experience, subjects, etc. }
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  batchTeachers   BatchTeacher[]
+  schedules       Schedule[]
+
+  @@map("teachers")
+}
+
+// ============================================================
+// BATCHES (core course unit — called "Course" in the UI)
+// ============================================================
+
+model Batch {
+  id                 String  @id @default(cuid())
+  organizationId     String
+  createdByUserId    String?
+  categoryId         String?
+  name               String
+  description        String?
+  class              String?
+  exam               String?
+  imageUrl           String?
+  introVideoUrl      String?
+  introVideoType     VideoType?
+  startDate          DateTime?
+  endDate           DateTime?
+  language          String?
+  level             BatchLevel @default(BEGINNER)
+  totalPrice         Float   @default(0)
+  discountPercentage Float   @default(0)
+  status             String   @default("INACTIVE")  // ACTIVE or INACTIVE
+  faqJson            Json?   @default("[]")  // Array<{ title, description }>
+  certificateEnabled       Boolean @default(false)
+  certificateTitle         String?
+  certificateTemplateId    String?
+  certificateTemplateUrl   String?
+  certificateIssuerName    String?
+  certificateSignerName    String?
+  certificateSignerTitle   String?
+  certificateLinkedInOrgId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  organization  Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdByUser User?             @relation("BatchCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  category      Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  subjects      Subject[]
+  teachers      BatchTeacher[]
+  enrollments   BatchEnrollment[]
+  schedules     Schedule[]
+  reviews       BatchReview[]
+  announcements Announcement[]
+  certificateIssues BatchCertificateIssue[]
+  aiPlaygrounds     AiPlayground[]
+  assignments       Assignment[]
+  notes             BatchNote[]
+  questions         BatchQuestion[]
+
+  @@map("batches")
+}
+
+enum BatchLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model Category {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  icon           String?
+  parentId       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  parent       Category?    @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children     Category[]   @relation("CategoryTree")
+  batches      Batch[]
+  testSeries   TestSeries[]
+
+  @@unique([organizationId, parentId, name])
+  @@index([organizationId, parentId])
+  @@map("categories")
+}
+
+model BatchTeacher {
+  batchId   String
+  teacherId String
+  createdAt DateTime @default(now())
+
+  batch   Batch   @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@id([batchId, teacherId])
+  @@map("batch_teachers")
+}
+
+model BatchEnrollment {
+  id        String   @id @default(cuid())
+  batchId   String
+  userId    String
+  isFree    Boolean  @default(false)
+  enrolledAt DateTime @default(now())
+
+  batch Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([batchId, userId])
+  @@map("batch_enrollments")
+}
+
+enum AnnouncementAudienceType {
+  ORGANIZATION
+  COURSE
+}
+
+model Announcement {
+  id               String                   @id @default(cuid())
+  organizationId   String
+  createdByUserId  String
+  audienceType     AnnouncementAudienceType
+  batchId          String?
+  subject          String
+  contentHtml      String
+  recipientCount   Int                      @default(0)
+  recipientsJson   Json?                    @default("[]")
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation(fields: [createdByUserId], references: [id], onDelete: Cascade)
+  batch        Batch?       @relation(fields: [batchId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@map("announcements")
+}
+
+model BatchReview {
+  id        String   @id @default(cuid())
+  batchId   String
+  userId    String
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  batch Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([batchId, userId])
+  @@map("batch_reviews")
+}
+
+model BatchCertificateIssue {
+  id                     String   @id @default(cuid())
+  credentialId           String   @unique @default(cuid())
+  batchId                String
+  userId                 String
+  recipientNameSnapshot  String
+  batchNameSnapshot      String
+  certificateTitleSnapshot String?
+  templateUrlSnapshot    String?
+  issuerNameSnapshot     String?
+  signerNameSnapshot     String?
+  signerTitleSnapshot    String?
+  linkedInOrgIdSnapshot  String?
+  progressPercentage     Float    @default(100)
+  issuedAt               DateTime @default(now())
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  batch Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([batchId, userId])
+  @@map("batch_certificate_issues")
+}
+
+// ============================================================
+// CONTENT HIERARCHY: Subject > Chapter > Topic > Content
+// ============================================================
+
+model Subject {
+  id           String  @id @default(cuid())
+  batchId      String
+  name         String
+  thumbnailUrl String?
+  order        Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  batch    Batch     @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  chapters Chapter[]
+  schedules Schedule[]
+
+  @@map("subjects")
+}
+
+model Chapter {
+  id        String @id @default(cuid())
+  subjectId String
+  name      String
+  order     Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topics  Topic[]
+
+  @@map("chapters")
+}
+
+model Topic {
+  id        String @id @default(cuid())
+  chapterId String
+  name      String
+  order     Int    @default(0)
+  quizJson  Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapter   Chapter    @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  contents  Content[]
+  assignments Assignment[]
+  schedules Schedule[]
+  quizAttempts TopicQuizAttempt[]
+  aiPlaygrounds AiPlayground[]
+
+  @@map("topics")
+}
+
+model TopicQuizAttempt {
+  id             String   @id @default(cuid())
+  topicId        String
+  userId         String
+  attemptNumber  Int      @default(1)
+  answersJson    Json?
+  score          Float    @default(0)
+  percentage     Float    @default(0)
+  correctCount   Int      @default(0)
+  totalQuestions Int      @default(0)
+  isPassed       Boolean  @default(false)
+  completedAt    DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([topicId, userId])
+  @@map("topic_quiz_attempts")
+}
+
+enum ContentType {
+  Lecture
+  PDF
+  MARKDOWN
+  URL
+}
+
+enum VideoType {
+  YOUTUBE
+  HLS
+}
+
+model Content {
+  id             String      @id @default(cuid())
+  topicId        String
+  title          String
+  description    String?
+  type           ContentType
+  order          Int         @default(0)
+
+  // PDF
+  pdfUrl         String?
+
+  // Markdown / external URL
+  markdownBody   String?
+  externalUrl    String?
+  externalProvider String?
+
+  // Video
+  videoUrl       String?
+  videoType      VideoType?
+  videoThumbnail String?
+  videoDuration  Float?      // seconds
+
+  // AI — auto-extracted text from video transcript / PDF / markdown
+  extractedText  String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  topic    Topic             @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  progress ContentProgress[]
+  aiPlaygrounds AiPlayground[]
+
+  @@map("contents")
+}
+
+// ============================================================
+// ASSIGNMENTS
+// ============================================================
+
+enum AssignmentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AssignmentQuestionType {
+  QUIZ
+  TRUE_FALSE
+  SHORT_ANSWER
+  FILE_SUBMISSION
+}
+
+enum AssignmentSubmissionStatus {
+  DRAFT
+  SUBMITTED
+  GRADED
+  RETURNED
+}
+
+model Assignment {
+  id              String           @id @default(cuid())
+  organizationId  String
+  batchId         String
+  topicId         String?
+  createdByUserId String?
+  title           String
+  description     String?
+  status          AssignmentStatus @default(DRAFT)
+  order           Int              @default(0)
+  dueAt           DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  batch         Batch        @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  topic         Topic?       @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  createdByUser User?        @relation("AssignmentCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  questions     AssignmentQuestion[]
+  submissions   AssignmentSubmission[]
+
+  @@index([organizationId, createdAt])
+  @@index([batchId, topicId])
+  @@map("assignments")
+}
+
+model AssignmentQuestion {
+  id             String                 @id @default(cuid())
+  assignmentId   String
+  type           AssignmentQuestionType
+  title          String?
+  prompt         String
+  optionsJson    Json?                  @default("[]")
+  correctAnswerJson Json?
+  points         Float                  @default(1)
+  order          Int                    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  @@index([assignmentId, order])
+  @@map("assignment_questions")
+}
+
+model AssignmentSubmission {
+  id            String                     @id @default(cuid())
+  assignmentId  String
+  studentId     String
+  answersJson   Json?                      @default("{}")
+  score         Float?
+  maxScore      Float?
+  status        AssignmentSubmissionStatus @default(DRAFT)
+  feedback      String?
+  submittedAt   DateTime?
+  gradedAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student    User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+  @@index([studentId, status])
+  @@map("assignment_submissions")
+}
+
+// ============================================================
+// SCHEDULES (live classes)
+// ============================================================
+
+enum ScheduleStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum ScheduleAudienceType {
+  ORGANIZATION
+  COURSE
+}
+
+model Schedule {
+  id                   String         @id @default(cuid())
+  organizationId       String
+  audienceType         ScheduleAudienceType @default(COURSE)
+  batchId              String?
+  subjectId            String?
+  topicId              String?
+  teacherId            String?
+  title                String
+  description          String?
+  subjectName          String?
+  youtubeLink          String
+  scheduledAt          DateTime
+  duration             Int            // minutes
+  thumbnailUrl         String?
+  notifyBeforeMinutes  Int?
+  tagsJson             Json?          @default("[]")
+  status               ScheduleStatus @default(SCHEDULED)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  batch   Batch?   @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  subject Subject? @relation(fields: [subjectId], references: [id])
+  topic   Topic?   @relation(fields: [topicId], references: [id])
+  teacher Teacher? @relation(fields: [teacherId], references: [id])
+  whiteboard ScheduleWhiteboard?
+
+  @@index([organizationId, audienceType, scheduledAt])
+  @@index([batchId, scheduledAt])
+  @@map("schedules")
+}
+
+model ScheduleWhiteboard {
+  id                     String   @id @default(cuid())
+  scheduleId             String   @unique
+  organizationId         String
+  dataJson               Json?
+  isStudentEditingEnabled Boolean @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  schedule     Schedule      @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("schedule_whiteboards")
+}
+
+// ============================================================
+// CONTENT PROGRESS TRACKING
+// ============================================================
+
+model ContentProgress {
+  id              String    @id @default(cuid())
+  userId          String
+  contentId       String
+  watchedSeconds  Float     @default(0)
+  totalDuration   Float     @default(0)
+  watchPercentage Float     @default(0)
+  isCompleted     Boolean   @default(false)
+  completedAt     DateTime?
+  watchCount      Int       @default(0)
+  lastWatchedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contentId])
+  @@map("content_progress")
+}
+
+// ============================================================
+// TEST SERIES
+// ============================================================
+
+model TestSeries {
+  id             String  @id @default(cuid())
+  organizationId String
+  categoryId     String?
+  title          String
+  description    String?
+  exam           String?
+  slug           String?
+  thumbnailUrl   String?
+  faqJson        Json?   @default("[]")
+  totalPrice     Float   @default(0)
+  discountPercentage Float @default(0)
+  isFree         Boolean @default(false)
+  durationDays   Int     @default(365)
+  isActive       Boolean @default(true)
+  isPublished    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization  Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  category      Category?              @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tests         Test[]
+  enrollments   TestSeriesEnrollment[]
+
+  @@map("test_series")
+}
+
+model TestSeriesEnrollment {
+  id           String   @id @default(cuid())
+  testSeriesId String
+  userId       String
+  isFree       Boolean  @default(false)
+  enrolledAt   DateTime @default(now())
+
+  testSeries TestSeries @relation(fields: [testSeriesId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([testSeriesId, userId])
+  @@map("test_series_enrollments")
+}
+
+model Test {
+  id           String  @id @default(cuid())
+  testSeriesId String
+  title        String
+  slug         String
+  description  String?
+  durationMinutes Int
+  totalMarks   Float
+  passingMarks Float
+  isFree       Boolean @default(false)
+  isPublished  Boolean @default(false)
+  instructionsJson Json? // { html, topics[] }
+  displayOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  testSeries TestSeries    @relation(fields: [testSeriesId], references: [id], onDelete: Cascade)
+  sections   TestSection[]
+  attempts   TestAttempt[]
+
+  @@unique([testSeriesId, slug])
+  @@map("tests")
+}
+
+model TestSection {
+  id           String @id @default(cuid())
+  testId       String
+  name         String
+  displayOrder Int    @default(0)
+  description  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  test      Test       @relation(fields: [testId], references: [id], onDelete: Cascade)
+  questions Question[]
+
+  @@map("test_sections")
+}
+
+enum QuestionType {
+  MCQ
+  TRUE_FALSE
+  NUMERICAL
+  FILL_BLANK
+}
+
+model Question {
+  id            String       @id @default(cuid())
+  sectionId     String
+  text          String
+  imageUrl      String?
+  type          QuestionType
+  marks         Float        @default(1)
+  negativeMarks Float        @default(0)
+  displayOrder  Int          @default(0)
+
+  // Correct answer storage
+  correctOptionId String?    // for MCQ
+  correctBool     Boolean?   // for TRUE_FALSE
+  correctNumber   Float?     // for NUMERICAL
+  correctText     String?    // for FILL_BLANK
+
+  // Solution/explanation
+  solutionText    String?
+  solutionImageUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  section  TestSection      @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  options  QuestionOption[]
+  answers  AttemptAnswer[]
+
+  @@map("questions")
+}
+
+model QuestionOption {
+  id         String  @id @default(cuid())
+  questionId String
+  text       String
+  imageUrl   String?
+  isCorrect  Boolean @default(false)
+  order      Int     @default(0)
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("question_options")
+}
+
+// ============================================================
+// TEST ATTEMPTS
+// ============================================================
+
+model TestAttempt {
+  id            String    @id @default(cuid())
+  testId        String
+  userId        String
+  attemptNumber Int       @default(1)
+  startedAt     DateTime  @default(now())
+  submittedAt   DateTime?
+  timeSpentSeconds Int    @default(0)
+  isCompleted   Boolean   @default(false)
+  isPassed      Boolean?
+
+  // Scoring
+  totalScore    Float?
+  percentage    Float?
+  correctCount  Int?
+  wrongCount    Int?
+  skippedCount  Int?
+  rank          Int?
+  percentile    Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  test    Test            @relation(fields: [testId], references: [id], onDelete: Cascade)
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers AttemptAnswer[]
+
+  @@map("test_attempts")
+}
+
+model AttemptAnswer {
+  id                 String  @id @default(cuid())
+  attemptId          String
+  questionId         String
+  selectedOptionId   String?
+  textAnswer         String?
+  isMarkedForReview  Boolean @default(false)
+  timeSpentSeconds   Int     @default(0)
+  isCorrect          Boolean?
+  marksAwarded       Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attempt  TestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
+  @@map("attempt_answers")
+}
+
+// ============================================================
+// PAYMENTS & ORDERS
+// ============================================================
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum EntityType {
+  BATCH
+  BATCH_CART
+  TEST_SERIES
+}
+
+enum ManualOrderStatus {
+  NOT_REQUIRED
+  AWAITING_PROOF
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  organizationId  String
+  userId          String
+  entityType      EntityType
+  entityId        String        // batchId or testSeriesId
+  amount          Float
+  currency        String        @default("TND")
+  paymentProvider String        @default("RAZORPAY")
+  paymentStatus   PaymentStatus @default(PENDING)
+
+  // Razorpay fields
+  providerOrderId   String?  @unique
+  providerPaymentId String?
+  providerSignature String?
+  receiptId         String?  @unique @default(cuid())
+
+  failureReason String?
+  refundId      String?
+  refundAmount  Float?
+  refundedAt    DateTime?
+  billingFirstName String?
+  billingLastName  String?
+  billingEnterprise String?
+  billingTaxNumber String?
+  billingRegion    String?
+  billingPhone     String?
+  billingEmail     String?
+  itemsJson        Json?             @default("[]")
+  manualReviewStatus ManualOrderStatus @default(NOT_REQUIRED)
+  proofImageUrl    String?
+  proofUploadedAt  DateTime?
+  adminReviewNote  String?
+  reviewedByUserId String?
+  reviewedAt       DateTime?
+
+  initiatedAt  DateTime  @default(now())
+  completedAt  DateTime?
+  failedAt     DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@map("orders")
+}
+
+// ============================================================
+// AI LAYER
+// ============================================================
+
+model AiPlayground {
+  id            String    @id @default(cuid())
+  orgId         String
+  batchId       String
+  topicId       String?
+  contentId     String?
+  title         String
+  concept       String
+  generatedHtml String    @db.Text
+  promptUsed    String    @db.Text
+  refinements   Int       @default(0)
+  createdBy     String
+  createdByRole String    // "TEACHER" | "STUDENT"
+  accessMode    String    @default("BATCH_ENROLLED")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  batch   Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  topic   Topic?   @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  content Content? @relation(fields: [contentId], references: [id], onDelete: SetNull)
+
+  @@map("ai_playgrounds")
+}
+
+model WeakConceptFlag {
+  id                   String   @id @default(cuid())
+  studentId            String
+  batchId              String
+  concept              String
+  suggestedReviewTopic String
+  createdAt            DateTime @default(now())
+
+  @@index([batchId, concept])
+  @@map("weak_concept_flags")
+}
+
+// ============================================================
+// STUDENT NOTES & Q&A
+// ============================================================
+
+model BatchNote {
+  id        String   @id @default(cuid())
+  batchId   String
+  userId    String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  batch Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([batchId, userId])
+  @@map("batch_notes")
+}
+
+enum QuestionStatus {
+  OPEN
+  ANSWERED
+}
+
+model BatchQuestion {
+  id        String         @id @default(cuid())
+  batchId   String
+  userId    String
+  title     String?
+  content   String         @db.Text
+  status    QuestionStatus @default(OPEN)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  batch     Batch                   @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  user      User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  responses BatchQuestionResponse[]
+
+  @@index([batchId])
+  @@map("batch_questions")
+}
+
+model BatchQuestionResponse {
+  id         String   @id @default(cuid())
+  questionId String
+  userId     String
+  content    String   @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  question BatchQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+  @@map("batch_question_responses")
+}
