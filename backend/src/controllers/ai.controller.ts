@@ -50,8 +50,8 @@ export const aiChat = async (
       };
     };
 
-    if (!message || !context?.batchId || !context?.chapterId || !context?.topicId || !context?.contentId) {
-      sendError(res, 'message and context (batchId, chapterId, topicId, contentId) are required', 400);
+    if (!message || !context?.batchId || !context?.contentId) {
+      sendError(res, 'message and context (batchId, contentId) are required', 400);
       return;
     }
 
@@ -76,49 +76,11 @@ export const aiChat = async (
       return;
     }
 
-    // 1. Fetch all context from DB in parallel
-    const [batch, chapter, topic, content, student] = await Promise.all([
+    // 1. Fetch batch and student context
+    const [batch, student] = await Promise.all([
       prisma.batch.findUnique({
         where: { id: context.batchId },
-        select: { name: true, exam: true, class: true, language: true },
-      }),
-      (prisma as any).chapter.findUnique({
-        where: { id: context.chapterId },
-        select: {
-          name: true,
-          order: true,
-          subject: {
-            select: {
-              chapters: { select: { name: true }, orderBy: { order: 'asc' } },
-            },
-          },
-        },
-      }),
-      (prisma as any).topic.findUnique({
-        where: { id: context.topicId },
-        select: {
-          name: true,
-          chapter: {
-            select: {
-              topics: {
-                select: { name: true },
-                orderBy: { order: 'asc' },
-              },
-            },
-          },
-        },
-      }),
-      (prisma as any).content.findUnique({
-        where: { id: context.contentId },
-        select: {
-          title: true,
-          type: true,
-          description: true,
-          extractedText: true,
-          markdownBody: true,
-          externalUrl: true,
-          videoUrl: true,
-        },
+        select: { name: true, exam: true, class: true, language: true, description: true, introVideoUrl: true },
       }),
       prisma.user.findUnique({
         where: { id: userId },
@@ -126,9 +88,77 @@ export const aiChat = async (
       }),
     ]);
 
-    if (!batch || !chapter || !topic || !content) {
-      sendError(res, 'Course context not found', 404);
+    if (!batch) {
+      sendError(res, 'Course not found', 404);
       return;
+    }
+
+    let chapter: any = null;
+    let topic: any = null;
+    let content: any = null;
+
+    if (context.contentId === 'course-introduction') {
+      content = {
+        title: 'Course Introduction',
+        type: 'Lecture',
+        description: batch.description,
+        extractedText: null,
+        markdownBody: null,
+        externalUrl: null,
+        videoUrl: batch.introVideoUrl,
+      };
+      chapter = { name: 'Course', order: 0, subject: { chapters: [] } };
+      topic = { name: 'Introduction', chapter: { topics: [] } };
+    } else {
+      if (!context.chapterId || !context.topicId) {
+        sendError(res, 'chapterId and topicId are required for regular content', 400);
+        return;
+      }
+      [chapter, topic, content] = await Promise.all([
+        (prisma as any).chapter.findUnique({
+          where: { id: context.chapterId },
+          select: {
+            name: true,
+            order: true,
+            subject: {
+              select: {
+                chapters: { select: { name: true }, orderBy: { order: 'asc' } },
+              },
+            },
+          },
+        }),
+        (prisma as any).topic.findUnique({
+          where: { id: context.topicId },
+          select: {
+            name: true,
+            chapter: {
+              select: {
+                topics: {
+                  select: { name: true },
+                  orderBy: { order: 'asc' },
+                },
+              },
+            },
+          },
+        }),
+        (prisma as any).content.findUnique({
+          where: { id: context.contentId },
+          select: {
+            title: true,
+            type: true,
+            description: true,
+            extractedText: true,
+            markdownBody: true,
+            externalUrl: true,
+            videoUrl: true,
+          },
+        }),
+      ]);
+
+      if (!chapter || !topic || !content) {
+        sendError(res, 'Course context not found', 404);
+        return;
+      }
     }
 
     const allChapters: Array<{ title: string }> = (chapter.subject?.chapters || []).map(

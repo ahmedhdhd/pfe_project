@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import * as c from '../controllers/misc.controller';
+import * as c from '../controllers/teacher.controller';
 import { authenticate, requireAdmin } from '../middleware/auth';
 
 const r = Router();

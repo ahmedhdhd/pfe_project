@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import * as c from '../controllers/misc.controller';
+import * as c from '../controllers/upload.controller';
 import { authenticate } from '../middleware/auth';
 
 const r = Router();
