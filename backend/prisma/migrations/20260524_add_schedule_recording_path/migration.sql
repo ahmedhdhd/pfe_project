@@ -1,0 +1,2 @@
+ALTER TABLE "schedules"
+ADD COLUMN IF NOT EXISTS "recordingPath" TEXT;

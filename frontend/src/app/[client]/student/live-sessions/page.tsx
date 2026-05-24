@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Calendar, Radio, Video } from "lucide-react";
 import { PremiumTabsTrigger } from "@/components/common/premium-tabs-trigger";
+import { ScheduleCalendar } from "@/components/common/schedule-calendar";
 import { SectionHeader } from "@/components/common/section-header";
 import { StudentScheduleList } from "@/components/student/student-schedule-list";
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
@@ -15,6 +16,7 @@ export default function StudentLiveSessionsPage() {
   const [activeTab, setActiveTab] = useState<
     "all" | "upcoming" | "live" | "completed"
   >("all");
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const { data: schedulesResponse, isLoading } = useGetClientSchedules();
   const allSchedules: Schedule[] = useMemo(
     () => schedulesResponse?.data || [],
@@ -104,20 +106,48 @@ export default function StudentLiveSessionsPage() {
             Completed
           </PremiumTabsTrigger>
         </TabsList>
+        <div className="mb-4">
+          <Tabs
+            value={viewMode}
+            onValueChange={(value) => setViewMode(value as "list" | "calendar")}
+          >
+            <TabsList>
+              <PremiumTabsTrigger value="list" icon={Video} mobileLabel="List">
+                List
+              </PremiumTabsTrigger>
+              <PremiumTabsTrigger value="calendar" icon={Calendar} mobileLabel="Calendar">
+                Calendar
+              </PremiumTabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
         <TabsContent value={activeTab} className="mt-0">
-          <StudentScheduleList
-            schedules={filteredSchedules}
-            isLoading={isLoading}
-            onWatch={(schedule) => {
-              const href = schedule.batchId
-                ? `/student/batches/${schedule.batchId}/schedule/${schedule.id}`
-                : `/student/live-sessions/${schedule.id}`;
-              router.push(href);
-            }}
-            emptyMessage="No live sessions available"
-            emptyDescription="New organization-wide and course live sessions will appear here."
-          />
+          {viewMode === "list" ? (
+            <StudentScheduleList
+              schedules={filteredSchedules}
+              isLoading={isLoading}
+              onWatch={(schedule) => {
+                const href = schedule.batchId
+                  ? `/student/batches/${schedule.batchId}/schedule/${schedule.id}`
+                  : `/student/live-sessions/${schedule.id}`;
+                router.push(href);
+              }}
+              emptyMessage="No live sessions available"
+              emptyDescription="New organization-wide and course live sessions will appear here."
+            />
+          ) : (
+            <ScheduleCalendar
+              schedules={filteredSchedules}
+              onWatch={(schedule) => {
+                const href = schedule.batchId
+                  ? `/student/batches/${schedule.batchId}/schedule/${schedule.id}`
+                  : `/student/live-sessions/${schedule.id}`;
+                router.push(href);
+              }}
+              emptyMessage="No live sessions available"
+            />
+          )}
         </TabsContent>
       </Tabs>
     </div>

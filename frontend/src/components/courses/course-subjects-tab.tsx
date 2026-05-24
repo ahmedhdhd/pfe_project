@@ -55,6 +55,7 @@ import {
   useDeleteTopic,
   useGetCourseOutline,
   useGetSubjectsByBatch,
+  useGetBatchPlaygrounds,
   useReorderContents,
 } from "@/hooks";
 import type { TopicQuiz, TopicQuizAttemptSummary } from "@/hooks/api";
@@ -65,6 +66,20 @@ import { buildExternalResourceDisplay } from "@/lib/utils/external-resource";
 import apiClient from "@/lib/api/client";
 import { toast } from "sonner";
 import { Batch, Subject } from "./types";
+import type { AiPlayground } from "@/lib/types/api";
+
+function findPlaygroundForScope(
+  playgrounds: AiPlayground[],
+  topicId: string,
+  contentId?: string | null
+): AiPlayground | null {
+  if (contentId) {
+    return playgrounds.find((p) => p.contentId === contentId) ?? null;
+  }
+  return (
+    playgrounds.find((p) => p.topicId === topicId && !p.contentId) ?? null
+  );
+}
 
 const PDFViewer = dynamic(
   () =>
@@ -220,6 +235,10 @@ export function CourseSubjectsTab({
 
   const { data, isLoading, isFetching } = useGetCourseOutline(courseId);
   const { data: subjectsResponse } = useGetSubjectsByBatch(courseId);
+  const { data: batchPlaygrounds = [] } = useGetBatchPlaygrounds(
+    courseId,
+    canManageCourse
+  );
   const updateIntroVideoMutation = useMutation({
     mutationFn: (introVideoUrl?: string) =>
       apiClient
@@ -447,6 +466,7 @@ export function CourseSubjectsTab({
         assignmentBasePath={basePath}
         counts={counts}
         canManageCourse={canManageCourse}
+        batchPlaygrounds={batchPlaygrounds}
         selection={selection}
         setSelection={setSelection}
         selectedNodes={selectedNodes}
@@ -540,15 +560,29 @@ export function CourseSubjectsTab({
         batchId={courseId}
         topicId={playgroundContext?.topicId}
         contentId={playgroundContext?.contentId}
+        initialConcept={
+          playgroundContext?.contentName || playgroundContext?.topicName || ""
+        }
+        contextLabel={
+          playgroundContext?.contentName || playgroundContext?.topicName
+        }
+        existingPlaygroundId={
+          playgroundContext
+            ? findPlaygroundForScope(
+                batchPlaygrounds,
+                playgroundContext.topicId,
+                playgroundContext.contentId
+              )?.id ?? null
+            : null
+        }
         onSuccess={(playground) => {
           toast.success(
-            `AI playground generated for ${
+            `AI playground saved for ${
               playgroundContext?.contentName ||
               playgroundContext?.topicName ||
               "this topic"
             }.`
           );
-          console.log("Playground created", playground);
         }}
       />
 
@@ -774,6 +808,13 @@ export function CourseSubjectsTab({
               selectedContentId={selectedContentId}
               isRefreshing={isFetching}
               canManageCourse={canManageCourse}
+              hasSavedPlayground={
+                !!findPlaygroundForScope(
+                  batchPlaygrounds,
+                  selectedNodes.topic.id,
+                  selectedContent?.id
+                )
+              }
               onAddContent={() => setCreateContentTopic(selectedNodes.topic!)}
               onSelectContent={(contentId) => setSelectedContentId(contentId)}
               onEditContent={(content) => setEditContent(content)}
@@ -960,6 +1001,7 @@ function TopicWorkspace({
   onOpenPlayground,
   onManageQuiz,
   onDeleteQuiz,
+  hasSavedPlayground = false,
 }: {
   courseId: string;
   assignmentBasePath: "admin" | "teacher";
@@ -970,6 +1012,7 @@ function TopicWorkspace({
   selectedContentId: string | null;
   isRefreshing: boolean;
   canManageCourse: boolean;
+  hasSavedPlayground?: boolean;
   onAddContent: () => void;
   onSelectContent: (contentId: string) => void;
   onEditContent: (content: HierarchyContent) => void;
@@ -1089,6 +1132,11 @@ function TopicWorkspace({
               >
                 <Sparkles className="mr-2 h-4 w-4" />
                 AI Playground
+                {hasSavedPlayground ? (
+                  <Badge variant="secondary" className="ml-2 text-[10px] px-1.5 py-0">
+                    Saved
+                  </Badge>
+                ) : null}
               </Button>
               <Button onClick={onAddContent}>
                 <Plus className="mr-2 h-4 w-4" />
@@ -1369,6 +1417,7 @@ function ChapterOnlyBuilder({
   assignmentBasePath,
   counts,
   canManageCourse,
+  batchPlaygrounds,
   selection,
   setSelection,
   selectedNodes,
@@ -1391,6 +1440,7 @@ function ChapterOnlyBuilder({
   assignmentBasePath: "admin" | "teacher";
   counts: ReturnType<typeof getChapterOutlineCounts>;
   canManageCourse: boolean;
+  batchPlaygrounds: AiPlayground[];
   selection: Selection | null;
   setSelection: (selection: Selection | null) => void;
   selectedNodes: {
@@ -1563,6 +1613,13 @@ function ChapterOnlyBuilder({
             selectedContentId={selectedContentId}
             isRefreshing={isRefreshing}
             canManageCourse={canManageCourse}
+            hasSavedPlayground={
+              !!findPlaygroundForScope(
+                batchPlaygrounds,
+                selectedNodes.topic.id,
+                selectedContent?.id
+              )
+            }
             onAddContent={() => setCreateContentTopic(selectedNodes.topic)}
             onSelectContent={(contentId) => setSelectedContentId(contentId)}
             onEditContent={(content) => setEditContent(content)}

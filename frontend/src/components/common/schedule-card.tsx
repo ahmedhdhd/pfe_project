@@ -98,6 +98,14 @@ export function ScheduleCard({
   };
 
   const statusConfig = getStatusConfig(status);
+  const watchLabel =
+    status === "COMPLETED"
+      ? "View Detail"
+      : "Open Room";
+  const watchLabelMobile =
+    status === "COMPLETED"
+      ? "Detail"
+      : "Open";
 
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -144,8 +152,8 @@ export function ScheduleCard({
                   className="gap-2 text-sm sm:text-base"
                 >
                   <Play className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="hidden sm:inline">Open Room</span>
-                  <span className="sm:hidden">Open</span>
+                  <span className="hidden sm:inline">{watchLabel}</span>
+                  <span className="sm:hidden">{watchLabelMobile}</span>
                 </Button>
               </div>
             )}
@@ -249,8 +257,8 @@ export function ScheduleCard({
                 className="flex-1 text-xs sm:text-sm"
               >
                 <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                <span className="hidden sm:inline">Open Room</span>
-                <span className="sm:hidden">Open</span>
+                <span className="hidden sm:inline">{watchLabel}</span>
+                <span className="sm:hidden">{watchLabelMobile}</span>
               </Button>
             )}
             {canManage && (

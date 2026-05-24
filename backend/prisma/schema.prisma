@@ -164,6 +164,7 @@ model User {
   batchNotes       BatchNote[]
   batchQuestions   BatchQuestion[]
   batchQuestionResponses BatchQuestionResponse[]
+  scheduleAttendances ScheduleAttendance[]
 
   @@unique([email, organizationId])
   @@unique([phoneNumber, countryCode, organizationId])
@@ -645,6 +646,10 @@ model Schedule {
   notifyBeforeMinutes  Int?
   tagsJson             Json?          @default("[]")
   status               ScheduleStatus @default(SCHEDULED)
+  egressId             String?
+  recordingPath        String?
+  aiSummary            String?
+  summaryGeneratedAt   DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -655,10 +660,33 @@ model Schedule {
   topic   Topic?   @relation(fields: [topicId], references: [id])
   teacher Teacher? @relation(fields: [teacherId], references: [id])
   whiteboard ScheduleWhiteboard?
+  attendances ScheduleAttendance[]
 
   @@index([organizationId, audienceType, scheduledAt])
   @@index([batchId, scheduledAt])
   @@map("schedules")
+}
+
+model ScheduleAttendance {
+  id           String   @id @default(cuid())
+  scheduleId   String
+  userId       String
+  joinedAt     DateTime @default(now())
+  lastJoinedAt DateTime?
+  leftAt       DateTime?
+  durationMins Int      @default(0)
+  isPresent    Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  schedule Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduleId, userId])
+  @@index([scheduleId])
+  @@index([userId])
+  @@map("schedule_attendances")
 }
 
 model ScheduleWhiteboard {

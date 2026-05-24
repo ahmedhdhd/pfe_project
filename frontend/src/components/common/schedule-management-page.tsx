@@ -8,6 +8,7 @@ import { CreateScheduleModal } from "@/components/common/create-schedule-modal";
 import { EditScheduleModal } from "@/components/common/edit-schedule-modal";
 import { PageHeader } from "@/components/common/page-header";
 import { ScheduleList } from "@/components/common/schedule-list";
+import { ScheduleCalendar } from "@/components/common/schedule-calendar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +36,7 @@ export function ScheduleManagementPage({
   const [activeTab, setActiveTab] = useState<"all" | "upcoming" | "completed">(
     "all"
   );
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(
@@ -129,30 +131,55 @@ export function ScheduleManagementPage({
                 setActiveTab(value as "all" | "upcoming" | "completed")
               }
             >
-              <TabsList className="mb-4">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-                <TabsTrigger value="completed">Completed</TabsTrigger>
-              </TabsList>
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <TabsList>
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+                  <TabsTrigger value="completed">Completed</TabsTrigger>
+                </TabsList>
+                <Tabs
+                  value={viewMode}
+                  onValueChange={(value) => setViewMode(value as "list" | "calendar")}
+                >
+                  <TabsList>
+                    <TabsTrigger value="list">List</TabsTrigger>
+                    <TabsTrigger value="calendar">Calendar</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
               <TabsContent value={activeTab} className="mt-0">
-                <ScheduleList
-                  schedules={filteredSchedules}
-                  isLoading={isLoading}
-                  canManage
-                  onEdit={(schedule) => {
-                    setSelectedSchedule(schedule);
-                    setIsEditModalOpen(true);
-                  }}
-                  onDelete={setDeleteSchedule}
-                  onWatch={handleWatch}
-                  emptyMessage={
-                    activeTab === "all"
-                      ? "No live sessions yet"
-                      : activeTab === "upcoming"
-                      ? "No upcoming live sessions"
-                      : "No completed live sessions"
-                  }
-                />
+                {viewMode === "list" ? (
+                  <ScheduleList
+                    schedules={filteredSchedules}
+                    isLoading={isLoading}
+                    canManage
+                    onEdit={(schedule) => {
+                      setSelectedSchedule(schedule);
+                      setIsEditModalOpen(true);
+                    }}
+                    onDelete={setDeleteSchedule}
+                    onWatch={handleWatch}
+                    emptyMessage={
+                      activeTab === "all"
+                        ? "No live sessions yet"
+                        : activeTab === "upcoming"
+                        ? "No upcoming live sessions"
+                        : "No completed live sessions"
+                    }
+                  />
+                ) : (
+                  <ScheduleCalendar
+                    schedules={filteredSchedules}
+                    onWatch={handleWatch}
+                    emptyMessage={
+                      activeTab === "all"
+                        ? "No live sessions yet"
+                        : activeTab === "upcoming"
+                        ? "No upcoming live sessions"
+                        : "No completed live sessions"
+                    }
+                  />
+                )}
               </TabsContent>
             </Tabs>
           </CardContent>

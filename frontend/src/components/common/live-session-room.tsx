@@ -7,9 +7,14 @@ import { ArrowLeft, Calendar, Clock, Radio, Video, PencilRuler } from "lucide-re
 import { LiveKitRoom, VideoConference } from "@livekit/components-react";
 import {
   useGetClientSchedule,
+  useGetClientScheduleAiSummary,
   useGetClientScheduleJoinToken,
+  useMarkClientScheduleAttendance,
   useGetSchedule,
+  useGetScheduleAttendance,
+  useGetScheduleAiSummary,
   useGetScheduleJoinToken,
+  useUpdateScheduleStatus,
 } from "@/hooks";
 import type { ScheduleStatus } from "@/lib/types/schedule";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +24,15 @@ import { LoadingSpinner } from "@/components/common/loading-spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LiveSessionWhiteboard } from "@/components/common/live-session-whiteboard";
 import { cn } from "@/lib/utils";
+import { formatScheduleAiSummaryDisplay } from "@/lib/schedule-summary";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type LiveSessionPortal = "admin" | "teacher" | "student";
 
@@ -99,10 +113,14 @@ export function LiveSessionRoom({
   fallbackBackLabel,
 }: LiveSessionRoomProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"session" | "whiteboard">(
+  const [activeTab, setActiveTab] = useState<
+    "session" | "whiteboard" | "attendance"
+  >(
     "session"
   );
   const isStudentPortal = portal === "student";
+  const [attendanceConnected, setAttendanceConnected] = useState(false);
+  const [roomShouldConnect, setRoomShouldConnect] = useState(true);
 
   const scheduleQuery = isStudentPortal
     ? useGetClientSchedule(scheduleId)
@@ -112,6 +130,15 @@ export function LiveSessionRoom({
     : useGetScheduleJoinToken(scheduleId, !!scheduleQuery.data);
 
   const schedule = scheduleQuery.data ?? tokenQuery.data?.schedule;
+  const attendanceQuery = useGetScheduleAttendance(
+    scheduleId,
+    !isStudentPortal && !!schedule
+  );
+  const attendanceMutation = useMarkClientScheduleAttendance();
+  const updateScheduleStatusMutation = useUpdateScheduleStatus();
+  const summaryQuery = isStudentPortal
+    ? useGetClientScheduleAiSummary(scheduleId, !!schedule)
+    : useGetScheduleAiSummary(scheduleId, !!schedule);
 
   const resolvedBackHref = useMemo(() => {
     if (!schedule) {
@@ -142,7 +169,7 @@ export function LiveSessionRoom({
     );
   }
 
-  if (!schedule || !tokenQuery.data) {
+  if (!schedule) {
     return (
       <div className="container mx-auto max-w-3xl px-4 py-10">
         <Card>
@@ -163,6 +190,23 @@ export function LiveSessionRoom({
   const session = tokenQuery.data;
   const statusConfig = getStatusConfig(schedule.status);
   const StatusIcon = statusConfig.icon;
+  const attendanceRows = attendanceQuery.data?.data ?? [];
+  const attendanceSummary = attendanceQuery.data?.summary;
+  const aiSummary = summaryQuery.data;
+  const summaryDisplay = formatScheduleAiSummaryDisplay(aiSummary?.aiSummary);
+  const summaryStillPending =
+    schedule.status === "COMPLETED" && !aiSummary?.summaryGeneratedAt;
+
+  const markAttendance = async (action: "join" | "leave") => {
+    if (!isStudentPortal || attendanceMutation.isPending) return;
+    try {
+      await attendanceMutation.mutateAsync({ id: scheduleId, action });
+    } catch {
+      // No-op: avoid interrupting the live session experience.
+    }
+  };
+
+  const isCompletedSession = schedule.status === "COMPLETED";
 
   return (
     <div className="min-h-screen bg-background">
@@ -233,53 +277,310 @@ export function LiveSessionRoom({
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Room
                 </p>
-                <p className="font-medium">{session.roomName}</p>
+                <p className="font-medium">{session?.roomName ?? schedule.roomName}</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "session" | "whiteboard")}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="session">
-              <Video className="mr-2 h-4 w-4" />
-              Session
-            </TabsTrigger>
-            <TabsTrigger value="whiteboard">
-              <PencilRuler className="mr-2 h-4 w-4" />
-              Whiteboard
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="session" forceMount className="mt-0">
-            <Card className="overflow-hidden border-border/60">
-              <CardHeader className="border-b border-border/60 bg-muted/20">
-                <CardTitle className="text-base font-medium">
-                  {session.canPublish ? "Host controls enabled" : "Student view"}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="h-[72vh] min-h-[520px] bg-black">
-                  <LiveKitRoom
-                    token={session.token}
-                    serverUrl={session.serverUrl}
-                    connect
-                    audio={session.canPublish}
-                    video={session.canPublish}
-                    className="h-full"
-                    data-lk-theme="default"
+        {schedule.status === "COMPLETED" && (
+          <Card className="mb-6 border-border/60">
+            <CardHeader className="border-b border-border/60 bg-muted/20">
+              <CardTitle className="text-base font-medium">
+                AI Live Session Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 p-4">
+              {summaryQuery.isLoading || summaryStillPending ? (
+                <p className="text-sm text-muted-foreground">
+                  Generating summary from the session recording. This can take a few minutes after the host ends the session.
+                </p>
+              ) : summaryDisplay.text ? (
+                <>
+                  <p
+                    className={cn(
+                      "whitespace-pre-line text-sm leading-relaxed",
+                      summaryDisplay.isError && "text-destructive"
+                    )}
                   >
-                    <VideoConference />
-                  </LiveKitRoom>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                    {summaryDisplay.text}
+                  </p>
+                  {aiSummary?.summaryGeneratedAt ? (
+                    <p className="text-xs text-muted-foreground">
+                      Generated on{" "}
+                      {format(new Date(aiSummary.summaryGeneratedAt), "PPP p")}
+                    </p>
+                  ) : null}
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Summary is not available yet. End the session as host so recording can finish, then ensure LiveKit egress, GROQ_API_KEY, and OpenRouter are configured on the server.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
-          <TabsContent value="whiteboard" forceMount className="mt-0">
-            <LiveSessionWhiteboard scheduleId={scheduleId} portal={portal} />
-          </TabsContent>
-        </Tabs>
+        {isCompletedSession ? (
+          <Card className="overflow-hidden border-border/60">
+            <CardHeader className="border-b border-border/60 bg-muted/20">
+              <CardTitle className="text-base font-medium">
+                Live Session Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 p-4">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="rounded-md border p-3">
+                  <p className="text-xs text-muted-foreground">Session title</p>
+                  <p className="font-medium">{schedule.title}</p>
+                </div>
+                <div className="rounded-md border p-3">
+                  <p className="text-xs text-muted-foreground">Scheduled at</p>
+                  <p className="font-medium">
+                    {format(new Date(schedule.scheduledAt), "PPP p")}
+                  </p>
+                </div>
+                <div className="rounded-md border p-3">
+                  <p className="text-xs text-muted-foreground">Duration</p>
+                  <p className="font-medium">{formatDuration(schedule.duration)}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) =>
+              setActiveTab(value as "session" | "whiteboard" | "attendance")
+            }
+          >
+            <TabsList className="mb-4">
+              <TabsTrigger value="session">
+                <Video className="mr-2 h-4 w-4" />
+                Session
+              </TabsTrigger>
+              <TabsTrigger value="whiteboard">
+                <PencilRuler className="mr-2 h-4 w-4" />
+                Whiteboard
+              </TabsTrigger>
+              {!isStudentPortal && (
+                <TabsTrigger value="attendance">
+                  <Clock className="mr-2 h-4 w-4" />
+                  Attendance
+                </TabsTrigger>
+              )}
+            </TabsList>
+
+            <TabsContent value="session" forceMount className="mt-0">
+              <Card className="overflow-hidden border-border/60">
+                <CardHeader className="border-b border-border/60 bg-muted/20">
+                  <CardTitle className="text-base font-medium">
+                    {session
+                      ? session.canPublish
+                        ? "Host controls enabled"
+                        : "Student view"
+                      : "Student view"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="h-[72vh] min-h-[520px] bg-black">
+                    {session ? (
+                      <LiveKitRoom
+                      token={session.token}
+                      serverUrl={session.serverUrl}
+                      connect={roomShouldConnect}
+                      audio={session.canPublish}
+                      video={session.canPublish}
+                      className="h-full"
+                      data-lk-theme="default"
+                      onConnected={() => {
+                        if (session.canPublish && schedule.status !== "LIVE") {
+                          void updateScheduleStatusMutation.mutateAsync({
+                            id: scheduleId,
+                            status: { status: "LIVE" },
+                          });
+                        }
+                        if (isStudentPortal && !attendanceConnected) {
+                          setAttendanceConnected(true);
+                          void markAttendance("join");
+                        }
+                      }}
+                      onDisconnected={() => {
+                        if (session.canPublish) {
+                          setRoomShouldConnect(false);
+                          void updateScheduleStatusMutation.mutateAsync({
+                            id: scheduleId,
+                            status: { status: "COMPLETED" },
+                          });
+                          return;
+                        }
+                        if (isStudentPortal && attendanceConnected) {
+                          setAttendanceConnected(false);
+                          void markAttendance("leave");
+                        }
+                      }}
+                      >
+                        <VideoConference />
+                      </LiveKitRoom>
+                    ) : (
+                      <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground bg-background">
+                        {errorMessage || "This live session has ended and is no longer accessible."}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="whiteboard" forceMount className="mt-0">
+              <LiveSessionWhiteboard scheduleId={scheduleId} portal={portal} />
+            </TabsContent>
+
+            {!isStudentPortal && (
+              <TabsContent value="attendance" forceMount className="mt-0">
+                <Card className="overflow-hidden border-border/60">
+                  <CardHeader className="border-b border-border/60 bg-muted/20">
+                    <CardTitle className="text-base font-medium">
+                      Session attendance
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    {attendanceSummary ? (
+                      <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        <div className="rounded-md border p-3">
+                          <p className="text-xs text-muted-foreground">Participants</p>
+                          <p className="text-xl font-semibold">{attendanceSummary.participants}</p>
+                        </div>
+                        <div className="rounded-md border p-3">
+                          <p className="text-xs text-muted-foreground">Present now</p>
+                          <p className="text-xl font-semibold">{attendanceSummary.presentNow}</p>
+                        </div>
+                        <div className="rounded-md border p-3">
+                          <p className="text-xs text-muted-foreground">Streaming duration</p>
+                          <p className="text-xl font-semibold">{attendanceSummary.streamingDurationMins} min</p>
+                        </div>
+                        <div className="rounded-md border p-3">
+                          <p className="text-xs text-muted-foreground">Avg attendance</p>
+                          <p className="text-xl font-semibold">{attendanceSummary.averageAttendanceMins} min</p>
+                        </div>
+                      </div>
+                    ) : null}
+                    {attendanceSummary?.streamStartedAt ? (
+                      <p className="mb-3 text-xs text-muted-foreground">
+                        Stream window: {format(new Date(attendanceSummary.streamStartedAt), "PPP p")}
+                        {" - "}
+                        {attendanceSummary.streamEndedAt
+                          ? format(new Date(attendanceSummary.streamEndedAt), "PPP p")
+                          : "ongoing"}
+                      </p>
+                    ) : null}
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Student</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Joined At</TableHead>
+                          <TableHead>Left At</TableHead>
+                          <TableHead>Duration (mins)</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {attendanceRows.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={5} className="text-center text-muted-foreground">
+                              No attendance records yet.
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          attendanceRows.map((row) => (
+                            <TableRow key={row.id}>
+                              <TableCell>{row.user.username}</TableCell>
+                              <TableCell>{row.user.email ?? "-"}</TableCell>
+                              <TableCell>{format(new Date(row.joinedAt), "PPP p")}</TableCell>
+                              <TableCell>{row.leftAt ? format(new Date(row.leftAt), "PPP p") : "-"}</TableCell>
+                              <TableCell>{row.durationMins}</TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            )}
+          </Tabs>
+        )}
+
+        {isCompletedSession && !isStudentPortal && (
+          <Card className="mt-6 overflow-hidden border-border/60">
+            <CardHeader className="border-b border-border/60 bg-muted/20">
+              <CardTitle className="text-base font-medium">
+                Session attendance
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              {attendanceSummary ? (
+                <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-md border p-3">
+                    <p className="text-xs text-muted-foreground">Participants</p>
+                    <p className="text-xl font-semibold">{attendanceSummary.participants}</p>
+                  </div>
+                  <div className="rounded-md border p-3">
+                    <p className="text-xs text-muted-foreground">Present now</p>
+                    <p className="text-xl font-semibold">{attendanceSummary.presentNow}</p>
+                  </div>
+                  <div className="rounded-md border p-3">
+                    <p className="text-xs text-muted-foreground">Streaming duration</p>
+                    <p className="text-xl font-semibold">{attendanceSummary.streamingDurationMins} min</p>
+                  </div>
+                  <div className="rounded-md border p-3">
+                    <p className="text-xs text-muted-foreground">Avg attendance</p>
+                    <p className="text-xl font-semibold">{attendanceSummary.averageAttendanceMins} min</p>
+                  </div>
+                </div>
+              ) : null}
+              {attendanceSummary?.streamStartedAt ? (
+                <p className="mb-3 text-xs text-muted-foreground">
+                  Stream window: {format(new Date(attendanceSummary.streamStartedAt), "PPP p")}
+                  {" - "}
+                  {attendanceSummary.streamEndedAt
+                    ? format(new Date(attendanceSummary.streamEndedAt), "PPP p")
+                    : "ongoing"}
+                </p>
+              ) : null}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Student</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Joined At</TableHead>
+                    <TableHead>Left At</TableHead>
+                    <TableHead>Duration (mins)</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {attendanceRows.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-muted-foreground">
+                        No attendance records yet.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    attendanceRows.map((row) => (
+                      <TableRow key={row.id}>
+                        <TableCell>{row.user.username}</TableCell>
+                        <TableCell>{row.user.email ?? "-"}</TableCell>
+                        <TableCell>{format(new Date(row.joinedAt), "PPP p")}</TableCell>
+                        <TableCell>{row.leftAt ? format(new Date(row.leftAt), "PPP p") : "-"}</TableCell>
+                        <TableCell>{row.durationMins}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

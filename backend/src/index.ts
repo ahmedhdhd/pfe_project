@@ -56,8 +56,25 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-const globalLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300 });
-const authLimiter   = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
+const isProduction = process.env.NODE_ENV === 'production';
+const authMax = Number(process.env.AUTH_RATE_LIMIT_MAX ?? (isProduction ? 20 : 1000));
+const globalMax = Number(process.env.GLOBAL_RATE_LIMIT_MAX ?? (isProduction ? 300 : 5000));
+
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: globalMax,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: authMax,
+  standardHeaders: true,
+  legacyHeaders: false,
+  // During local dev, failed retries can quickly trigger 429.
+  // This keeps production behavior unchanged while making local auth testing smoother.
+  skipSuccessfulRequests: !isProduction,
+});
 app.use(globalLimiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));

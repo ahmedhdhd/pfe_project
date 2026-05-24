@@ -118,6 +118,7 @@ export {
   useAiChat,
   useTeacherGeneratePlayground,
   useGetBatchPlaygrounds,
+  useGetPlaygroundById,
   useGetWeakConcepts,
   queryKeys,
 } from "./api";

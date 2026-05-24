@@ -9,6 +9,8 @@ import type {
   ScheduleListResponse,
   ScheduleJoinSession,
   ScheduleWhiteboard,
+  ScheduleAttendance,
+  ScheduleAiSummary,
 } from "@/lib/types/schedule";
 
 const normalizeScheduleListResponse = (payload: unknown): ScheduleListResponse => {
@@ -229,6 +231,43 @@ export const useUpdateClientScheduleWhiteboard = () => {
       queryClient.invalidateQueries({
         queryKey: [...clientScheduleQueryKeys.detail(variables.id), "whiteboard"],
       });
+    },
+  });
+};
+
+export const useMarkClientScheduleAttendance = () => {
+  return useMutation({
+    mutationFn: async ({
+      id,
+      action,
+    }: {
+      id: string;
+      action: "join" | "leave";
+    }) => {
+      const response = await apiClient.post<{ data: ScheduleAttendance }>(
+        `/api/schedules/${id}/attendance/${action}`
+      );
+      return response.data.data;
+    },
+  });
+};
+
+export const useGetClientScheduleAiSummary = (id: string, enabled = true) => {
+  return useQuery({
+    queryKey: [...clientScheduleQueryKeys.detail(id), "ai-summary"],
+    queryFn: async () => {
+      const response = await apiClient.get<{ data: ScheduleAiSummary }>(
+        `/api/schedules/${id}/summary`
+      );
+      return response.data.data;
+    },
+    enabled: !!id && enabled && tokenManager.isAuthenticated(),
+    refetchInterval: (query) => {
+      const summary = query.state.data;
+      if (summary?.status === "COMPLETED" && !summary?.summaryGeneratedAt) {
+        return 5000;
+      }
+      return false;
     },
   });
 };

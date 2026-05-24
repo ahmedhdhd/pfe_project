@@ -2,9 +2,13 @@
  * Storage utility — Supabase
  */
 
+import { promises as fsPromises } from 'fs';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 import WebSocket from 'ws';
+
+export const LIVE_SESSION_RECORDINGS_FOLDER = 'live-sessions';
+export const SUPABASE_RECORDING_PREFIX = 'supabase:';
 
 // ── Supabase client ───────────────────────────────────────────────
 
@@ -106,4 +110,47 @@ export const uploadFile = async (
 export const deleteFile = async (key: string): Promise<void> => {
   const { error } = await supabase.storage.from(BUCKET).remove([key]);
   if (error) throw error;
+};
+
+export const buildLiveSessionRecordingKey = (scheduleId: string): string =>
+  `${LIVE_SESSION_RECORDINGS_FOLDER}/${scheduleId}/${Date.now()}.mp4`;
+
+export const parseSupabaseRecordingRef = (recordingPath: string): string | null => {
+  const trimmed = recordingPath.trim();
+  if (!trimmed.startsWith(SUPABASE_RECORDING_PREFIX)) return null;
+  return trimmed.slice(SUPABASE_RECORDING_PREFIX.length);
+};
+
+export const uploadBufferToKey = async (
+  buffer: Buffer,
+  key: string,
+  contentType: string
+): Promise<{ key: string; publicUrl: string }> => {
+  const { error } = await supabase.storage.from(BUCKET).upload(key, buffer, {
+    contentType,
+    upsert: true,
+  });
+  if (error) throw error;
+  return { key, publicUrl: getPublicUrl(key) };
+};
+
+/** Upload a finished LiveKit recording file into Supabase Storage. */
+export const uploadLiveSessionRecordingFromPath = async (
+  localPath: string,
+  scheduleId: string
+): Promise<{ key: string; publicUrl: string }> => {
+  const buffer = await fsPromises.readFile(localPath);
+  const key = buildLiveSessionRecordingKey(scheduleId);
+  return uploadBufferToKey(buffer, key, 'audio/mp4');
+};
+
+export const isSupabaseStorageConfigured = (): boolean =>
+  !!(process.env.SUPABASE_URL?.trim() && process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() && process.env.SUPABASE_BUCKET?.trim());
+
+export const downloadSupabaseFileToPath = async (key: string, destPath: string): Promise<void> => {
+  const { data, error } = await supabase.storage.from(BUCKET).download(key);
+  if (error) throw error;
+  if (!data) throw new Error(`Supabase download returned no data for key: ${key}`);
+  const buffer = Buffer.from(await data.arrayBuffer());
+  await fsPromises.writeFile(destPath, buffer);
 };

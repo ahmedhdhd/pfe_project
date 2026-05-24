@@ -1,0 +1,5 @@
+ALTER TABLE "schedules"
+ADD COLUMN IF NOT EXISTS "aiSummary" TEXT;
+
+ALTER TABLE "schedules"
+ADD COLUMN IF NOT EXISTS "summaryGeneratedAt" TIMESTAMP(3);

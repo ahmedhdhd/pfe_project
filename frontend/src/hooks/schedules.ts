@@ -12,6 +12,9 @@ import type {
   ScheduleListResponse,
   ScheduleJoinSession,
   ScheduleWhiteboard,
+  ScheduleAttendance,
+  ScheduleAttendanceSummary,
+  ScheduleAiSummary,
 } from "@/lib/types/schedule";
 
 const normalizeScheduleListResponse = (
@@ -404,6 +407,45 @@ export const useDeleteSchedule = () => {
       queryClient.removeQueries({
         queryKey: scheduleQueryKeys.detail(deletedId),
       });
+    },
+  });
+};
+
+export const useGetScheduleAttendance = (id: string, enabled = true) => {
+  return useQuery({
+    queryKey: [...scheduleQueryKeys.detail(id), "attendance"],
+    queryFn: async () => {
+      const response = await apiClient.get<{
+        data: {
+          data: ScheduleAttendance[];
+          summary: ScheduleAttendanceSummary;
+        };
+      }>(
+        `/admin/schedules/${id}/attendance`
+      );
+      return response.data.data;
+    },
+    enabled: !!id && enabled && tokenManager.isAuthenticated(),
+    refetchInterval: 10000,
+  });
+};
+
+export const useGetScheduleAiSummary = (id: string, enabled = true) => {
+  return useQuery({
+    queryKey: [...scheduleQueryKeys.detail(id), "ai-summary"],
+    queryFn: async () => {
+      const response = await apiClient.get<{ data: ScheduleAiSummary }>(
+        `/admin/schedules/${id}/summary`
+      );
+      return response.data.data;
+    },
+    enabled: !!id && enabled && tokenManager.isAuthenticated(),
+    refetchInterval: (query) => {
+      const summary = query.state.data;
+      if (summary?.status === "COMPLETED" && !summary?.summaryGeneratedAt) {
+        return 5000;
+      }
+      return false;
     },
   });
 };

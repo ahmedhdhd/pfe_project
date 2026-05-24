@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
+import { promises as fsPromises } from 'fs';
 import jwt from 'jsonwebtoken';
 import prisma from '../utils/prisma';
 import { logger } from '../utils/logger';
@@ -7,6 +8,14 @@ import { sendLiveSessionCreatedEmail } from '../utils/email';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../middleware/auth';
 import { normalizeOptionalString, ensureBatchReadAccess } from './misc.helpers';
+import { buildScheduleEgressOutputPath, resolveLocalRecordingPath, startRoomAudioEgress, stopEgress, waitForEgressFile } from '../utils/livekit-egress';
+import { transcribeLocalMediaFileWithGroq } from '../utils/text-extraction';
+import {
+  isSupabaseStorageConfigured,
+  SUPABASE_RECORDING_PREFIX,
+  uploadLiveSessionRecordingFromPath,
+} from '../utils/s3';
+import { buildOpenRouterHeaders } from '../utils/openrouter';
 
 const normalizeScheduleTags = (tags: unknown): string[] => {
   if (!Array.isArray(tags)) return [];
@@ -101,6 +110,141 @@ const ensureScheduleReadAccess = async (req: AuthRequest, res: Response, schedul
 const canEditScheduleWhiteboard = (req: AuthRequest, whiteboard: { isStudentEditingEnabled: boolean } | null) => {
   if (req.user?.role === 'ADMIN' || req.user?.role === 'TEACHER') return true;
   return !!whiteboard?.isStudentEditingEnabled;
+};
+
+const computeElapsedMinutes = (from: Date, to: Date): number => {
+  const ms = to.getTime() - from.getTime();
+  if (ms <= 0) return 0;
+  return Math.floor(ms / 60000);
+};
+
+const isScheduleTerminated = (schedule: { status: 'SCHEDULED' | 'LIVE' | 'COMPLETED' | 'CANCELLED'; scheduledAt: Date; duration: number; }): boolean => {
+  return schedule.status === 'COMPLETED' || schedule.status === 'CANCELLED';
+};
+
+const isSummaryGenerationError = (value: string | null | undefined): boolean =>
+  typeof value === 'string' && value.startsWith('=== SUMMARY GENERATION ERROR ===');
+
+const generateAiSummaryFromTranscript = async (organizationId: string, title: string, transcript: string): Promise<string> => {
+  const orgAiConfig = await prisma.organizationConfig.findUnique({
+    where: { organizationId },
+    select: { openRouterApiKey: true },
+  });
+  const openRouterApiKey = orgAiConfig?.openRouterApiKey?.trim() || process.env.OPENROUTER_API_KEY?.trim() || '';
+  if (!openRouterApiKey) {
+    throw new Error('OpenRouter API key is not configured for summary generation');
+  }
+
+  const openRouterModel = process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat-v3-0324';
+  const prompt = `This is a transcript of a live class titled ${title}. Summarize: main topics explained, questions students asked, and key takeaways.\n\nTranscript:\n${transcript}`;
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: buildOpenRouterHeaders(openRouterApiKey),
+    body: JSON.stringify({
+      model: openRouterModel,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.2,
+    }),
+  });
+
+  const raw = await response.text();
+  if (!response.ok) throw new Error(`OpenRouter summary request failed (${response.status}): ${raw.slice(0, 500)}`);
+  const payload = JSON.parse(raw) as { choices?: Array<{ message?: { content?: string } }> };
+  const summary = payload?.choices?.[0]?.message?.content?.trim() || '';
+  if (!summary) throw new Error('OpenRouter returned an empty summary');
+  return summary;
+};
+
+const generateScheduleSummaryForCompletedSession = async (
+  scheduleId: string,
+  options?: { egressId?: string | null; fallbackRecordingPath?: string | null }
+): Promise<void> => {
+  const schedule = await prisma.schedule.findUnique({ where: { id: scheduleId } });
+  if (!schedule || schedule.status !== 'COMPLETED') return;
+  if (schedule.summaryGeneratedAt && schedule.aiSummary && !isSummaryGenerationError(schedule.aiSummary)) return;
+
+  let tempRecordingPath: string | null = null;
+
+  try {
+    const egressId = options?.egressId || schedule.egressId;
+    const fallbackRecordingPath = options?.fallbackRecordingPath || schedule.recordingPath || null;
+    let recordingPath: string | null = null;
+
+    if (egressId) {
+      recordingPath = await waitForEgressFile(egressId, fallbackRecordingPath);
+    } else if (fallbackRecordingPath) {
+      recordingPath = await resolveLocalRecordingPath(fallbackRecordingPath);
+    }
+
+    if (!recordingPath) {
+      throw new Error(
+        egressId
+          ? 'Recording file was not found after LiveKit egress completed. Ensure the egress worker writes to LIVEKIT_EGRESS_OUTPUT_DIR on this server, or returns a downloadable URL.'
+          : 'No session recording found. Join and end the live session as host so audio egress can run (requires LiveKit egress and LIVEKIT_EGRESS_OUTPUT_DIR).'
+      );
+    }
+
+    if (recordingPath.includes('livekit-recording-')) {
+      tempRecordingPath = recordingPath;
+    }
+
+    let persistedRecordingPath: string | null = null;
+    const isLocalRecordingFile =
+      !recordingPath.startsWith(SUPABASE_RECORDING_PREFIX) && !/^https?:\/\//i.test(recordingPath);
+    if (isLocalRecordingFile && isSupabaseStorageConfigured()) {
+      try {
+        const uploaded = await uploadLiveSessionRecordingFromPath(recordingPath, schedule.id);
+        persistedRecordingPath = `${SUPABASE_RECORDING_PREFIX}${uploaded.key}`;
+        logger.info(`Live session recording uploaded to Supabase: ${uploaded.key}`);
+      } catch (uploadError: any) {
+        logger.warn(
+          `Could not upload recording to Supabase for schedule ${schedule.id}: ${uploadError?.message || String(uploadError)}`
+        );
+      }
+    } else if (recordingPath.startsWith(SUPABASE_RECORDING_PREFIX)) {
+      persistedRecordingPath = recordingPath;
+    }
+
+    const transcript = await transcribeLocalMediaFileWithGroq(recordingPath);
+    if (!transcript) {
+      throw new Error(
+        'Transcription failed or returned empty transcript. Set GROQ_API_KEY and ensure ffmpeg is installed on the server.'
+      );
+    }
+
+    const aiSummary = await generateAiSummaryFromTranscript(schedule.organizationId, schedule.title, transcript);
+    await prisma.schedule.update({
+      where: { id: schedule.id },
+      data: {
+        aiSummary,
+        summaryGeneratedAt: new Date(),
+        egressId: null,
+        recordingPath: persistedRecordingPath,
+      },
+    });
+  } catch (error: any) {
+    const message = error?.message || String(error);
+    logger.error(`Failed to generate AI summary for schedule ${scheduleId}: ${message}`);
+    try {
+      await prisma.schedule.update({
+        where: { id: scheduleId },
+        data: {
+          aiSummary: `=== SUMMARY GENERATION ERROR ===\n${message}`,
+          summaryGeneratedAt: new Date(),
+        },
+      });
+    } catch (persistErr: any) {
+      logger.error(`Failed to persist summary generation error for schedule ${scheduleId}: ${persistErr?.message || String(persistErr)}`);
+    }
+  } finally {
+    if (tempRecordingPath) {
+      try {
+        await fsPromises.unlink(tempRecordingPath);
+      } catch {
+        // ignore temp cleanup errors
+      }
+    }
+  }
 };
 
 // ── Schedules ─────────────────────────────────────────────
@@ -208,8 +352,65 @@ export const updateScheduleStatus = async (req: Request, res: Response, next: Ne
     const authReq = req as AuthRequest;
     const existing = await prisma.schedule.findUnique({ where: { id: req.params.id } });
     if (!existing || existing.organizationId !== authReq.user!.organizationId) { sendError(res, 'Live session not found', 404); return; }
-    const schedule = await prisma.schedule.update({ where: { id: req.params.id }, data: { status: req.body.status } });
+    const nextStatus = req.body.status;
+    let schedule = await prisma.schedule.update({ where: { id: req.params.id }, data: { status: nextStatus } });
+
+    if (nextStatus === 'LIVE' && !schedule.egressId) {
+      try {
+        const roomName = resolveScheduleRoomName(schedule as { id: string; youtubeLink: string });
+        const outputPath = buildScheduleEgressOutputPath(schedule.id);
+        const { egressId, recordingPath } = await startRoomAudioEgress(roomName, outputPath, schedule.id);
+        schedule = await prisma.schedule.update({
+          where: { id: schedule.id },
+          data: { egressId, recordingPath },
+        });
+      } catch (egressError: any) {
+        logger.error(`Failed to start egress for schedule ${schedule.id}: ${egressError?.message || String(egressError)}`);
+      }
+    }
+
+    if (nextStatus === 'COMPLETED') {
+      if (schedule.egressId) {
+        try {
+          await stopEgress(schedule.egressId);
+        } catch (stopError: any) {
+          logger.warn(`Failed to stop egress ${schedule.egressId} for schedule ${schedule.id}: ${stopError?.message || String(stopError)}`);
+        }
+      }
+      void generateScheduleSummaryForCompletedSession(schedule.id, {
+        egressId: schedule.egressId,
+        fallbackRecordingPath: schedule.recordingPath,
+      });
+    }
     sendSuccess(res, serializeSchedule(schedule));
+  } catch (e) { next(e); }
+};
+
+export const getScheduleSummary = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const schedule = await prisma.schedule.findUnique({
+      where: { id: req.params.id },
+      select: {
+        id: true,
+        organizationId: true,
+        audienceType: true,
+        batchId: true,
+        title: true,
+        status: true,
+        aiSummary: true,
+        summaryGeneratedAt: true,
+      },
+    });
+    if (!schedule) { sendError(res, 'Live session not found', 404); return; }
+    if (!(await ensureScheduleReadAccess(req, res, schedule))) return;
+
+    sendSuccess(res, {
+      scheduleId: schedule.id,
+      title: schedule.title,
+      status: schedule.status,
+      aiSummary: schedule.aiSummary,
+      summaryGeneratedAt: schedule.summaryGeneratedAt,
+    });
   } catch (e) { next(e); }
 };
 
@@ -246,12 +447,44 @@ export const getScheduleJoinToken = async (req: AuthRequest, res: Response, next
     const livekitApiKey = process.env.LIVEKIT_API_KEY;
     const livekitApiSecret = process.env.LIVEKIT_API_SECRET;
     if (!livekitUrl || !livekitApiKey || !livekitApiSecret) { sendError(res, 'LiveKit is not configured. Add LIVEKIT_URL, LIVEKIT_API_KEY, and LIVEKIT_API_SECRET.', 500); return; }
-    const schedule = await prisma.schedule.findUnique({ where: { id: req.params.id }, include: { batch: { select: { name: true } }, subject: { select: { name: true } } } });
+    let schedule = await prisma.schedule.findUnique({ where: { id: req.params.id }, include: { batch: { select: { name: true } }, subject: { select: { name: true } } } });
     if (!schedule) { sendError(res, 'Live session not found', 404); return; }
     if (!(await ensureScheduleReadAccess(req, res, schedule))) return;
     const user = await prisma.user.findUnique({ where: { id: req.user!.userId }, select: { id: true, username: true, email: true, role: true } });
     if (!user) { sendError(res, 'User not found', 404); return; }
     const isHost = req.user?.role === 'ADMIN' || req.user?.role === 'TEACHER';
+
+    if (isHost) {
+      if (schedule.status === 'COMPLETED' || schedule.status === 'CANCELLED') {
+        sendError(res, 'This live session is already completed and cannot be started again', 403);
+        return;
+      }
+      if (schedule.status !== 'LIVE') {
+        schedule = await prisma.schedule.update({
+          where: { id: schedule.id },
+          data: { status: 'LIVE' },
+          include: { batch: { select: { name: true } }, subject: { select: { name: true } } },
+        });
+      }
+      if (!schedule.egressId) {
+        try {
+          const roomName = resolveScheduleRoomName(schedule);
+          const outputPath = buildScheduleEgressOutputPath(schedule.id);
+          const { egressId, recordingPath } = await startRoomAudioEgress(roomName, outputPath, schedule.id);
+          schedule = await prisma.schedule.update({
+            where: { id: schedule.id },
+            data: { egressId, recordingPath },
+            include: { batch: { select: { name: true } }, subject: { select: { name: true } } },
+          });
+        } catch (egressError: any) {
+          logger.error(`Failed to start egress in join token flow for schedule ${schedule.id}: ${egressError?.message || String(egressError)}`);
+        }
+      }
+    } else if (isScheduleTerminated(schedule)) {
+      sendError(res, 'This live session has ended and is no longer accessible', 403);
+      return;
+    }
+
     const roomName = resolveScheduleRoomName(schedule);
     const participantName = user.username || user.email || 'Participant';
     const identity = `${isHost ? 'host' : 'student'}-${user.id}`;
@@ -289,5 +522,135 @@ export const updateScheduleWhiteboard = async (req: AuthRequest, res: Response, 
       update: { ...(wantsToChangeBoard ? { dataJson: normalizeWhiteboardData(boardDataSource) } : {}), ...(wantsToChangeStudentEditing && typeof req.body.isStudentEditingEnabled === 'boolean' ? { isStudentEditingEnabled: req.body.isStudentEditingEnabled } : {}) },
     });
     sendSuccess(res, { id: updated.id, scheduleId: schedule.id, data: normalizeWhiteboardData(updated.dataJson), isStudentEditingEnabled: updated.isStudentEditingEnabled, permissions: { canEdit: canEditScheduleWhiteboard(req, updated), canManageSettings }, updatedAt: updated.updatedAt });
+  } catch (e) { next(e); }
+};
+
+export const finalizeScheduleSummary = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const schedule = await prisma.schedule.findUnique({ where: { id: req.params.id } });
+    if (!schedule || schedule.organizationId !== req.user!.organizationId) {
+      sendError(res, 'Live session not found', 404);
+      return;
+    }
+
+    if (schedule.egressId) {
+      try {
+        await stopEgress(schedule.egressId);
+      } catch (stopError: any) {
+        logger.warn(`Failed to stop egress ${schedule.egressId} during manual finalize for schedule ${schedule.id}: ${stopError?.message || String(stopError)}`);
+      }
+    }
+
+    if (schedule.status !== 'COMPLETED') {
+      await prisma.schedule.update({ where: { id: schedule.id }, data: { status: 'COMPLETED' } });
+    }
+
+    void generateScheduleSummaryForCompletedSession(schedule.id, {
+      egressId: schedule.egressId,
+      fallbackRecordingPath: schedule.recordingPath,
+    });
+    sendSuccess(res, { message: 'Summary finalization started' });
+  } catch (e) { next(e); }
+};
+
+export const markScheduleAttendanceJoin = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (req.user?.role !== 'STUDENT') { sendError(res, 'Only students can mark attendance', 403); return; }
+    const schedule = await prisma.schedule.findUnique({ where: { id: req.params.id } });
+    if (!schedule) { sendError(res, 'Live session not found', 404); return; }
+    if (!(await ensureScheduleReadAccess(req, res, schedule))) return;
+
+    const now = new Date();
+    const attendance = await prisma.scheduleAttendance.upsert({
+      where: { scheduleId_userId: { scheduleId: schedule.id, userId: req.user.userId } },
+      create: {
+        scheduleId: schedule.id,
+        userId: req.user.userId,
+        joinedAt: now,
+        lastJoinedAt: now,
+        leftAt: null,
+        isPresent: true,
+      },
+      update: {
+        lastJoinedAt: now,
+        leftAt: null,
+        isPresent: true,
+      },
+    });
+
+    sendSuccess(res, attendance);
+  } catch (e) { next(e); }
+};
+
+export const markScheduleAttendanceLeave = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (req.user?.role !== 'STUDENT') { sendError(res, 'Only students can mark attendance', 403); return; }
+    const schedule = await prisma.schedule.findUnique({ where: { id: req.params.id } });
+    if (!schedule) { sendError(res, 'Live session not found', 404); return; }
+    if (!(await ensureScheduleReadAccess(req, res, schedule))) return;
+
+    const existing = await prisma.scheduleAttendance.findUnique({
+      where: { scheduleId_userId: { scheduleId: schedule.id, userId: req.user.userId } },
+    });
+    if (!existing) { sendError(res, 'Attendance not found. Join the session first.', 400); return; }
+
+    const now = new Date();
+    const elapsed = existing.lastJoinedAt ? computeElapsedMinutes(existing.lastJoinedAt, now) : 0;
+    const attendance = await prisma.scheduleAttendance.update({
+      where: { id: existing.id },
+      data: {
+        durationMins: existing.durationMins + elapsed,
+        leftAt: now,
+        lastJoinedAt: null,
+        isPresent: false,
+      },
+    });
+
+    sendSuccess(res, attendance);
+  } catch (e) { next(e); }
+};
+
+export const listScheduleAttendance = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const schedule = await prisma.schedule.findUnique({ where: { id: req.params.id } });
+    if (!schedule) { sendError(res, 'Live session not found', 404); return; }
+    if (!(await ensureScheduleReadAccess(req, res, schedule))) return;
+    if (req.user?.role !== 'ADMIN' && req.user?.role !== 'TEACHER') { sendError(res, 'You do not have permission to view attendance', 403); return; }
+
+    const attendance = await prisma.scheduleAttendance.findMany({
+      where: { scheduleId: schedule.id },
+      include: { user: { select: { id: true, username: true, email: true } } },
+      orderBy: { joinedAt: 'asc' },
+    });
+    const now = new Date();
+    const normalizedDurations = attendance.map((row) => {
+      const liveExtra = row.lastJoinedAt ? computeElapsedMinutes(row.lastJoinedAt, now) : 0;
+      return row.durationMins + liveExtra;
+    });
+    const totalAttendanceMins = normalizedDurations.reduce((sum, mins) => sum + mins, 0);
+    const participants = attendance.length;
+    const presentNow = attendance.filter((row) => !!row.lastJoinedAt).length;
+    const averageAttendanceMins = participants > 0 ? Math.round(totalAttendanceMins / participants) : 0;
+    const streamStartedAt = attendance.length > 0 ? attendance.reduce((min, row) => row.joinedAt < min ? row.joinedAt : min, attendance[0].joinedAt) : null;
+    const streamEndedAt = attendance.length > 0
+      ? attendance.reduce((max, row) => {
+        const candidate = row.lastJoinedAt ?? row.leftAt ?? row.joinedAt;
+        return candidate > max ? candidate : max;
+      }, attendance[0].leftAt ?? attendance[0].lastJoinedAt ?? attendance[0].joinedAt)
+      : null;
+    const streamingDurationMins = streamStartedAt && streamEndedAt ? computeElapsedMinutes(streamStartedAt, streamEndedAt) : 0;
+
+    sendSuccess(res, {
+      data: attendance,
+      summary: {
+        participants,
+        presentNow,
+        totalAttendanceMins,
+        averageAttendanceMins,
+        streamingDurationMins,
+        streamStartedAt,
+        streamEndedAt,
+      },
+    });
   } catch (e) { next(e); }
 };

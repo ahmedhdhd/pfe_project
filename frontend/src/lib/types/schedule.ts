@@ -133,3 +133,37 @@ export interface ScheduleWhiteboard {
   };
   updatedAt?: string | null;
 }
+
+export interface ScheduleAttendance {
+  id: string;
+  scheduleId: string;
+  userId: string;
+  joinedAt: string;
+  lastJoinedAt?: string | null;
+  leftAt?: string | null;
+  durationMins: number;
+  isPresent: boolean;
+  user: {
+    id: string;
+    username: string;
+    email?: string | null;
+  };
+}
+
+export interface ScheduleAttendanceSummary {
+  participants: number;
+  presentNow: number;
+  totalAttendanceMins: number;
+  averageAttendanceMins: number;
+  streamingDurationMins: number;
+  streamStartedAt?: string | null;
+  streamEndedAt?: string | null;
+}
+
+export interface ScheduleAiSummary {
+  scheduleId: string;
+  title: string;
+  status: ScheduleStatus;
+  aiSummary?: string | null;
+  summaryGeneratedAt?: string | null;
+}

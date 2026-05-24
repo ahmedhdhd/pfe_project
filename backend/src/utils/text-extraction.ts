@@ -74,6 +74,28 @@ async function transcribeWithGroq(audioPath: string, apiKey: string): Promise<st
   return typeof payload.text === 'string' ? payload.text.trim() : '';
 }
 
+export async function transcribeLocalMediaFileWithGroq(mediaPath: string): Promise<string> {
+  const groqApiKey = process.env.GROQ_API_KEY?.trim();
+  if (!groqApiKey) {
+    throw new Error('GROQ_API_KEY is not set; cannot transcribe session recording');
+  }
+
+  const tempId = randomUUID();
+  const audioPath = path.join(os.tmpdir(), `queztlearn-local-audio-${tempId}.mp3`);
+
+  try {
+    await extractAudioToMp3(mediaPath, audioPath);
+    const transcript = await transcribeWithGroq(audioPath, groqApiKey);
+    logger.info(`Extracted ${transcript.length} chars from local media file: ${mediaPath}`);
+    return transcript;
+  } catch (error: any) {
+    logger.error(`Local media transcription failed for ${mediaPath}: ${error.message}`);
+    throw error;
+  } finally {
+    await unlinkQuiet(audioPath);
+  }
+}
+
 /**
  * Extract transcript from non-YouTube videos (e.g. Supabase-hosted MP4):
  * 1) download video to temp file

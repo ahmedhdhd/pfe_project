@@ -2909,21 +2909,38 @@ export const useTeacherGeneratePlayground = () => {
       apiClient
         .post<ApiResponse<{ playground: AiPlayground & { html: string } }>>(
           "/api/ai/playground/generate",
-          payload
+          payload,
+          { timeout: 180000 }
         )
         .then((res) => res.data),
   });
 };
 
 /** Teacher/Admin: list all playgrounds for a batch */
-export const useGetBatchPlaygrounds = (batchId: string) => {
+export const useGetBatchPlaygrounds = (batchId: string, enabled = true) => {
   return useQuery({
     queryKey: ["ai-playgrounds", batchId],
-    queryFn: () =>
-      apiClient
-        .get<ApiResponse<AiPlayground[]>>(`/api/ai/playgrounds/${batchId}`)
-        .then((res) => res.data),
-    enabled: !!batchId,
+    queryFn: async () => {
+      const res = await apiClient.get<ApiResponse<AiPlayground[]>>(
+        `/api/ai/playgrounds/${batchId}`
+      );
+      return res.data?.data ?? [];
+    },
+    enabled: !!batchId && enabled,
+  });
+};
+
+/** Teacher/Admin: load a saved playground with HTML preview */
+export const useGetPlaygroundById = (id: string | null, enabled = true) => {
+  return useQuery({
+    queryKey: ["ai-playground", id],
+    queryFn: async () => {
+      const res = await apiClient.get<
+        ApiResponse<{ playground: AiPlayground & { html: string } }>
+      >(`/api/ai/playground/${id}`);
+      return res.data?.data?.playground ?? null;
+    },
+    enabled: !!id && enabled,
   });
 };
 

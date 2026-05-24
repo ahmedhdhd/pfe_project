@@ -1,5 +1,7 @@
 import { Response, NextFunction } from 'express';
+import { Prisma } from '@prisma/client';
 import prisma from '../utils/prisma';
+import { logger } from '../utils/logger';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../middleware/auth';
 import {
@@ -249,10 +251,42 @@ export const aiChat = async (
           }
         : {};
 
+    let linkedPlayground: { concept: string; generatedHtml: string } | null = null;
+    if (context.contentId && context.contentId !== 'course-introduction') {
+      linkedPlayground = await prisma.aiPlayground.findFirst({
+        where: {
+          batchId: context.batchId,
+          OR: [
+            { contentId: context.contentId },
+            ...(context.topicId
+              ? [{ topicId: context.topicId, contentId: null }]
+              : []),
+          ],
+        },
+        orderBy: { updatedAt: 'desc' },
+        select: { concept: true, generatedHtml: true },
+      });
+    }
+
+    const wantsInteractiveWidget =
+      /\b(playground|interactive|visuali[sz]e|simulation|widget|démo|demo)\b/i.test(
+        message
+      );
+
+    const includePlayground = !!linkedPlayground && wantsInteractiveWidget;
+
     sendSuccess(res, {
       reply: {
-        type: 'text',
+        type: includePlayground ? 'mixed' : 'text',
         text: replyText,
+        ...(includePlayground && linkedPlayground
+          ? {
+              playground: {
+                concept: linkedPlayground.concept,
+                html: linkedPlayground.generatedHtml,
+              },
+            }
+          : {}),
       },
       ...debugRag,
     });
@@ -336,8 +370,8 @@ export const teacherGeneratePlayground = async (
           return;
         }
       } else {
-        const existing = await (prisma as any).aiPlayground.findUnique({
-          where: { id: refineFromId },
+        const existing = await prisma.aiPlayground.findFirst({
+          where: { id: refineFromId, orgId, batchId },
         });
         if (!existing) {
           sendError(res, 'Playground not found', 404);
@@ -350,12 +384,12 @@ export const teacherGeneratePlayground = async (
       }
     }
 
-    const batch = await prisma.batch.findUnique({
-      where: { id: batchId },
+    const batch = await prisma.batch.findFirst({
+      where: { id: batchId, organizationId: orgId },
       select: { name: true, exam: true, language: true },
     });
     if (!batch) {
-      sendError(res, 'Batch not found', 404);
+      sendError(res, 'Course not found', 404);
       return;
     }
 
@@ -382,20 +416,26 @@ export const teacherGeneratePlayground = async (
       ? Math.min(baseRefinementCount + 1, 10)
       : 0;
 
-    let playground: any;
+    let playground: { id: string; concept: string; refinements: number };
     try {
       if (refineFromId && !isTempRefinement) {
-        playground = await (prisma as any).aiPlayground.update({
+        const updated = await prisma.aiPlayground.update({
           where: { id: refineFromId },
           data: {
             generatedHtml: html,
             promptUsed: userPrompt || '',
+            concept,
+            title: concept,
             refinements: { increment: 1 },
-            updatedAt: new Date(),
           },
         });
-      } else if (!refineFromId) {
-        playground = await (prisma as any).aiPlayground.create({
+        playground = {
+          id: updated.id,
+          concept: updated.concept,
+          refinements: updated.refinements,
+        };
+      } else {
+        const created = await prisma.aiPlayground.create({
           data: {
             orgId,
             batchId,
@@ -407,25 +447,29 @@ export const teacherGeneratePlayground = async (
             promptUsed: userPrompt || '',
             createdBy: userId,
             createdByRole: 'TEACHER',
+            refinements: isTempRefinement ? fallbackRefinementCount : 0,
           },
         });
-      } else {
-        playground = createTemporaryPlayground({
-          id: refineFromId,
-          concept,
-          refinements: fallbackRefinementCount,
-        });
+        playground = {
+          id: created.id,
+          concept: created.concept,
+          refinements: created.refinements,
+        };
       }
     } catch (persistError) {
-      console.warn(
-        'teacherGeneratePlayground persistence failed, returning temporary playground:',
-        persistError
+      const message =
+        persistError instanceof Prisma.PrismaClientKnownRequestError
+          ? `Database error (${persistError.code}): ${persistError.message}`
+          : persistError instanceof Error
+            ? persistError.message
+            : String(persistError);
+      logger.error(`teacherGeneratePlayground persistence failed: ${message}`);
+      sendError(
+        res,
+        `Playground was generated but could not be saved. Run database migrations (ai_playgrounds table). Details: ${message.slice(0, 300)}`,
+        500
       );
-      playground = createTemporaryPlayground({
-        id: isTempRefinement ? refineFromId : undefined,
-        concept,
-        refinements: fallbackRefinementCount,
-      });
+      return;
     }
 
     sendSuccess(res, {
@@ -434,6 +478,56 @@ export const teacherGeneratePlayground = async (
         html,
         concept: playground.concept,
         refinements: playground.refinements,
+        topicId: topicId || null,
+        contentId: contentId || null,
+      },
+    });
+  } catch (e: any) {
+    const errorMessage = String(e?.message || '');
+    if (errorMessage.includes('OpenRouter')) {
+      sendError(res, errorMessage.slice(0, 800), 502);
+      return;
+    }
+    next(e);
+  }
+};
+
+export const getPlaygroundById = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const orgId = req.user!.organizationId;
+    const playground = await prisma.aiPlayground.findFirst({
+      where: { id: req.params.id, orgId },
+      select: {
+        id: true,
+        title: true,
+        concept: true,
+        generatedHtml: true,
+        refinements: true,
+        topicId: true,
+        contentId: true,
+        batchId: true,
+        createdAt: true,
+      },
+    });
+    if (!playground) {
+      sendError(res, 'Playground not found', 404);
+      return;
+    }
+    sendSuccess(res, {
+      playground: {
+        id: playground.id,
+        title: playground.title,
+        concept: playground.concept,
+        html: playground.generatedHtml,
+        refinements: playground.refinements,
+        topicId: playground.topicId,
+        contentId: playground.contentId,
+        batchId: playground.batchId,
+        createdAt: playground.createdAt,
       },
     });
   } catch (e) {
@@ -450,8 +544,17 @@ export const listBatchPlaygrounds = async (
 ): Promise<void> => {
   try {
     const { batchId } = req.params;
-    const playgrounds = await (prisma as any).aiPlayground.findMany({
-      where: { batchId },
+    const orgId = req.user!.organizationId;
+    const batch = await prisma.batch.findFirst({
+      where: { id: batchId, organizationId: orgId },
+      select: { id: true },
+    });
+    if (!batch) {
+      sendError(res, 'Course not found', 404);
+      return;
+    }
+    const playgrounds = await prisma.aiPlayground.findMany({
+      where: { batchId, orgId },
       select: {
         id: true,
         title: true,
