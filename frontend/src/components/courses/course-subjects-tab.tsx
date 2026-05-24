@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import {
@@ -15,6 +16,7 @@ import {
   FileText,
   FolderOpen,
   GripVertical,
+  LayoutTemplate,
   Layers3,
   LibraryBig,
   Maximize2,
@@ -25,7 +27,7 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react";
-import { PlaygroundGeneratorModal } from "@/components/admin/ai/PlaygroundGeneratorModal";
+import { AiPlaygroundFrame } from "@/components/common/ai-playground-frame";
 import { ConfirmationDialog } from "@/components/common/confirmation-dialog";
 import { CreateChapterModal } from "@/components/common/create-chapter-modal";
 import { CreateContentModal } from "@/components/common/create-content-modal";
@@ -102,6 +104,7 @@ interface HierarchyContent {
   title?: string;
   name?: string;
   type: ContentType;
+  playgroundId?: string;
   order?: number;
   pdfUrl?: string;
   markdownBody?: string;
@@ -205,6 +208,7 @@ export function CourseSubjectsTab({
   onEditSubject,
   onDeleteSubject,
 }: CourseSubjectsTabProps) {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [selection, setSelection] = useState<Selection | null>(null);
   const [selectedContentId, setSelectedContentId] = useState<string | null>(
@@ -226,12 +230,6 @@ export function CourseSubjectsTab({
   const [editTopicQuizTopic, setEditTopicQuizTopic] =
     useState<HierarchyTopic | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
-  const [playgroundContext, setPlaygroundContext] = useState<{
-    topicId: string;
-    contentId?: string;
-    topicName: string;
-    contentName?: string;
-  } | null>(null);
 
   const { data, isLoading, isFetching } = useGetCourseOutline(courseId);
   const { data: subjectsResponse } = useGetSubjectsByBatch(courseId);
@@ -369,6 +367,36 @@ export function CourseSubjectsTab({
     }
   };
 
+  const openPlaygroundBuilder = (
+    topicNode: HierarchyTopic,
+    contentNode?: HierarchyContent | null
+  ) => {
+    const params = new URLSearchParams({
+      topicId: topicNode.id,
+      topicName: topicNode.name,
+    });
+    const existingPlayground = contentNode
+      ? findPlaygroundForScope(batchPlaygrounds, topicNode.id, contentNode.id)
+      : findPlaygroundForScope(batchPlaygrounds, topicNode.id);
+
+    const isPlaygroundContent =
+      contentNode?.type === ContentType.PLAYGROUND && !!contentNode.playgroundId;
+
+    if (contentNode) {
+      params.set("contentName", getContentName(contentNode));
+    }
+
+    if (existingPlayground?.id) {
+      params.set("playgroundId", existingPlayground.id);
+    }
+
+    if (isPlaygroundContent) {
+      params.set("contentId", contentNode.id);
+    }
+
+    router.push(`/${basePath}/courses/${courseId}/playgrounds?${params.toString()}`);
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -482,14 +510,7 @@ export function CourseSubjectsTab({
         setEditContent={setEditContent}
         setEditTopicQuizTopic={setEditTopicQuizTopic}
         setDeleteTarget={setDeleteTarget}
-        onOpenPlayground={(topicNode, contentNode) =>
-          setPlaygroundContext({
-            topicId: topicNode.id,
-            contentId: contentNode?.id,
-            topicName: topicNode.name,
-            contentName: contentNode ? getContentName(contentNode) : undefined,
-          })
-        }
+        onOpenPlayground={openPlaygroundBuilder}
       />
 
       <CreateChapterModal
@@ -552,38 +573,6 @@ export function CourseSubjectsTab({
             : null
         }
         onSuccess={invalidateHierarchy}
-      />
-
-      <PlaygroundGeneratorModal
-        isOpen={!!playgroundContext}
-        onClose={() => setPlaygroundContext(null)}
-        batchId={courseId}
-        topicId={playgroundContext?.topicId}
-        contentId={playgroundContext?.contentId}
-        initialConcept={
-          playgroundContext?.contentName || playgroundContext?.topicName || ""
-        }
-        contextLabel={
-          playgroundContext?.contentName || playgroundContext?.topicName
-        }
-        existingPlaygroundId={
-          playgroundContext
-            ? findPlaygroundForScope(
-                batchPlaygrounds,
-                playgroundContext.topicId,
-                playgroundContext.contentId
-              )?.id ?? null
-            : null
-        }
-        onSuccess={(playground) => {
-          toast.success(
-            `AI playground saved for ${
-              playgroundContext?.contentName ||
-              playgroundContext?.topicName ||
-              "this topic"
-            }.`
-          );
-        }}
       />
 
       <ConfirmationDialog
@@ -1285,6 +1274,8 @@ function TopicWorkspace({
                             ) : null}
                             {content.type === "Lecture" ? (
                               <PlayCircle className="h-4 w-4 text-emerald-600" />
+                            ) : content.type === ContentType.PLAYGROUND ? (
+                              <LayoutTemplate className="h-4 w-4 text-primary" />
                             ) : (
                               <FileText className="h-4 w-4 text-amber-600" />
                             )}
@@ -1614,10 +1605,8 @@ function ChapterOnlyBuilder({
             isRefreshing={isRefreshing}
             canManageCourse={canManageCourse}
             hasSavedPlayground={
-              !!findPlaygroundForScope(
-                batchPlaygrounds,
-                selectedNodes.topic.id,
-                selectedContent?.id
+              batchPlaygrounds.some(
+                (playground) => playground.topicId === selectedNodes.topic.id
               )
             }
             onAddContent={() => setCreateContentTopic(selectedNodes.topic)}
@@ -1901,6 +1890,17 @@ function ContentPreview({ content }: { content: HierarchyContent }) {
           {content.markdownBody}
         </ReactMarkdown>
       </article>
+    );
+  }
+
+  if (content.type === ContentType.PLAYGROUND) {
+    return (
+      <AiPlaygroundFrame
+        playgroundId={content.playgroundId}
+        title={getContentName(content)}
+        className="mx-auto max-w-5xl"
+        minHeightClassName="min-h-[640px]"
+      />
     );
   }
 

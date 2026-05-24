@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AiPlaygroundFrame } from "@/components/common/ai-playground-frame";
 import { UnifiedVideoPlayer } from "@/components/common/unified-video-player";
 import { CourseContent } from "./types";
 import { getVideoMimeType } from "./utils";
@@ -53,6 +54,17 @@ export function ContentViewer({ content, onBack }: ContentViewerProps) {
           />
         );
       }
+    }
+
+    if (content.type === "PLAYGROUND") {
+      return (
+        <AiPlaygroundFrame
+          playgroundId={content.playgroundId}
+          title={content.name}
+          className="mx-auto max-w-5xl"
+          minHeightClassName="min-h-[600px]"
+        />
+      );
     }
 
     return (

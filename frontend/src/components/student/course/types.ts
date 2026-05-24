@@ -5,6 +5,7 @@ export interface CourseContent {
   name: string;
   type: ContentType | "Video" | "Assignment";
   pdfUrl?: string;
+  playgroundId?: string;
   videoUrl?: string;
   videoType?: VideoType | "MP4" | "YouTube";
   videoThumbnail?: string;

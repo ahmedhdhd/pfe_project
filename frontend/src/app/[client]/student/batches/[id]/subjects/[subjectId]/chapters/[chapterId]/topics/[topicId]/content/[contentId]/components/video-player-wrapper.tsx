@@ -7,6 +7,7 @@ import type Player from "video.js/dist/types/player";
 import dynamic from "next/dynamic";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
+import { AiPlaygroundFrame } from "@/components/common/ai-playground-frame";
 import { UnifiedVideoPlayer } from "@/components/common/unified-video-player";
 import type { Content } from "../utils/content-player-utils";
 import { getVideoType } from "../utils/content-player-utils";
@@ -47,6 +48,7 @@ export function VideoPlayerWrapper({
   const isLecture = content.type === "Lecture" && content.videoUrl;
   const isPdf = content.type === "PDF" && content.pdfUrl;
   const isMarkdown = content.type === "MARKDOWN" && content.markdownBody;
+  const isPlayground = content.type === "PLAYGROUND" && content.playgroundId;
   const externalResource = buildExternalResourceDisplay(
     content.externalUrl,
     content.externalProvider
@@ -185,6 +187,28 @@ export function VideoPlayerWrapper({
               </div>
             ) : null}
           </article>
+          {footer}
+        </div>
+      ) : isPlayground ? (
+        <div className="min-h-0 flex-1 overflow-auto bg-background px-5 py-5">
+          <div className="mx-auto w-full max-w-6xl space-y-4">
+            <AiPlaygroundFrame
+              playgroundId={content.playgroundId}
+              title={content.name}
+              className="mx-auto max-w-5xl"
+              minHeightClassName="min-h-[640px]"
+            />
+            {content.description?.trim() ? (
+              <div className="rounded-2xl border bg-muted/30 p-4">
+                <h2 className="text-sm font-semibold text-foreground">
+                  Playground Description
+                </h2>
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+                  {content.description}
+                </p>
+              </div>
+            ) : null}
+          </div>
           {footer}
         </div>
       ) : isExternalUrl && externalResource ? (

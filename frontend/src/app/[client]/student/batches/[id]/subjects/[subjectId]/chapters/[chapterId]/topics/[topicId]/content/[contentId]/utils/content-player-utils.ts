@@ -2,11 +2,12 @@ export interface Content {
   id: string;
   name: string;
   topicId: string;
-  type: "Lecture" | "PDF" | "MARKDOWN" | "URL";
+  type: "Lecture" | "PDF" | "MARKDOWN" | "URL" | "PLAYGROUND";
   pdfUrl?: string;
   markdownBody?: string;
   externalUrl?: string;
   externalProvider?: string;
+  playgroundId?: string;
   videoUrl?: string;
   videoType?: "YOUTUBE" | "HLS";
   videoThumbnail?: string;

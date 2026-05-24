@@ -651,6 +651,7 @@ export interface AiPlayground {
   createdAt: string;
   topicId?: string;
   contentId?: string;
+  html?: string;
 }
 
 export interface WeakConceptFlag {

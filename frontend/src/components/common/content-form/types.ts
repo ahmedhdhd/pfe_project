@@ -5,6 +5,7 @@ export enum ContentType {
   PDF = "PDF",
   MARKDOWN = "MARKDOWN",
   URL = "URL",
+  PLAYGROUND = "PLAYGROUND",
 }
 
 export enum VideoType {
@@ -21,6 +22,7 @@ export interface ContentFormData {
   markdownBody: string;
   externalUrl: string;
   externalProvider: string;
+  playgroundId: string;
   videoUrl: string;
   videoType: VideoType;
   videoThumbnail: string;
@@ -45,6 +47,7 @@ export interface ContentData {
   markdownBody?: string;
   externalUrl?: string;
   externalProvider?: string;
+  playgroundId?: string;
   videoUrl?: string;
   videoType?: VideoType;
   videoThumbnail?: string;
@@ -63,6 +66,7 @@ export interface Content {
   markdownBody?: string;
   externalUrl?: string;
   externalProvider?: string;
+  playgroundId?: string;
   videoUrl?: string;
   videoType?: VideoType;
   videoThumbnail?: string;
@@ -81,6 +85,7 @@ export const DEFAULT_FORM_DATA: ContentFormData = {
   markdownBody: "",
   externalUrl: "",
   externalProvider: "",
+  playgroundId: "",
   videoUrl: "",
   videoType: VideoType.YOUTUBE,
   videoThumbnail: "",

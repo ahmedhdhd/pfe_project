@@ -14,6 +14,7 @@ import {
 } from '../utils/embeddings';
 import { buildOpenRouterHeaders } from '../utils/openrouter';
 import { generatePlaygroundHtmlOpenRouter } from '../utils/openrouter-playground';
+import { ensureBatchReadAccess } from './misc.helpers';
 
 const TEMP_PLAYGROUND_ID_PREFIX = 'temp-playground-';
 
@@ -517,6 +518,7 @@ export const getPlaygroundById = async (
       sendError(res, 'Playground not found', 404);
       return;
     }
+    if (!(await ensureBatchReadAccess(req, res, playground.batchId))) return;
     sendSuccess(res, {
       playground: {
         id: playground.id,
@@ -530,6 +532,122 @@ export const getPlaygroundById = async (
         createdAt: playground.createdAt,
       },
     });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const publishPlaygroundToTopic = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const orgId = req.user!.organizationId;
+    const { topicId, title, description } = req.body as {
+      topicId?: string;
+      title?: string;
+      description?: string;
+    };
+
+    if (!topicId || !title?.trim()) {
+      sendError(res, 'topicId and title are required', 400);
+      return;
+    }
+
+    const playground = await prisma.aiPlayground.findFirst({
+      where: { id: req.params.id, orgId },
+      select: {
+        id: true,
+        batchId: true,
+        topicId: true,
+        contentId: true,
+      },
+    });
+    if (!playground) {
+      sendError(res, 'Playground not found', 404);
+      return;
+    }
+
+    const topic = await prisma.topic.findUnique({
+      where: { id: topicId },
+      include: { chapter: { include: { subject: { select: { batchId: true } } } } },
+    });
+    if (!topic || topic.chapter.subject.batchId !== playground.batchId) {
+      sendError(res, 'Topic not found in this course', 404);
+      return;
+    }
+
+    const content = await prisma.$transaction(async (tx) => {
+      if (playground.contentId) {
+        const existingContent = await tx.content.findUnique({
+          where: { id: playground.contentId },
+          select: {
+            id: true,
+            type: true,
+            playgroundId: true,
+          },
+        });
+
+        if (
+          existingContent &&
+          existingContent.type === 'PLAYGROUND' &&
+          existingContent.playgroundId === playground.id
+        ) {
+          const updated = await tx.content.update({
+            where: { id: playground.contentId },
+            data: {
+              topicId,
+              title: title.trim(),
+              description: description?.trim() || null,
+              type: 'PLAYGROUND',
+              playgroundId: playground.id,
+            },
+          });
+
+          await tx.aiPlayground.update({
+            where: { id: playground.id },
+            data: {
+              topicId,
+              title: title.trim(),
+              contentId: updated.id,
+            },
+          });
+
+          return updated;
+        }
+      }
+
+      const lastContent = await tx.content.findFirst({
+        where: { topicId },
+        orderBy: { order: 'desc' },
+        select: { order: true },
+      });
+
+      const created = await tx.content.create({
+        data: {
+          topicId,
+          title: title.trim(),
+          description: description?.trim() || null,
+          type: 'PLAYGROUND',
+          playgroundId: playground.id,
+          order: (lastContent?.order ?? -1) + 1,
+        },
+      });
+
+      await tx.aiPlayground.update({
+        where: { id: playground.id },
+        data: {
+          topicId,
+          title: title.trim(),
+          contentId: created.id,
+        },
+      });
+
+      return created;
+    });
+
+    sendSuccess(res, { content });
   } catch (e) {
     next(e);
   }

@@ -6,6 +6,7 @@ import {
   teacherGeneratePlayground,
   listBatchPlaygrounds,
   getPlaygroundById,
+  publishPlaygroundToTopic,
   getWeakConcepts,
   testOpenRouterApiKey,
   getEmbeddingHealth,
@@ -45,7 +46,10 @@ router.post('/playground/generate', authenticate, requireTeacher, playgroundLimi
 router.get('/playgrounds/:batchId', authenticate, requireTeacher, listBatchPlaygrounds);
 
 // Teacher/Admin — fetch one playground (includes HTML for editor preview)
-router.get('/playground/:id', authenticate, requireTeacher, getPlaygroundById);
+router.get('/playground/:id', authenticate, getPlaygroundById);
+
+// Teacher/Admin — publish a playground into a topic as course content
+router.post('/playground/:id/publish', authenticate, requireTeacher, publishPlaygroundToTopic);
 
 // Teacher/Admin — get weak concept flags for a batch
 router.get('/weak-concepts/:batchId', authenticate, getWeakConcepts);
@@ -57,4 +61,3 @@ router.post('/test-openrouter-key', authenticate, testOpenRouterApiKey);
 router.get('/embedding-health', authenticate, getEmbeddingHealth);
 
 export default router;
-

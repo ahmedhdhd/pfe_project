@@ -476,6 +476,7 @@ enum ContentType {
   PDF
   MARKDOWN
   URL
+  PLAYGROUND
 }
 
 enum VideoType {
@@ -498,6 +499,7 @@ model Content {
   markdownBody   String?
   externalUrl    String?
   externalProvider String?
+  playgroundId   String?
 
   // Video
   videoUrl       String?

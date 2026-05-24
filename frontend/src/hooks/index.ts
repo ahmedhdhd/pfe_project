@@ -119,6 +119,7 @@ export {
   useTeacherGeneratePlayground,
   useGetBatchPlaygrounds,
   useGetPlaygroundById,
+  usePublishPlaygroundToTopic,
   useGetWeakConcepts,
   queryKeys,
 } from "./api";

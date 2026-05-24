@@ -66,7 +66,8 @@ const normalizeContentPayload = (body: Record<string, unknown>) => {
     rawType === ContentType.Lecture ||
     rawType === ContentType.PDF ||
     rawType === ContentType.MARKDOWN ||
-    rawType === ContentType.URL
+    rawType === ContentType.URL ||
+    rawType === ContentType.PLAYGROUND
       ? (rawType as ContentTypeValue)
       : undefined;
   const title = toOptionalString(body.title) || toOptionalString(body.name);
@@ -77,6 +78,7 @@ const normalizeContentPayload = (body: Record<string, unknown>) => {
   const markdownBody = toOptionalString(body.markdownBody);
   const externalUrl = normalizeExternalUrl(toOptionalString(body.externalUrl));
   const externalProvider = toOptionalString(body.externalProvider);
+  const playgroundId = toOptionalString(body.playgroundId);
   const videoUrl = toOptionalString(body.videoUrl);
   const videoThumbnail = toOptionalString(body.videoThumbnail);
   const rawDuration = body.videoDuration;
@@ -98,6 +100,7 @@ const normalizeContentPayload = (body: Record<string, unknown>) => {
     markdownBody: type === ContentType.MARKDOWN ? markdownBody : undefined,
     externalUrl: type === ContentType.URL ? externalUrl : undefined,
     externalProvider: type === ContentType.URL ? externalProvider : undefined,
+    playgroundId: type === ContentType.PLAYGROUND ? playgroundId : undefined,
     videoUrl: type === 'Lecture' ? videoUrl : undefined,
     videoType:
       type === 'Lecture'
@@ -122,9 +125,10 @@ const validateContentPayload = (
     payload.type !== ContentType.Lecture &&
     payload.type !== ContentType.PDF &&
     payload.type !== ContentType.MARKDOWN &&
-    payload.type !== ContentType.URL
+    payload.type !== ContentType.URL &&
+    payload.type !== ContentType.PLAYGROUND
   ) {
-    return 'type must be Lecture, PDF, MARKDOWN, or URL';
+    return 'type must be Lecture, PDF, MARKDOWN, URL, or PLAYGROUND';
   }
 
   if (payload.type === ContentType.Lecture) {
@@ -147,6 +151,10 @@ const validateContentPayload = (
     return 'externalUrl must be a valid http(s) URL';
   }
 
+  if (payload.type === ContentType.PLAYGROUND && !payload.playgroundId) {
+    return 'playgroundId is required for PLAYGROUND content';
+  }
+
   return null;
 };
 
@@ -162,6 +170,7 @@ const buildCreateData = (
   ...(payload.markdownBody ? { markdownBody: payload.markdownBody } : {}),
   ...(payload.externalUrl ? { externalUrl: payload.externalUrl } : {}),
   ...(payload.externalProvider ? { externalProvider: payload.externalProvider } : {}),
+  ...(payload.playgroundId ? { playgroundId: payload.playgroundId } : {}),
   ...(payload.videoUrl ? { videoUrl: payload.videoUrl } : {}),
   ...(payload.videoType ? { videoType: payload.videoType } : {}),
   ...(payload.videoThumbnail ? { videoThumbnail: payload.videoThumbnail } : {}),
@@ -182,6 +191,7 @@ const buildUpdateData = (
   markdownBody: payload.markdownBody ?? null,
   externalUrl: payload.externalUrl ?? null,
   externalProvider: payload.externalProvider ?? null,
+  playgroundId: payload.playgroundId ?? null,
   videoUrl: payload.videoUrl ?? null,
   videoType: payload.videoType ?? null,
   videoThumbnail: payload.videoThumbnail ?? null,
