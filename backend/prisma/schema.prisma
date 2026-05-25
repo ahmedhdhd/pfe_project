@@ -648,8 +648,8 @@ model Schedule {
   notifyBeforeMinutes  Int?
   tagsJson             Json?          @default("[]")
   status               ScheduleStatus @default(SCHEDULED)
-  egressId             String?
   recordingPath        String?
+  transcriptDraft      String?
   aiSummary            String?
   summaryGeneratedAt   DateTime?
 

@@ -381,6 +381,29 @@ export const useUpdateScheduleStatus = () => {
   });
 };
 
+export const useUploadScheduleTranscriptChunk = () => {
+  return useMutation({
+    mutationFn: async ({
+      id,
+      file,
+    }: {
+      id: string;
+      file: Blob;
+    }) => {
+      const formData = new FormData();
+      formData.append("file", file, `schedule-${id}-${Date.now()}.webm`);
+
+      const response = await apiClient.post(`/admin/schedules/${id}/transcript-chunk`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return response.data?.data;
+    },
+  });
+};
+
 /**
  * Delete a schedule
  *

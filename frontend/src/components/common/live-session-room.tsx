@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ArrowLeft, Calendar, Clock, Radio, Video, PencilRuler } from "lucide-react";
@@ -14,6 +14,7 @@ import {
   useGetScheduleAttendance,
   useGetScheduleAiSummary,
   useGetScheduleJoinToken,
+  useUploadScheduleTranscriptChunk,
   useUpdateScheduleStatus,
 } from "@/hooks";
 import type { ScheduleStatus } from "@/lib/types/schedule";
@@ -121,6 +122,10 @@ export function LiveSessionRoom({
   const isStudentPortal = portal === "student";
   const [attendanceConnected, setAttendanceConnected] = useState(false);
   const [roomShouldConnect, setRoomShouldConnect] = useState(true);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const pendingTranscriptUploadsRef = useRef<Array<Promise<unknown>>>([]);
+  const lastTranscriptUploadRef = useRef<Promise<unknown>>(Promise.resolve());
 
   const scheduleQuery = isStudentPortal
     ? useGetClientSchedule(scheduleId)
@@ -135,6 +140,7 @@ export function LiveSessionRoom({
     !isStudentPortal && !!schedule
   );
   const attendanceMutation = useMarkClientScheduleAttendance();
+  const transcriptChunkMutation = useUploadScheduleTranscriptChunk();
   const updateScheduleStatusMutation = useUpdateScheduleStatus();
   const summaryQuery = isStudentPortal
     ? useGetClientScheduleAiSummary(scheduleId, !!schedule)
@@ -161,6 +167,120 @@ export function LiveSessionRoom({
     getErrorMessage(scheduleQuery.error, "") ||
     getErrorMessage(tokenQuery.error, "Unable to open this live session.");
 
+  const session = tokenQuery.data;
+  const statusConfig = getStatusConfig(schedule?.status);
+  const StatusIcon = statusConfig.icon;
+  const attendanceRows = attendanceQuery.data?.data ?? [];
+  const attendanceSummary = attendanceQuery.data?.summary;
+  const aiSummary = summaryQuery.data;
+  const summaryDisplay = formatScheduleAiSummaryDisplay(aiSummary?.aiSummary);
+  const summaryStillPending =
+    schedule?.status === "COMPLETED" && !aiSummary?.summaryGeneratedAt;
+
+  const markAttendance = async (action: "join" | "leave") => {
+    if (!isStudentPortal || attendanceMutation.isPending) return;
+    try {
+      await attendanceMutation.mutateAsync({ id: scheduleId, action });
+    } catch {
+      // No-op: avoid interrupting the live session experience.
+    }
+  };
+
+  const queueTranscriptUpload = (blob: Blob) => {
+    if (!session?.canPublish || blob.size === 0) {
+      return Promise.resolve();
+    }
+
+    const uploadPromise = lastTranscriptUploadRef.current.finally(() =>
+      transcriptChunkMutation.mutateAsync({ id: scheduleId, file: blob })
+    ).catch(() => {
+      // Avoid disrupting the live session if one chunk upload fails.
+    });
+
+    lastTranscriptUploadRef.current = uploadPromise;
+
+    pendingTranscriptUploadsRef.current.push(uploadPromise);
+    uploadPromise.finally(() => {
+      pendingTranscriptUploadsRef.current =
+        pendingTranscriptUploadsRef.current.filter((entry) => entry !== uploadPromise);
+    });
+
+    return uploadPromise;
+  };
+
+  const cleanupTranscriptCapture = () => {
+    mediaRecorderRef.current = null;
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
+    }
+  };
+
+  const startTranscriptCapture = async () => {
+    if (
+      !session?.canPublish ||
+      typeof window === "undefined" ||
+      typeof navigator === "undefined" ||
+      mediaRecorderRef.current
+    ) {
+      return;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      mediaStreamRef.current = stream;
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (event) => {
+        void queueTranscriptUpload(event.data);
+      };
+      recorder.onstop = () => {
+        cleanupTranscriptCapture();
+      };
+
+      recorder.start(120000);
+    } catch {
+      cleanupTranscriptCapture();
+    }
+  };
+
+  const stopTranscriptCapture = async () => {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder) {
+      cleanupTranscriptCapture();
+      await Promise.all([...pendingTranscriptUploadsRef.current]);
+      return;
+    }
+
+    if (recorder.state === "inactive") {
+      cleanupTranscriptCapture();
+      await Promise.all([...pendingTranscriptUploadsRef.current]);
+      return;
+    }
+
+    await new Promise<void>((resolve) => {
+      recorder.addEventListener(
+        "stop",
+        () => {
+          Promise.all([...pendingTranscriptUploadsRef.current]).finally(() => resolve());
+        },
+        { once: true }
+      );
+      recorder.stop();
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      void stopTranscriptCapture();
+    };
+  }, []);
+
   if (isLoading) {
     return (
       <div className="container mx-auto flex min-h-[60vh] items-center justify-center px-4 py-10">
@@ -186,25 +306,6 @@ export function LiveSessionRoom({
       </div>
     );
   }
-
-  const session = tokenQuery.data;
-  const statusConfig = getStatusConfig(schedule.status);
-  const StatusIcon = statusConfig.icon;
-  const attendanceRows = attendanceQuery.data?.data ?? [];
-  const attendanceSummary = attendanceQuery.data?.summary;
-  const aiSummary = summaryQuery.data;
-  const summaryDisplay = formatScheduleAiSummaryDisplay(aiSummary?.aiSummary);
-  const summaryStillPending =
-    schedule.status === "COMPLETED" && !aiSummary?.summaryGeneratedAt;
-
-  const markAttendance = async (action: "join" | "leave") => {
-    if (!isStudentPortal || attendanceMutation.isPending) return;
-    try {
-      await attendanceMutation.mutateAsync({ id: scheduleId, action });
-    } catch {
-      // No-op: avoid interrupting the live session experience.
-    }
-  };
 
   const isCompletedSession = schedule.status === "COMPLETED";
 
@@ -293,7 +394,7 @@ export function LiveSessionRoom({
             <CardContent className="space-y-2 p-4">
               {summaryQuery.isLoading || summaryStillPending ? (
                 <p className="text-sm text-muted-foreground">
-                  Generating summary from the session recording. This can take a few minutes after the host ends the session.
+                  Generating summary from the uploaded transcript chunks. This can take a few minutes after the host ends the session.
                 </p>
               ) : summaryDisplay.text ? (
                 <>
@@ -314,7 +415,7 @@ export function LiveSessionRoom({
                 </>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Summary is not available yet. End the session as host so recording can finish, then ensure LiveKit egress, GROQ_API_KEY, and OpenRouter are configured on the server.
+                  Summary is not available yet. Join and end the session as host so transcript chunks can upload, then ensure GROQ_API_KEY and OpenRouter are configured on the server.
                 </p>
               )}
             </CardContent>
@@ -394,11 +495,14 @@ export function LiveSessionRoom({
                       className="h-full"
                       data-lk-theme="default"
                       onConnected={() => {
-                        if (session.canPublish && schedule.status !== "LIVE") {
-                          void updateScheduleStatusMutation.mutateAsync({
-                            id: scheduleId,
-                            status: { status: "LIVE" },
-                          });
+                        if (session.canPublish) {
+                          if (schedule.status !== "LIVE") {
+                            void updateScheduleStatusMutation.mutateAsync({
+                              id: scheduleId,
+                              status: { status: "LIVE" },
+                            });
+                          }
+                          void startTranscriptCapture();
                         }
                         if (isStudentPortal && !attendanceConnected) {
                           setAttendanceConnected(true);
@@ -408,10 +512,13 @@ export function LiveSessionRoom({
                       onDisconnected={() => {
                         if (session.canPublish) {
                           setRoomShouldConnect(false);
-                          void updateScheduleStatusMutation.mutateAsync({
-                            id: scheduleId,
-                            status: { status: "COMPLETED" },
-                          });
+                          void (async () => {
+                            await stopTranscriptCapture();
+                            await updateScheduleStatusMutation.mutateAsync({
+                              id: scheduleId,
+                              status: { status: "COMPLETED" },
+                            });
+                          })();
                           return;
                         }
                         if (isStudentPortal && attendanceConnected) {
