@@ -3,11 +3,15 @@ import prisma from '../utils/prisma';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../middleware/auth';
 import { sendAssignmentResultEmail } from '../utils/email';
+import { buildOpenRouterHeaders } from '../utils/openrouter';
+import { logger } from '../utils/logger';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 const QUESTION_TYPES = ['QUIZ', 'TRUE_FALSE', 'SHORT_ANSWER', 'FILE_SUBMISSION'] as const;
 type AssignmentQuestionType = (typeof QUESTION_TYPES)[number];
+const QUESTION_LEVELS = ['EASY', 'MEDIUM', 'HARD'] as const;
+type AssignmentQuestionLevel = (typeof QUESTION_LEVELS)[number];
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
@@ -27,9 +31,258 @@ const normalizeQuestionType = (value: unknown): AssignmentQuestionType =>
     ? (value as AssignmentQuestionType)
     : 'QUIZ';
 
-const normalizeJsonArray = (value: unknown) => (Array.isArray(value) ? value : []);
-const normalizeJsonObject = (value: unknown) =>
-  value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+const normalizeQuestionLevel = (value: unknown): AssignmentQuestionLevel =>
+  QUESTION_LEVELS.includes(String(value || '').toUpperCase() as AssignmentQuestionLevel)
+    ? (String(value || '').toUpperCase() as AssignmentQuestionLevel)
+    : 'MEDIUM';
+
+const normalizeJsonArray = (value: unknown): unknown[] => (Array.isArray(value) ? value : []);
+const normalizeJsonObject = (value: unknown): Record<string, unknown> =>
+  value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+
+const stripHtml = (value: unknown) =>
+  String(value || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const extractJsonObject = (text: string): Record<string, unknown> => {
+  try {
+    return JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('AI response did not contain JSON');
+    return JSON.parse(match[0]) as Record<string, unknown>;
+  }
+};
+
+const getCorrectAnswerLabel = (question: any) => {
+  const correct = normalizeJsonObject(question.correctAnswerJson);
+  if (question.type === 'QUIZ') {
+    const optionId = String(correct.optionId || '');
+    const option = normalizeJsonArray(question.optionsJson).find(
+      (item: any) => String(item?.id) === optionId
+    ) as any;
+    return stripHtml(option?.text || optionId);
+  }
+  if (question.type === 'TRUE_FALSE') {
+    return String(Boolean(correct.value));
+  }
+  if (question.type === 'SHORT_ANSWER') {
+    return stripHtml(correct.text || '');
+  }
+  return '';
+};
+
+const getStudentAnswerLabel = (question: any, answers: Record<string, unknown>) => {
+  const answer = answers[question.id];
+  if (question.type === 'QUIZ') {
+    const option = normalizeJsonArray(question.optionsJson).find(
+      (item: any) => String(item?.id) === String(answer || '')
+    ) as any;
+    return stripHtml(option?.text || answer || '');
+  }
+  if (question.type === 'TRUE_FALSE') {
+    return String(Boolean(answer));
+  }
+  return stripHtml(answer || '');
+};
+
+const isObjectiveAnswerCorrect = (question: any, answers: Record<string, unknown>) => {
+  const correct = normalizeJsonObject(question.correctAnswerJson);
+  const answer = answers[question.id];
+  if (question.type === 'QUIZ') return String(answer || '') === String(correct.optionId || '');
+  if (question.type === 'TRUE_FALSE') return Boolean(answer) === Boolean(correct.value);
+  return null;
+};
+
+const buildAssignmentAttemptContext = ({
+  assignment,
+  answers,
+}: {
+  assignment: any;
+  answers: Record<string, unknown>;
+}) =>
+  (assignment.questions || []).map((question: any, index: number) => ({
+    questionId: question.id,
+    number: index + 1,
+    type: question.type,
+    prompt: stripHtml(question.prompt),
+    points: Number(question.points || 0),
+    studentAnswer: getStudentAnswerLabel(question, answers),
+    correctAnswer: getCorrectAnswerLabel(question),
+    isCorrect: isObjectiveAnswerCorrect(question, answers),
+  }));
+
+const buildRuleBasedAssignmentFeedback = ({
+  assignment,
+  answers,
+  scorePercent,
+}: {
+  assignment: any;
+  answers: Record<string, unknown>;
+  scorePercent: number | null;
+}) => {
+  const questionFeedback = buildAssignmentAttemptContext({ assignment, answers }).map((item: any) => ({
+    questionId: item.questionId,
+    isCorrect: item.isCorrect,
+    feedback:
+      item.isCorrect === true
+        ? 'Good work. Your answer matches the expected concept.'
+        : item.isCorrect === false
+        ? `Review this question again. Your answer was "${item.studentAnswer || 'blank'}"; the expected answer is "${item.correctAnswer || 'the answer key'}".`
+        : 'This answer needs teacher review. Compare your response with the suggested answer and improve the key idea.',
+    whyCorrectAnswer: item.correctAnswer,
+    studyHint: `Revisit the part of the assignment about: ${item.prompt.slice(0, 120)}`,
+  }));
+
+  const weakConcepts = questionFeedback
+    .filter((item: any) => item.isCorrect === false)
+    .map((item: any) => {
+      const question = (assignment.questions || []).find((q: any) => q.id === item.questionId);
+      return stripHtml(question?.title || question?.prompt || 'Assignment concept').slice(0, 120);
+    })
+    .slice(0, 5);
+
+  return {
+    overallFeedback:
+      scorePercent !== null && scorePercent >= 70
+        ? 'You showed solid understanding. Review the missed or manually graded questions to make the answer stronger.'
+        : 'This submission shows areas to reinforce. Focus on the weak concepts below, then review the assignment material again.',
+    weakConcepts,
+    strengths: scorePercent !== null && scorePercent >= 80 ? ['Strong overall assignment performance'] : [],
+    recommendations: [
+      'Review questions marked incorrect or unclear.',
+      'Compare short answers with the suggested answer key.',
+      'Ask your teacher about any concept that still feels confusing.',
+    ],
+    questionFeedback,
+  };
+};
+
+const generateAssignmentAiFeedbackPayload = async ({
+  organizationId,
+  assignment,
+  answers,
+  scorePercent,
+}: {
+  organizationId: string;
+  assignment: any;
+  answers: Record<string, unknown>;
+  scorePercent: number | null;
+}) => {
+  const fallback = buildRuleBasedAssignmentFeedback({ assignment, answers, scorePercent });
+  const orgAiConfig = await prisma.organizationConfig.findUnique({
+    where: { organizationId },
+    select: { openRouterApiKey: true },
+  });
+  const openRouterApiKey =
+    orgAiConfig?.openRouterApiKey?.trim() || process.env.OPENROUTER_API_KEY?.trim() || '';
+  if (!openRouterApiKey) return fallback;
+
+  const model = process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat-v3-0324';
+  const prompt = `You are an educational tutor. Analyze this assignment submission for "${assignment.title}".
+Return JSON only with keys: overallFeedback, weakConcepts, strengths, recommendations, questionFeedback.
+Each questionFeedback item must include: questionId, isCorrect, feedback, whyCorrectAnswer, studyHint.
+Be concise, supportive, and explain what the student got wrong and why. If a question needs manual grading, say what to improve without inventing a score.
+
+Assignment attempt:
+${JSON.stringify({
+  title: assignment.title,
+  description: stripHtml(assignment.description),
+  scorePercent,
+  questions: buildAssignmentAttemptContext({ assignment, answers }),
+}).slice(0, 18000)}`;
+
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: buildOpenRouterHeaders(openRouterApiKey),
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.2,
+        max_tokens: Number(process.env.OPENROUTER_ASSIGNMENT_FEEDBACK_MAX_TOKENS || 1400),
+      }),
+    });
+    const raw = await response.text();
+    if (!response.ok) {
+      throw new Error(`OpenRouter assignment feedback failed (${response.status}): ${raw.slice(0, 400)}`);
+    }
+    const payload = JSON.parse(raw) as { choices?: Array<{ message?: { content?: string } }> };
+    const parsed = extractJsonObject(payload.choices?.[0]?.message?.content?.trim() || '');
+    return {
+      overallFeedback:
+        typeof parsed.overallFeedback === 'string'
+          ? parsed.overallFeedback
+          : fallback.overallFeedback,
+      weakConcepts: normalizeJsonArray(parsed.weakConcepts),
+      strengths: normalizeJsonArray(parsed.strengths),
+      recommendations: normalizeJsonArray(parsed.recommendations),
+      questionFeedback: normalizeJsonArray(parsed.questionFeedback),
+    };
+  } catch (error: any) {
+    logger.warn(`Assignment AI feedback fallback used: ${error?.message || String(error)}`);
+    return fallback;
+  }
+};
+
+const upsertAssignmentAiFeedback = async (submissionId: string) => {
+  const submission = await (prisma as any).assignmentSubmission.findUnique({
+    where: { id: submissionId },
+    include: {
+      assignment: {
+        include: {
+          questions: { orderBy: { order: 'asc' } },
+        },
+      },
+    },
+  });
+  if (!submission?.assignment) return null;
+
+  const answers = normalizeJsonObject(submission.answersJson);
+  const scorePercent =
+    typeof submission.score === 'number' &&
+    typeof submission.maxScore === 'number' &&
+    submission.maxScore > 0
+      ? (submission.score / submission.maxScore) * 100
+      : null;
+  const payload = await generateAssignmentAiFeedbackPayload({
+    organizationId: submission.assignment.organizationId,
+    assignment: submission.assignment,
+    answers,
+    scorePercent,
+  });
+
+  return (prisma as any).assignmentAiFeedback.upsert({
+    where: { submissionId: submission.id },
+    create: {
+      submissionId: submission.id,
+      assignmentId: submission.assignmentId,
+      studentId: submission.studentId,
+      batchId: submission.assignment.batchId,
+      scorePercent,
+      feedbackText: payload.overallFeedback,
+      weakConceptsJson: payload.weakConcepts,
+      strengthsJson: payload.strengths,
+      recommendationsJson: payload.recommendations,
+      questionFeedbackJson: payload.questionFeedback,
+      generatedAt: new Date(),
+    },
+    update: {
+      scorePercent,
+      feedbackText: payload.overallFeedback,
+      weakConceptsJson: payload.weakConcepts,
+      strengthsJson: payload.strengths,
+      recommendationsJson: payload.recommendations,
+      questionFeedbackJson: payload.questionFeedback,
+      generatedAt: new Date(),
+    },
+  });
+};
 
 const ensureBatchAccess = async (req: AuthRequest, res: Response, batchId: string) => {
   const batch = await prisma.batch.findFirst({
@@ -337,6 +590,143 @@ export const createQuestion = async (
   }
 };
 
+export const generateAssignmentWithAi = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const assignment = await ensureAssignmentAccess(req, res, req.params.id);
+    if (!assignment) return;
+
+    const promptText = optionalString(req.body?.prompt);
+    if (!promptText) {
+      sendError(res, 'prompt is required', 400);
+      return;
+    }
+
+    const orgAiConfig = await prisma.organizationConfig.findUnique({
+      where: { organizationId: req.user!.organizationId },
+      select: { openRouterApiKey: true },
+    });
+    const openRouterApiKey =
+      orgAiConfig?.openRouterApiKey?.trim() || process.env.OPENROUTER_API_KEY?.trim() || '';
+    if (!openRouterApiKey) {
+      sendError(res, 'OpenRouter API key is not configured', 400);
+      return;
+    }
+
+    const count = Math.min(Math.max(Number(req.body?.count) || 5, 1), 12);
+    const level = normalizeQuestionLevel(req.body?.level);
+    const levelInstruction =
+      level === 'EASY'
+        ? 'Easy: test recall and basic understanding with direct wording and low cognitive load.'
+        : level === 'HARD'
+        ? 'Hard: require analysis, application, edge cases, or multi-step reasoning. Avoid trick questions, but make distractors plausible.'
+        : 'Medium: mix understanding and application. Questions should be clear but require more than memorization.';
+    const model = process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat-v3-0324';
+    const generationPrompt = `Generate ${count} ${level.toLowerCase()} assignment questions for this LMS assignment.
+Return JSON only:
+{
+  "questions": [
+    {
+      "type": "QUIZ" | "TRUE_FALSE" | "SHORT_ANSWER",
+      "title": "short title",
+      "prompt": "student-facing question, can include simple HTML",
+      "points": 1,
+      "options": [{"id":"a","text":"Option A"}],
+      "correctAnswer": {"optionId":"a"} OR {"value":true} OR {"text":"expected answer"}
+    }
+  ]
+}
+Use only supported types: QUIZ, TRUE_FALSE, SHORT_ANSWER. For QUIZ, include 4 options with ids a,b,c,d and one correct optionId. For TRUE_FALSE, include correctAnswer.value. For SHORT_ANSWER, include correctAnswer.text.
+Difficulty requirement: ${levelInstruction}
+
+Assignment:
+${JSON.stringify({
+  title: assignment.title,
+  description: stripHtml(assignment.description),
+  course: assignment.batch?.name,
+  topic: assignment.topic?.name,
+  level,
+  teacherPrompt: promptText,
+}).slice(0, 8000)}`;
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: buildOpenRouterHeaders(openRouterApiKey),
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: generationPrompt }],
+        temperature: 0.35,
+        max_tokens: Number(process.env.OPENROUTER_ASSIGNMENT_GENERATION_MAX_TOKENS || 2200),
+      }),
+    });
+    const raw = await response.text();
+    if (!response.ok) {
+      sendError(res, `OpenRouter assignment generation failed: ${raw.slice(0, 300)}`, 502);
+      return;
+    }
+
+    const payload = JSON.parse(raw) as { choices?: Array<{ message?: { content?: string } }> };
+    const parsed = extractJsonObject(payload.choices?.[0]?.message?.content?.trim() || '');
+    const questions = normalizeJsonArray(parsed.questions)
+      .map((question: any) => {
+        const type = normalizeQuestionType(question?.type);
+        return {
+          type: type === 'FILE_SUBMISSION' ? 'SHORT_ANSWER' : type,
+          title: optionalString(question?.title) || null,
+          prompt: optionalString(question?.prompt) || 'Generated question',
+          points: Number(question?.points) > 0 ? Number(question.points) : 1,
+          options:
+            type === 'QUIZ'
+              ? normalizeJsonArray(question?.options).slice(0, 6)
+              : type === 'TRUE_FALSE'
+              ? [
+                  { id: 'true', text: 'True' },
+                  { id: 'false', text: 'False' },
+                ]
+              : [],
+          correctAnswer: normalizeJsonObject(question?.correctAnswer),
+        };
+      })
+      .filter((question: any) => question.prompt);
+
+    if (questions.length === 0) {
+      sendError(res, 'AI did not return valid questions. Try a more specific prompt.', 502);
+      return;
+    }
+
+    const lastQuestion = await (prisma as any).assignmentQuestion.findFirst({
+      where: { assignmentId: assignment.id },
+      orderBy: { order: 'desc' },
+      select: { order: true },
+    });
+    const startOrder = (lastQuestion?.order ?? -1) + 1;
+
+    const created = await (prisma as any).$transaction(
+      questions.map((question: any, index: number) =>
+        (prisma as any).assignmentQuestion.create({
+          data: {
+            assignmentId: assignment.id,
+            type: question.type,
+            title: question.title,
+            prompt: question.prompt,
+            optionsJson: question.options,
+            correctAnswerJson: question.correctAnswer,
+            points: question.points,
+            order: startOrder + index,
+          },
+        })
+      )
+    );
+
+    sendSuccess(res, { questions: created }, undefined, 201);
+  } catch (e) {
+    next(e);
+  }
+};
+
 export const updateQuestion = async (
   req: AuthRequest,
   res: Response,
@@ -423,6 +813,7 @@ export const listSubmissions = async (
       where: { assignmentId: assignment.id },
       include: {
         student: { select: { id: true, username: true, email: true, profileImg: true } },
+        aiFeedback: true,
       },
       orderBy: { submittedAt: 'desc' },
     });
@@ -497,6 +888,8 @@ export const gradeSubmission = async (
       },
     });
 
+    await upsertAssignmentAiFeedback(submission.id);
+
     sendSuccess(res, submission);
   } catch (e) {
     next(e);
@@ -546,6 +939,8 @@ export const publishSubmission = async (
       },
     });
 
+    await upsertAssignmentAiFeedback(submission.id);
+
     const recipient = existing.student?.email?.trim();
     if (recipient) {
       const actionUrl = buildStudentPortalUrl(
@@ -593,6 +988,7 @@ export const getStudentAssignment = async (
           studentId: req.user!.userId,
         },
       },
+      include: { aiFeedback: true },
     });
 
     sendSuccess(res, {
@@ -641,9 +1037,12 @@ export const submitAssignment = async (
         status: 'SUBMITTED',
         submittedAt: new Date(),
       },
+      include: { aiFeedback: true },
     });
 
-    sendSuccess(res, submission);
+    const aiFeedback = await upsertAssignmentAiFeedback(submission.id);
+
+    sendSuccess(res, { ...submission, aiFeedback });
   } catch (e) {
     next(e);
   }

@@ -1247,6 +1247,24 @@ export interface TopicQuiz {
   questions: TopicQuizQuestion[];
 }
 
+export interface TopicQuizAiQuestionFeedback {
+  questionId: string;
+  isCorrect?: boolean;
+  feedback?: string;
+  whyCorrectAnswer?: string;
+  studyHint?: string;
+}
+
+export interface TopicQuizAiFeedback {
+  id: string;
+  weakConcepts: unknown[];
+  strengths: unknown[];
+  recommendations: unknown[];
+  questionFeedback: TopicQuizAiQuestionFeedback[];
+  feedbackText: string;
+  generatedAt: string;
+}
+
 export interface TopicQuizAttemptSummary {
   id: string;
   attemptNumber: number;
@@ -1256,6 +1274,7 @@ export interface TopicQuizAttemptSummary {
   totalQuestions: number;
   isPassed: boolean;
   completedAt: string;
+  aiFeedback?: TopicQuizAiFeedback | null;
 }
 
 // Create Topic
@@ -1747,6 +1766,7 @@ export type AssignmentQuestionType =
   | "FILE_SUBMISSION";
 
 export type AssignmentStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
+export type AssignmentQuestionLevel = "EASY" | "MEDIUM" | "HARD";
 export type AssignmentSubmissionStatus =
   | "DRAFT"
   | "SUBMITTED"
@@ -1801,6 +1821,28 @@ export interface AssignmentSubmission {
   submittedAt?: string | null;
   gradedAt?: string | null;
   student?: { id: string; username: string; email?: string; profileImg?: string };
+  aiFeedback?: AssignmentAiFeedback | null;
+}
+
+export interface AssignmentAiFeedback {
+  id: string;
+  submissionId: string;
+  assignmentId: string;
+  studentId: string;
+  batchId: string;
+  scorePercent?: number | null;
+  weakConceptsJson?: unknown[];
+  strengthsJson?: unknown[];
+  recommendationsJson?: unknown[];
+  questionFeedbackJson?: Array<{
+    questionId?: string;
+    isCorrect?: boolean | null;
+    feedback?: string;
+    whyCorrectAnswer?: string;
+    studyHint?: string;
+  }>;
+  feedbackText: string;
+  generatedAt: string;
 }
 
 export const assignmentKeys = {
@@ -1928,6 +1970,37 @@ export const useCreateAssignmentQuestion = () => {
       queryClient.invalidateQueries({
         queryKey: assignmentKeys.detail(variables.assignmentId),
       });
+    },
+  });
+};
+
+export const useGenerateAssignmentWithAi = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      assignmentId,
+      prompt,
+      count,
+      level,
+    }: {
+      assignmentId: string;
+      prompt: string;
+      count?: number;
+      level?: AssignmentQuestionLevel;
+    }) =>
+      apiClient
+        .post<{ success: boolean; data: { questions: AssignmentQuestion[] } }>(
+          `/admin/assignments/${assignmentId}/generate`,
+          { prompt, count, level }
+        )
+        .then((res) => res.data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: assignmentKeys.detail(variables.assignmentId),
+      });
+      queryClient.invalidateQueries({ queryKey: ["course-hierarchy"] });
+      queryClient.invalidateQueries({ queryKey: ["course-outline"] });
     },
   });
 };

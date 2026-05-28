@@ -230,6 +230,15 @@ export const serializeTopicQuizAttempt = (
         totalQuestions: number;
         isPassed: boolean;
         completedAt: Date;
+        aiFeedback?: {
+          id: string;
+          weakConceptsJson: unknown;
+          strengthsJson: unknown;
+          recommendationsJson: unknown;
+          questionFeedbackJson: unknown;
+          feedbackText: string;
+          generatedAt: Date;
+        } | null;
       }
     | null
     | undefined
@@ -247,6 +256,25 @@ export const serializeTopicQuizAttempt = (
     totalQuestions: attempt.totalQuestions,
     isPassed: attempt.isPassed,
     completedAt: attempt.completedAt,
+    aiFeedback: attempt.aiFeedback
+      ? {
+          id: attempt.aiFeedback.id,
+          weakConcepts: Array.isArray(attempt.aiFeedback.weakConceptsJson)
+            ? attempt.aiFeedback.weakConceptsJson
+            : [],
+          strengths: Array.isArray(attempt.aiFeedback.strengthsJson)
+            ? attempt.aiFeedback.strengthsJson
+            : [],
+          recommendations: Array.isArray(attempt.aiFeedback.recommendationsJson)
+            ? attempt.aiFeedback.recommendationsJson
+            : [],
+          questionFeedback: Array.isArray(attempt.aiFeedback.questionFeedbackJson)
+            ? attempt.aiFeedback.questionFeedbackJson
+            : [],
+          feedbackText: attempt.aiFeedback.feedbackText,
+          generatedAt: attempt.aiFeedback.generatedAt,
+        }
+      : null,
   };
 };
 
@@ -263,6 +291,15 @@ export const serializeTopicRecord = <
       totalQuestions: number;
       isPassed: boolean;
       completedAt: Date;
+      aiFeedback?: {
+        id: string;
+        weakConceptsJson: unknown;
+        strengthsJson: unknown;
+        recommendationsJson: unknown;
+        questionFeedbackJson: unknown;
+        feedbackText: string;
+        generatedAt: Date;
+      } | null;
     }>;
   },
 >(

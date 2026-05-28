@@ -9,8 +9,10 @@ import {
   CheckCircle2,
   FileUp,
   ListChecks,
+  Loader2,
   Plus,
   Save,
+  Sparkles,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -30,6 +32,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -42,6 +51,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useCreateAssignmentQuestion,
   useDeleteAssignmentQuestion,
+  useGenerateAssignmentWithAi,
   useGetAssignment,
   useGetAssignmentAnalytics,
   useGetAssignmentSubmissions,
@@ -51,6 +61,7 @@ import {
 } from "@/hooks";
 import type {
   AssignmentSubmission,
+  AssignmentQuestionLevel,
   AssignmentQuestion,
   AssignmentQuestionOption,
   AssignmentQuestionType,
@@ -140,6 +151,12 @@ export function AssignmentEditorPage({
   assignmentId: string;
 }) {
   const [isTypeDialogOpen, setIsTypeDialogOpen] = useState(false);
+  const [isAiDialogOpen, setIsAiDialogOpen] = useState(false);
+  const [aiDraft, setAiDraft] = useState({
+    prompt: "",
+    count: 5,
+    level: "MEDIUM" as AssignmentQuestionLevel,
+  });
   const [selectedQuestionId, setSelectedQuestionId] = useState<string>("");
   const [questionDraft, setQuestionDraft] = useState<{
     title: string;
@@ -169,6 +186,7 @@ export function AssignmentEditorPage({
   const { data: submissionsResponse } = useGetAssignmentSubmissions(assignmentId);
   const { data: analyticsResponse } = useGetAssignmentAnalytics(assignmentId);
   const createQuestion = useCreateAssignmentQuestion();
+  const generateAssignmentWithAi = useGenerateAssignmentWithAi();
   const updateQuestion = useUpdateAssignmentQuestion();
   const deleteQuestion = useDeleteAssignmentQuestion();
   const gradeSubmission = useGradeAssignmentSubmission();
@@ -251,6 +269,30 @@ export function AssignmentEditorPage({
       toast.success("Question added.");
     } catch {
       toast.error("Unable to add question.");
+    }
+  };
+
+  const handleGenerateWithAi = async () => {
+    if (!aiDraft.prompt.trim()) {
+      toast.error("Describe what the assignment should cover.");
+      return;
+    }
+
+    try {
+      const result = await generateAssignmentWithAi.mutateAsync({
+        assignmentId,
+        prompt: aiDraft.prompt,
+        count: aiDraft.count,
+        level: aiDraft.level,
+      });
+      const firstQuestion = result.data.questions[0];
+      if (firstQuestion?.id) {
+        setSelectedQuestionId(firstQuestion.id);
+      }
+      setIsAiDialogOpen(false);
+      toast.success(`Generated ${result.data.questions.length} questions.`);
+    } catch {
+      toast.error("Unable to generate assignment questions.");
     }
   };
 
@@ -446,7 +488,11 @@ export function AssignmentEditorPage({
         <TabsContent value="editor" className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
             <Card className="h-fit">
-              <CardHeader>
+              <CardHeader className="space-y-2">
+                <Button onClick={() => setIsAiDialogOpen(true)} variant="secondary">
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  AI Generate
+                </Button>
                 <Button onClick={() => setIsTypeDialogOpen(true)}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add Question
@@ -958,6 +1004,89 @@ export function AssignmentEditorPage({
                 );
               }
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isAiDialogOpen} onOpenChange={setIsAiDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Generate Assignment with AI</DialogTitle>
+            <DialogDescription>
+              Describe the lesson, difficulty, and question style. AI will add editable questions to this assignment.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Prompt</Label>
+              <Textarea
+                rows={6}
+                value={aiDraft.prompt}
+                onChange={(e) =>
+                  setAiDraft((prev) => ({ ...prev, prompt: e.target.value }))
+                }
+                placeholder="Example: Create beginner questions about React hooks: useState, useEffect, dependency arrays, and common mistakes."
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Question level</Label>
+                <Select
+                  value={aiDraft.level}
+                  onValueChange={(value) =>
+                    setAiDraft((prev) => ({
+                      ...prev,
+                      level: value as AssignmentQuestionLevel,
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="EASY">Easy</SelectItem>
+                    <SelectItem value="MEDIUM">Medium</SelectItem>
+                    <SelectItem value="HARD">Hard</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Number of questions</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={12}
+                  value={aiDraft.count}
+                  onChange={(e) =>
+                    setAiDraft((prev) => ({
+                      ...prev,
+                      count: Math.min(Math.max(Number(e.target.value) || 1, 1), 12),
+                    }))
+                  }
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAiDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleGenerateWithAi}
+                disabled={generateAssignmentWithAi.isPending}
+              >
+                {generateAssignmentWithAi.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-2 h-4 w-4" />
+                )}
+                Generate
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

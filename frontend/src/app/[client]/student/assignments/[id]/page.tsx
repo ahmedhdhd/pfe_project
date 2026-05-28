@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import DOMPurify from "dompurify";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle2, FileUp } from "lucide-react";
+import { ArrowLeft, CheckCircle2, FileUp, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +31,22 @@ function getOptions(question: AssignmentQuestion) {
   return [];
 }
 
+const asStringArray = (value?: unknown[]) =>
+  Array.isArray(value)
+    ? value
+        .map((item) => {
+          if (typeof item === "string") return item.trim();
+          if (item && typeof item === "object") {
+            const record = item as Record<string, unknown>;
+            return String(
+              record.reason || record.title || record.text || record.type || ""
+            ).trim();
+          }
+          return String(item || "").trim();
+        })
+        .filter(Boolean)
+    : [];
+
 export default function StudentAssignmentPage() {
   const params = useParams();
   const router = useRouter();
@@ -44,6 +60,7 @@ export default function StudentAssignmentPage() {
 
   const isSubmitted = Boolean(assignment?.mySubmission?.submittedAt);
   const isResultPublished = assignment?.mySubmission?.status === "RETURNED";
+  const aiFeedback = assignment?.mySubmission?.aiFeedback;
   const questions = useMemo(
     () => [...(assignment?.questions || [])].sort((a, b) => a.order - b.order),
     [assignment?.questions]
@@ -152,6 +169,109 @@ export default function StudentAssignmentPage() {
                   No feedback was added for this submission.
                 </p>
               )}
+            </CardContent>
+          </Card>
+        ) : null}
+
+        {aiFeedback ? (
+          <Card className="overflow-hidden border-primary/20 bg-primary/[0.03]">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <CardTitle className="text-xl">AI Learning Feedback</CardTitle>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Generated{" "}
+                {aiFeedback.generatedAt
+                  ? new Date(aiFeedback.generatedAt).toLocaleString()
+                  : "after your submission"}
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="rounded-2xl border bg-background p-4 text-sm leading-6">
+                {aiFeedback.feedbackText}
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="rounded-2xl border bg-background p-4">
+                  <p className="mb-2 text-sm font-semibold">Strengths</p>
+                  {asStringArray(aiFeedback.strengthsJson).length > 0 ? (
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      {asStringArray(aiFeedback.strengthsJson).map((item) => (
+                        <li key={item}>- {item}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Keep practicing to make your strengths clearer.
+                    </p>
+                  )}
+                </div>
+                <div className="rounded-2xl border bg-background p-4">
+                  <p className="mb-2 text-sm font-semibold">Knowledge gaps</p>
+                  {asStringArray(aiFeedback.weakConceptsJson).length > 0 ? (
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      {asStringArray(aiFeedback.weakConceptsJson).map((item) => (
+                        <li key={item}>- {item}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No major gaps were detected.
+                    </p>
+                  )}
+                </div>
+                <div className="rounded-2xl border bg-background p-4">
+                  <p className="mb-2 text-sm font-semibold">Study next</p>
+                  {asStringArray(aiFeedback.recommendationsJson).length > 0 ? (
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      {asStringArray(aiFeedback.recommendationsJson).map((item) => (
+                        <li key={item}>- {item}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Review the questions below and ask your teacher what to reinforce.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {Array.isArray(aiFeedback.questionFeedbackJson) &&
+              aiFeedback.questionFeedbackJson.length > 0 ? (
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold">Question-by-question feedback</p>
+                  {aiFeedback.questionFeedbackJson.map((item, index) => (
+                    <div
+                      key={`${item.questionId || index}-${index}`}
+                      className="rounded-2xl border bg-background p-4 text-sm"
+                    >
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        <span className="font-medium">Question {index + 1}</span>
+                        {typeof item.isCorrect === "boolean" ? (
+                          <Badge variant={item.isCorrect ? "default" : "destructive"}>
+                            {item.isCorrect ? "Correct" : "Review"}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">Needs review</Badge>
+                        )}
+                      </div>
+                      <p className="text-muted-foreground">{item.feedback}</p>
+                      {item.studyHint ? (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          Study hint: {item.studyHint}
+                        </p>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
+        ) : isSubmitted ? (
+          <Card>
+            <CardContent className="py-5 text-sm text-muted-foreground">
+              AI feedback is being prepared. It will appear here after the assignment is analyzed.
             </CardContent>
           </Card>
         ) : null}

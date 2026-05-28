@@ -107,6 +107,7 @@ export const getCourseHierarchyByBatch = async (req: AuthRequest, res: Response,
                         where: { userId: req.user.userId },
                         orderBy: { completedAt: 'desc' },
                         take: 1,
+                        include: { aiFeedback: true },
                       }
                     : false,
               },
@@ -183,6 +184,7 @@ export const getCourseOutlineByBatch = async (req: AuthRequest, res: Response, n
                         where: { userId: req.user.userId },
                         orderBy: { completedAt: 'desc' },
                         take: 1,
+                        include: { aiFeedback: true },
                       }
                     : false,
               },

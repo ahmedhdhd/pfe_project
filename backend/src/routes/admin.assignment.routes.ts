@@ -12,6 +12,7 @@ r.post('/', c.createAssignment);
 r.get('/:id', c.getAssignment);
 r.put('/:id', c.updateAssignment);
 r.delete('/:id', c.deleteAssignment);
+r.post('/:id/generate', c.generateAssignmentWithAi);
 
 r.post('/:assignmentId/questions', c.createQuestion);
 r.put('/questions/:questionId', c.updateQuestion);

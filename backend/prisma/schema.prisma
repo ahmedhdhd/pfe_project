@@ -154,6 +154,7 @@ model User {
   topicQuizAttempts TopicQuizAttempt[]
   createdAssignments Assignment[] @relation("AssignmentCreator")
   assignmentSubmissions AssignmentSubmission[]
+  assignmentAiFeedbacks AssignmentAiFeedback[]
   enrollments      BatchEnrollment[]
   testSeriesEnrollments TestSeriesEnrollment[]
   orders           Order[]
@@ -165,6 +166,7 @@ model User {
   batchQuestions   BatchQuestion[]
   batchQuestionResponses BatchQuestionResponse[]
   scheduleAttendances ScheduleAttendance[]
+  quizAiFeedbacks QuizAiFeedback[]
 
   @@unique([email, organizationId])
   @@unique([phoneNumber, countryCode, organizationId])
@@ -267,6 +269,8 @@ model Batch {
   announcements Announcement[]
   certificateIssues BatchCertificateIssue[]
   aiPlaygrounds     AiPlayground[]
+  quizAiFeedbacks   QuizAiFeedback[]
+  assignmentAiFeedbacks AssignmentAiFeedback[]
   assignments       Assignment[]
   notes             BatchNote[]
   questions         BatchQuestion[]
@@ -445,6 +449,7 @@ model Topic {
   schedules Schedule[]
   quizAttempts TopicQuizAttempt[]
   aiPlaygrounds AiPlayground[]
+  quizAiFeedbacks QuizAiFeedback[]
 
   @@map("topics")
 }
@@ -466,9 +471,36 @@ model TopicQuizAttempt {
 
   topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  aiFeedback QuizAiFeedback?
 
   @@index([topicId, userId])
   @@map("topic_quiz_attempts")
+}
+
+model QuizAiFeedback {
+  id                  String   @id @default(cuid())
+  quizAttemptId       String   @unique
+  userId              String
+  topicId             String
+  batchId             String
+  scorePercent        Float
+  weakConceptsJson    Json     @default("[]")
+  strengthsJson       Json     @default("[]")
+  recommendationsJson Json     @default("[]")
+  questionFeedbackJson Json    @default("[]")
+  feedbackText        String
+  generatedAt         DateTime @default(now())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  attempt TopicQuizAttempt @relation(fields: [quizAttemptId], references: [id], onDelete: Cascade)
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic   Topic            @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  batch   Batch            @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([userId, topicId])
+  @@index([batchId])
+  @@map("quiz_ai_feedbacks")
 }
 
 enum ContentType {
@@ -565,6 +597,7 @@ model Assignment {
   createdByUser User?        @relation("AssignmentCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
   questions     AssignmentQuestion[]
   submissions   AssignmentSubmission[]
+  aiFeedbacks    AssignmentAiFeedback[]
 
   @@index([organizationId, createdAt])
   @@index([batchId, topicId])
@@ -608,10 +641,37 @@ model AssignmentSubmission {
 
   assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   student    User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  aiFeedback AssignmentAiFeedback?
 
   @@unique([assignmentId, studentId])
   @@index([studentId, status])
   @@map("assignment_submissions")
+}
+
+model AssignmentAiFeedback {
+  id                   String   @id @default(cuid())
+  submissionId         String   @unique
+  assignmentId         String
+  studentId            String
+  batchId              String
+  scorePercent         Float?
+  weakConceptsJson     Json     @default("[]")
+  strengthsJson        Json     @default("[]")
+  recommendationsJson  Json     @default("[]")
+  questionFeedbackJson Json     @default("[]")
+  feedbackText         String   @db.Text
+  generatedAt          DateTime @default(now())
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  submission AssignmentSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  assignment Assignment           @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student    User                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  batch      Batch                @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, assignmentId])
+  @@index([batchId])
+  @@map("assignment_ai_feedbacks")
 }
 
 // ============================================================

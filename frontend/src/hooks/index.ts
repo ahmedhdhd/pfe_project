@@ -75,6 +75,7 @@ export {
   useUpdateAssignment,
   useDeleteAssignment,
   useCreateAssignmentQuestion,
+  useGenerateAssignmentWithAi,
   useUpdateAssignmentQuestion,
   useDeleteAssignmentQuestion,
   useGetAssignmentSubmissions,
