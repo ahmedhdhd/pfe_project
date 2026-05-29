@@ -2,9 +2,11 @@ import { Router } from 'express';
 import * as bc from '../controllers/batch.controller';
 import * as oc from '../controllers/organization.controller';
 import { authenticate, requireAdmin, requireTeacher } from '../middleware/auth';
+import { requireOrgFeature } from '../middleware/orgFeatures';
 
 const r = Router();
 r.use(authenticate);
+r.use(requireOrgFeature('courses'));
 r.get('/', requireTeacher, bc.listBatches);
 r.post('/', requireAdmin, bc.createBatch);
 r.get('/:id/reviews', requireTeacher, bc.listBatchReviews);

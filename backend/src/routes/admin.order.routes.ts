@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import * as c from '../controllers/order.controller';
 import { authenticate, requireTeacher } from '../middleware/auth';
+import { requireOrgFeature } from '../middleware/orgFeatures';
 
 const r = Router();
 
 r.use(authenticate, requireTeacher);
+r.use(requireOrgFeature('orders'));
 r.get('/', c.listAdminOrders);
 r.get('/:id', c.getAdminOrderById);
 r.post('/:id/approve', c.approveAdminOrder);

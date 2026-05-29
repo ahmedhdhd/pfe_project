@@ -41,6 +41,8 @@ interface OptimisticConfigProviderProps {
   children: React.ReactNode;
   subdomain: string;
   apiUrl?: string;
+  /** Skip background API fetch (onboarding iframe preview uses postMessage instead) */
+  skipFetch?: boolean;
 }
 
 /**
@@ -58,6 +60,7 @@ export function OptimisticConfigProvider({
   children,
   subdomain,
   apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+  skipFetch = false,
 }: OptimisticConfigProviderProps) {
   const [config, setConfig] =
     useState<Partial<OrganizationConfig>>(DEFAULT_CONFIG);
@@ -66,6 +69,9 @@ export function OptimisticConfigProvider({
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    if (skipFetch) {
+      return;
+    }
     // Don't fetch for default subdomain
     if (!subdomain || subdomain === "default" || subdomain === "localhost") {
       return;
@@ -107,7 +113,7 @@ export function OptimisticConfigProvider({
     return () => {
       mounted = false;
     };
-  }, [subdomain, apiUrl]);
+  }, [subdomain, apiUrl, skipFetch]);
 
   const value: ConfigContextValue = {
     config,

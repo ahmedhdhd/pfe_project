@@ -37,6 +37,7 @@ export interface LoginResponse {
     organizationId: string;
     organizationName?: string;
     organizationSlug?: string;
+    hasCompletedOnboarding?: boolean;
   };
 }
 
@@ -331,6 +332,48 @@ export interface CreateOrganizationConfigResponse {
   success: boolean;
   data: OrganizationConfig;
   message?: string;
+}
+
+/** Partial org config patch from AI platform designer */
+export type PlatformCustomizationPatch = Partial<
+  Pick<
+    CreateOrganizationConfigData,
+    | "name"
+    | "motto"
+    | "description"
+    | "theme"
+    | "heroTitle"
+    | "heroSubtitle"
+    | "ctaText"
+    | "ctaUrl"
+    | "features"
+    | "testimonials"
+    | "faq"
+    | "socialLinks"
+    | "metaTitle"
+    | "metaDescription"
+    | "featuresEnabled"
+    | "customCSS"
+    | "maintenanceMode"
+  >
+>;
+
+export interface PlatformCustomizationSuggestResponse {
+  success: boolean;
+  data: {
+    summary: string;
+    patch: PlatformCustomizationPatch;
+    warnings: string[];
+    changedFields: string[];
+  };
+}
+
+export interface PlatformCustomizationApplyResponse {
+  success: boolean;
+  data: {
+    config: OrganizationConfig;
+    changedFields: string[];
+  };
 }
 
 export interface BatchReviewUser {

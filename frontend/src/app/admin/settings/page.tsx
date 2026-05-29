@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/common/page-header";
 import { useCurrentUser } from "@/hooks";
@@ -10,6 +11,7 @@ import {
   useUpdateOrganizationConfig,
 } from "@/hooks/api";
 import { CreateOrganizationConfigData } from "@/lib/types/api";
+import Link from "next/link";
 import {
   Loader2,
   Save,
@@ -22,6 +24,7 @@ import {
   AlertCircle,
   Settings2,
   Bot,
+  Sparkles,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -329,6 +332,24 @@ export default function AdminSettingsPage() {
               : "Manage your organization settings, theme, and configuration"
         }
       />
+
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="flex flex-col gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-medium flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              AI Platform Designer
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Chat with AI to customize branding, homepage, and features — with a
+              live preview of your public site.
+            </p>
+          </div>
+          <Button asChild>
+            <Link href="/admin/onboarding">Open AI designer</Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       <form onSubmit={handleSubmit}>
         <Tabs defaultValue="general" className="space-y-6">

@@ -21,6 +21,7 @@ import {
   BookPlus,
   UserCheck,
   ExternalLink,
+  Sparkles,
 } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { StatsSkeleton } from "@/components/common/loading-skeleton";
@@ -325,6 +326,24 @@ export default function AdminDashboard() {
         )}
       </div>
 
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="flex flex-col gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-medium flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              AI Platform Designer
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Set up or update your homepage, theme, and features with guided AI
+              chat and a live preview.
+            </p>
+          </div>
+          <Button asChild>
+            <Link href="/admin/onboarding">Open AI designer</Link>
+          </Button>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-4 md:grid-cols-2">
         {/* Recent Activity */}
         <motion.div
@@ -428,6 +447,12 @@ export default function AdminDashboard() {
                   <Link href="/admin/courses">
                     <BookPlus className="mr-2 h-4 w-4" />
                     Manage Courses
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="justify-start">
+                  <Link href="/admin/onboarding">
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    AI Platform Designer
                   </Link>
                 </Button>
                 <Button asChild variant="outline" className="justify-start">

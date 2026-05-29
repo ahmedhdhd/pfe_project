@@ -13,6 +13,9 @@ import {
   OrganizationConfigResponse,
   CreateOrganizationConfigData,
   CreateOrganizationConfigResponse,
+  PlatformCustomizationPatch,
+  PlatformCustomizationSuggestResponse,
+  PlatformCustomizationApplyResponse,
   Order,
   OrderHistoryResponse,
   RecentlyWatchedResponse,
@@ -23,6 +26,10 @@ import {
   BatchProgressResponse,
   MarkCompleteResponse,
 } from "@/lib/types/api";
+import type {
+  OnboardingChatResponse,
+  OnboardingParseResponse,
+} from "@/lib/types/onboarding";
 
 // API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -39,6 +46,7 @@ export interface User {
   username: string;
   role: "ADMIN" | "TEACHER" | "STUDENT";
   isVerified: boolean;
+  hasCompletedOnboarding?: boolean;
   createdAt: string;
   profileImg?: string;
   gender?: "Male" | "Female" | "Other";
@@ -224,6 +232,7 @@ export const tokenManager = {
       organizationSlug?: string;
       phoneNumber?: string;
       countryCode?: string;
+      hasCompletedOnboarding?: boolean;
     },
     refreshToken?: string
   ) => {
@@ -309,6 +318,25 @@ export const tokenManager = {
 
   clearAuthData: () => {
     deleteCookie(QUEZT_AUTH_KEY);
+  },
+
+  updateStoredUser: (patch: Partial<{
+    id: string;
+    email?: string;
+    username: string;
+    role: string;
+    organizationId: string;
+    organizationName?: string;
+    organizationSlug?: string;
+    hasCompletedOnboarding?: boolean;
+  }>) => {
+    const authData = tokenManager.getAuthData();
+    if (!authData?.user) return;
+    tokenManager.setAuthData(
+      authData.token,
+      { ...authData.user, ...patch },
+      authData.refreshToken
+    );
   },
 
   isAuthenticated: () => {
@@ -488,6 +516,53 @@ export const api = {
 
   getOrganizationConfigAdmin: () =>
     apiClient.get<OrganizationConfigResponse>("/admin/organization-config/config"),
+
+  suggestPlatformCustomization: (prompt: string) =>
+    apiClient.post<PlatformCustomizationSuggestResponse>(
+      "/admin/organization-config/config/ai-suggest",
+      { prompt }
+    ),
+
+  applyPlatformCustomization: (patch: PlatformCustomizationPatch) =>
+    apiClient.post<PlatformCustomizationApplyResponse>(
+      "/admin/organization-config/config/ai-apply",
+      { patch }
+    ),
+
+  onboardingChat: (data: {
+    messages: Array<{ role: "user" | "assistant"; content: string }>;
+    organizationId: string;
+  }) =>
+    apiClient.post<OnboardingChatResponse>(
+      "/api/ai/onboarding-chat",
+      data
+    ),
+
+  parseOnboardingAnswer: (data: {
+    messages: Array<{ role: "user" | "assistant"; content: string }>;
+    organizationId: string;
+  }) =>
+    apiClient.post<OnboardingParseResponse>(
+      "/api/ai/parse-onboarding-answer",
+      data
+    ),
+
+  updateOrganizationConfigById: (
+    organizationId: string,
+    payload: Record<string, unknown>
+  ) =>
+    apiClient.put<OrganizationConfigResponse>(
+      `/api/organization/${organizationId}/config`,
+      payload
+    ),
+
+  patchCurrentUser: (data: { hasCompletedOnboarding?: boolean }) =>
+    apiClient.patch<ApiResponse<{
+      id: string;
+      hasCompletedOnboarding: boolean;
+      organizationId: string;
+      organizationSlug?: string;
+    }>>("/api/users/me", data),
 
   // Profile endpoints (Client/Student)
   getProfile: () => apiClient.get<ApiResponse<User>>("/api/profile"),

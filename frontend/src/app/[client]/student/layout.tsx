@@ -2,6 +2,7 @@
 
 import { StudentLayout } from "@/components/common/student-layout";
 import { RouteGuard } from "@/components/common/route-guard";
+import { StudentFeatureGuard } from "@/components/student/StudentFeatureGuard";
 
 export default function StudentLayoutWrapper({
   children,
@@ -10,7 +11,9 @@ export default function StudentLayoutWrapper({
 }) {
   return (
     <RouteGuard allowedRoles={["student", "admin", "teacher"]}>
-      <StudentLayout>{children}</StudentLayout>
+      <StudentFeatureGuard>
+        <StudentLayout>{children}</StudentLayout>
+      </StudentFeatureGuard>
     </RouteGuard>
   );
 }

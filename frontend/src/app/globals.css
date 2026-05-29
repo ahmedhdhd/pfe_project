@@ -145,3 +145,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Onboarding / designer iframe preview — hide learner chat widgets */
+[data-embed-preview="true"] #chatbot-trigger,
+[data-embed-preview="true"] [aria-label="Chat assistant"],
+[data-embed-preview="true"] [aria-label="Open chat assistant"],
+[data-embed-preview="true"] #crisp-chatbox,
+[data-embed-preview="true"] .crisp-client,
+[data-embed-preview="true"] #intercom-container,
+[data-embed-preview="true"] .tawk-min-container {
+  display: none !important;
+  pointer-events: none !important;
+}

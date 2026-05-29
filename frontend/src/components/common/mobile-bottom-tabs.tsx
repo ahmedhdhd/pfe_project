@@ -14,7 +14,7 @@ import {
   Megaphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { STUDENT_NAVIGATION_ITEMS } from "@/lib/constants";
+import { useStudentNavigationItems } from "@/lib/constants/platform-features";
 
 // Extended navigation item type with optional badge
 interface NavigationItemWithBadge {
@@ -53,6 +53,7 @@ export function MobileBottomTabs({
   isLoading = false,
 }: MobileBottomTabsProps) {
   const pathname = usePathname();
+  const studentNavItems = useStudentNavigationItems();
 
   // Active route detection function
   const isActive = (href: string) => {
@@ -89,7 +90,7 @@ export function MobileBottomTabs({
 
   // Filter navigation items - UX best practice: 4-5 items max for optimal usability
   // Prioritize: Dashboard, Batches, Progress, Tests, Grades
-  const navItems = STUDENT_NAVIGATION_ITEMS.slice(0, 5).map((item) => ({
+  const navItems = studentNavItems.slice(0, 5).map((item) => ({
     ...item,
     badge: badges[item.href],
   })); // Reduced from 7 to 5 for better UX

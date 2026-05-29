@@ -54,7 +54,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     const accessToken = signAccessToken(payload);
     const refreshToken = signRefreshToken(payload);
     await prisma.refreshToken.create({ data: { userId: user.id, token: refreshToken, expiresAt: new Date(Date.now() + 7 * 86400000) } });
-    sendSuccess(res, { token: accessToken, refreshToken, user: { id: user.id, email: user.email, username: user.username, role: user.role, organizationId: user.organizationId, organizationName: user.organization.name, organizationSlug: user.organization.slug } });
+    sendSuccess(res, { token: accessToken, refreshToken, user: { id: user.id, email: user.email, username: user.username, role: user.role, organizationId: user.organizationId, organizationName: user.organization.name, organizationSlug: user.organization.slug, hasCompletedOnboarding: user.hasCompletedOnboarding } });
   } catch (e) { next(e); }
 
 };

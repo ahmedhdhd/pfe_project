@@ -35,6 +35,11 @@ import {
   useOrgName,
   useOrgPaymentMode,
 } from "@/lib/store/organization-config";
+import {
+  useIsOrgFeatureEnabled,
+  useStudentNavigationItems,
+} from "@/lib/constants/platform-features";
+import type { LucideIcon } from "lucide-react";
 import { tokenManager } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import {
@@ -52,15 +57,22 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-// Navigation items matching STUDENT_NAVIGATION_ITEMS
-const NAV_LINKS = [
-  { href: "/student/my-learning", label: "My Learning", icon: LayoutDashboard },
-  { href: "/student/explore", label: "Explore", icon: BookOpen },
-  { href: "/student/certificates", label: "Certificates", icon: Award },
-  { href: "/student/live-sessions", label: "Live Sessions", icon: Calendar },
-];
+const NAV_ICON_MAP: Record<string, LucideIcon> = {
+  LayoutDashboard,
+  BookOpen,
+  Award,
+  Calendar,
+  TrendingUp,
+  FileText,
+};
 
 export function StudentHeader() {
+  const navItems = useStudentNavigationItems();
+  const navLinks = navItems.map((item) => ({
+    href: item.href,
+    label: item.title,
+    icon: NAV_ICON_MAP[item.icon] ?? LayoutDashboard,
+  }));
   const orgLogo = useOrgLogo();
   const orgName = useOrgName();
   const currency = useOrgCurrency();
@@ -74,7 +86,9 @@ export function StudentHeader() {
   const clearCart = useStudentCourseCartStore((state) => state.clearCart);
 
   const isDark = theme === "dark";
-  const showCart = paymentMode === "per_course";
+  const ordersEnabled = useIsOrgFeatureEnabled("orders");
+  const showCart = paymentMode === "per_course" && ordersEnabled;
+  const homeHref = navLinks[0]?.href ?? "/student/my-learning";
   const cartTotal = cartItems.reduce((sum, item) => sum + item.finalPrice, 0);
 
   // Check if a nav link is active
@@ -103,7 +117,7 @@ export function StudentHeader() {
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 md:px-6">
         {/* ── Left: Logo + Org Name ── */}
         <Link
-          href="/student/my-learning"
+          href={homeHref}
           className="flex items-center gap-2.5 mr-6 shrink-0 group"
         >
           {orgLogo ? (
@@ -127,7 +141,7 @@ export function StudentHeader() {
 
         {/* ── Center: Navigation Links ── */}
         <nav className="hidden md:flex items-center gap-1 flex-1">
-          {NAV_LINKS.map((link) => {
+          {navLinks.map((link) => {
             const active = isActive(link.href);
             return (
               <Link

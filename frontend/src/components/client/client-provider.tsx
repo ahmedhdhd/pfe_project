@@ -10,6 +10,7 @@ import {
 import { Client } from "@/lib/types/client";
 import { useOrganizationConfig } from "@/hooks/api";
 import { OrganizationConfig } from "@/lib/types/api";
+import { useOrganizationConfigStore } from "@/lib/store/organization-config";
 import { extractOrganizationSlug } from "@/lib/utils/organization";
 
 // Helper function to map OrganizationConfig to Client interface
@@ -95,6 +96,8 @@ export function ClientProvider({
 
   const finalSubdomain = subdomain || detectedSubdomain;
 
+  const storeConfig = useOrganizationConfigStore((state) => state.config);
+
   // Use the organization config hook
   const {
     data: orgConfigData,
@@ -102,20 +105,30 @@ export function ClientProvider({
     error: orgConfigError,
   } = useOrganizationConfig(finalSubdomain || "");
 
+  const effectiveConfig: OrganizationConfig | null =
+    storeConfig && storeConfig.slug === finalSubdomain
+      ? storeConfig
+      : orgConfigData?.success && orgConfigData.data
+      ? orgConfigData.data
+      : storeConfig;
+
   // Convert organization config to client format
   const client =
-    orgConfigData?.success && orgConfigData.data
-      ? mapOrganizationConfigToClient(orgConfigData.data, finalSubdomain || "")
+    effectiveConfig && finalSubdomain
+      ? mapOrganizationConfigToClient(effectiveConfig, finalSubdomain)
       : null;
 
-  // Handle different error scenarios
-  const error = orgConfigError
-    ? `Failed to load organization configuration${
-        finalSubdomain ? ` for ${finalSubdomain}` : ""
-      }`
-    : !finalSubdomain && !domain
-    ? "No organization slug or domain provided"
-    : null;
+  const clientLoading = isLoading && !storeConfig;
+
+  // Handle different error scenarios — preview store config takes priority
+  const error =
+    orgConfigError && !effectiveConfig
+      ? `Failed to load organization configuration${
+          finalSubdomain ? ` for ${finalSubdomain}` : ""
+        }`
+      : !finalSubdomain && !domain
+      ? "No organization slug or domain provided"
+      : null;
 
   // Inject tenant-based theming
   useEffect(() => {
@@ -134,7 +147,7 @@ export function ClientProvider({
 
   return (
     <ClientContext.Provider
-      value={{ client: client || null, isLoading, error: error || null }}
+      value={{ client: client || null, isLoading: clientLoading, error: error || null }}
     >
       {children}
     </ClientContext.Provider>

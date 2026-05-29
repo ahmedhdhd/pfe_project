@@ -1,9 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const AUTH_COOKIE = "QUEZT_AUTH";
+
+function getAuthUser(request: NextRequest): {
+  role?: string;
+  hasCompletedOnboarding?: boolean;
+} | null {
+  const raw = request.cookies.get(AUTH_COOKIE)?.value;
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as { user?: { role?: string; hasCompletedOnboarding?: boolean } };
+    return parsed.user ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostHeader = request.headers.get("host") || "";
   const hostname = hostHeader.split(":")?.[0];
+
+  const authUser = getAuthUser(request);
+  if (
+    authUser?.role === "ADMIN" &&
+    authUser.hasCompletedOnboarding === false &&
+    pathname.startsWith("/admin") &&
+    !pathname.startsWith("/admin/onboarding")
+  ) {
+    return NextResponse.redirect(new URL("/admin/onboarding", request.url));
+  }
 
   // Extract subdomain from hostname (e.g., "mit" from "mit.teslaacademy.com")
   const subdomain =

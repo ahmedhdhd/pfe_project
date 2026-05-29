@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { authenticate, requireTeacher } from '../middleware/auth';
+import { requireOrgFeature } from '../middleware/orgFeatures';
 import * as c from '../controllers/assignment.controller';
 
 const r = Router();
 
 r.use(authenticate);
 r.use(requireTeacher);
+r.use(requireOrgFeature('assignments'));
 
 r.get('/', c.listAssignments);
 r.post('/', c.createAssignment);

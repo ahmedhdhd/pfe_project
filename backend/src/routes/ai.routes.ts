@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { authenticate, requireTeacher } from '../middleware/auth';
+import { authenticate, requireTeacher, requireAdmin } from '../middleware/auth';
+import {
+  onboardingChat,
+  parseOnboardingAnswerHandler,
+} from '../controllers/onboarding.controller';
 import {
   aiChat,
   teacherGeneratePlayground,
@@ -38,6 +42,10 @@ const playgroundLimiter = rateLimit({
 
 // Student — chat with AI tutor
 router.post('/chat', authenticate, aiLimiter, aiChat);
+
+// Admin onboarding wizard (Gemini via OpenRouter)
+router.post('/onboarding-chat', authenticate, requireAdmin, aiLimiter, onboardingChat);
+router.post('/parse-onboarding-answer', authenticate, requireAdmin, aiLimiter, parseOnboardingAnswerHandler);
 
 // Teacher/Admin — generate or refine a playground widget
 router.post('/playground/generate', authenticate, requireTeacher, playgroundLimiter, teacherGeneratePlayground);

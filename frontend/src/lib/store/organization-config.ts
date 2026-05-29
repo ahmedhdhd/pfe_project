@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { OrganizationConfig } from "@/lib/types/api";
+import { organizationConfigsEqual } from "@/lib/platform-preview";
 
 interface OrganizationConfigState {
   config: OrganizationConfig | null;
@@ -15,7 +16,13 @@ export const useOrganizationConfigStore = create<OrganizationConfigState>()(
     (set) => ({
       config: null,
       isLoading: false,
-      setConfig: (config) => set({ config, isLoading: false }),
+      setConfig: (config) =>
+        set((state) => {
+          if (organizationConfigsEqual(state.config, config)) {
+            return state;
+          }
+          return { config, isLoading: false };
+        }),
       clearConfig: () => set({ config: null, isLoading: false }),
       setLoading: (isLoading) => set({ isLoading }),
     }),
@@ -63,9 +70,16 @@ export const useOrgMaintenanceMode = () => {
   return config?.maintenanceMode || false;
 };
 
+/** Homepage marketing feature cards (not module toggles). */
 export const useOrgFeatures = () => {
   const config = useOrganizationConfigStore((state) => state.config);
   return config?.features || [];
+};
+
+/** Module on/off flags — controlled by AI onboarding / platform designer. */
+export const useOrgFeaturesEnabled = () => {
+  const config = useOrganizationConfigStore((state) => state.config);
+  return config?.featuresEnabled;
 };
 
 export const useOrgTestimonials = () => {

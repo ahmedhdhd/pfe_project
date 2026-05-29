@@ -25,12 +25,14 @@ import {
   GraduationCap,
   Shapes,
   UserIcon,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/lib/store";
 import { getNavigationItems, ROLES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser, useLogout } from "@/hooks";
+import { useOrganizationConfig } from "@/hooks/api";
 import {
   Sidebar as UISidebar,
   SidebarBody,
@@ -54,6 +56,7 @@ const iconMap = {
   Megaphone,
   GraduationCap,
   Shapes,
+  Sparkles,
 };
 
 interface SidebarProps {
@@ -113,6 +116,14 @@ function SidebarContent({ className }: { className?: string }) {
   const [hostname, setHostname] = useState("");
   const { open: sidebarOpen } = useSidebar();
   const { data: user, isLoading: userLoading } = useCurrentUser();
+  const orgSlug =
+    user?.organizationSlug ||
+    (typeof window !== "undefined"
+      ? window.location.hostname.split(".")[0]
+      : "");
+  const { data: orgConfigData } = useOrganizationConfig(
+    orgSlug && orgSlug !== "localhost" ? orgSlug : ""
+  );
   const logoutMutation = useLogout();
 
   useEffect(() => {
@@ -129,7 +140,15 @@ function SidebarContent({ className }: { className?: string }) {
 
   // Get navigation items based on current domain and role
   const effectiveRole = role || user?.role || ROLES.STUDENT;
-  const filteredItems = getNavigationItems(hostname, effectiveRole);
+  const featuresEnabled =
+    orgConfigData?.success && orgConfigData.data?.featuresEnabled
+      ? orgConfigData.data.featuresEnabled
+      : undefined;
+  const filteredItems = getNavigationItems(
+    hostname,
+    effectiveRole,
+    featuresEnabled
+  );
 
   const isActive = (href: string) => {
     // Normalize: remove client segment if present (e.g., /mit/student/dashboard -> /student/dashboard)
@@ -164,7 +183,13 @@ function SidebarContent({ className }: { className?: string }) {
       return normalizedPath === "/admin/clients";
     }
     if (href === "/admin/settings") {
-      return normalizedPath === "/admin/settings";
+      return (
+        normalizedPath === "/admin/settings" ||
+        normalizedPath.startsWith("/admin/settings/")
+      );
+    }
+    if (href === "/admin/onboarding") {
+      return normalizedPath === "/admin/onboarding";
     }
     if (href === "/admin/billing") {
       return normalizedPath === "/admin/billing";

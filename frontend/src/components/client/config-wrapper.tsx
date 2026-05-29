@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useOrganizationConfig } from "@/hooks/api";
 import { useOrganizationConfigStore } from "@/lib/store/organization-config";
 import { ClientThemeProvider } from "./theme-provider";
 import { OptimisticConfigProvider } from "./optimistic-config-provider";
 import { getCachedConfig, setCachedConfig } from "@/lib/config/cache";
+import {
+  getPlatformPreviewConfig,
+  isEmbedPreviewMode,
+  organizationConfigsEqual,
+  PREVIEW_CONFIG_MESSAGE,
+  setPlatformPreviewConfig,
+} from "@/lib/platform-preview";
+import type { OrganizationConfig } from "@/lib/types/api";
 
 interface ClientConfigWrapperProps {
   children: React.ReactNode;
@@ -15,38 +23,93 @@ interface ClientConfigWrapperProps {
 export function ClientConfigWrapper({ children }: ClientConfigWrapperProps) {
   const params = useParams();
   const clientSlug = params.client as string;
+  const embedPreview = useRef(
+    typeof window !== "undefined" ? isEmbedPreviewMode() : false
+  ).current;
 
-  const {
-    config: storedConfig,
-    setConfig,
-    setLoading,
-  } = useOrganizationConfigStore();
-  const { data, isLoading, error } = useOrganizationConfig(clientSlug);
+  const setConfig = useOrganizationConfigStore((state) => state.setConfig);
+  const setLoading = useOrganizationConfigStore((state) => state.setLoading);
+  const storedConfig = useOrganizationConfigStore((state) => state.config);
 
-  // Check cache IMMEDIATELY on mount (before API call)
+  const { data, isLoading, error } = useOrganizationConfig(
+    embedPreview ? "" : clientSlug
+  );
+
+  const [showPreviewBanner, setShowPreviewBanner] = useState(embedPreview);
+
+  const applyConfig = useCallback(
+    (config: OrganizationConfig) => {
+      const current = useOrganizationConfigStore.getState().config;
+      if (organizationConfigsEqual(current, config)) {
+        return;
+      }
+      setConfig(config);
+    },
+    [setConfig]
+  );
+
+  // Initial load: session preview or cache (once per slug)
   useEffect(() => {
     if (!clientSlug || clientSlug === "default") return;
 
-    const cached = getCachedConfig(clientSlug);
-    if (cached && !storedConfig) {
-      // Apply cached config INSTANTLY - user sees correct theme immediately!
-      setConfig(cached);
+    const preview = getPlatformPreviewConfig(clientSlug);
+    if (preview) {
+      applyConfig(preview);
+      setShowPreviewBanner(true);
+      return;
     }
-  }, [clientSlug, storedConfig, setConfig]);
 
-  // Update store and cache when API data arrives
+    if (embedPreview) {
+      setShowPreviewBanner(true);
+      return;
+    }
+
+    const cached = getCachedConfig(clientSlug);
+    if (cached) {
+      applyConfig(cached);
+    }
+  }, [clientSlug, embedPreview, applyConfig]);
+
+  // API data — skip while embedded onboarding preview is active
   useEffect(() => {
+    if (embedPreview) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(isLoading);
 
+    if (getPlatformPreviewConfig(clientSlug)) {
+      setShowPreviewBanner(true);
+      return;
+    }
+
     if (data?.success && data?.data) {
-      setConfig(data.data);
-      // Update cache for next visit
+      applyConfig(data.data);
       setCachedConfig(clientSlug, data.data);
     }
-  }, [data, isLoading, setConfig, setLoading, clientSlug]);
+  }, [data, isLoading, clientSlug, embedPreview, applyConfig, setLoading]);
 
-  // Show maintenance mode if enabled
-  if (storedConfig?.maintenanceMode) {
+  // Live preview updates from parent (onboarding)
+  useEffect(() => {
+    if (!clientSlug) return;
+
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== PREVIEW_CONFIG_MESSAGE) return;
+      if (event.data.slug !== clientSlug) return;
+
+      const config = event.data.config as OrganizationConfig;
+      setPlatformPreviewConfig(clientSlug, config);
+      applyConfig(config);
+      setShowPreviewBanner(true);
+    };
+
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [clientSlug, applyConfig]);
+
+  if (storedConfig?.maintenanceMode && !embedPreview) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center space-y-4 p-8">
@@ -60,9 +123,7 @@ export function ClientConfigWrapper({ children }: ClientConfigWrapperProps) {
     );
   }
 
-  // Show error state ONLY if no cached config exists
-  // If cached config exists, show content with cached theme (graceful degradation)
-  if (error && !storedConfig) {
+  if (error && !storedConfig && !embedPreview) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center space-y-4 p-8">
@@ -77,12 +138,18 @@ export function ClientConfigWrapper({ children }: ClientConfigWrapperProps) {
     );
   }
 
-  // 🎯 NO LOADING STATE!
-  // User either sees cached config instantly OR default theme
-  // API fetch happens in background - theme updates seamlessly
-
   return (
-    <OptimisticConfigProvider subdomain={clientSlug}>
+    <OptimisticConfigProvider subdomain={clientSlug} skipFetch={embedPreview}>
+      {showPreviewBanner && !embedPreview && (
+        <div className="bg-amber-500 text-amber-950 text-center text-sm py-2 px-4">
+          Preview mode — changes are not saved until you launch or apply.
+        </div>
+      )}
+      {showPreviewBanner && embedPreview && (
+        <div className="bg-primary/10 text-primary text-center text-[11px] py-1.5 px-2 border-b shrink-0">
+          Homepage preview — setup chat is on the left panel only
+        </div>
+      )}
       <ClientThemeProvider>{children}</ClientThemeProvider>
     </OptimisticConfigProvider>
   );

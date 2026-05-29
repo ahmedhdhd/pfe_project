@@ -1,4 +1,7 @@
 import { NavigationItem } from "@/lib/types";
+import { filterNavigationByFeatures } from "@/lib/constants/platform-features";
+export { STUDENT_NAVIGATION_ITEMS } from "@/lib/constants/student-navigation";
+import { STUDENT_NAVIGATION_ITEMS } from "@/lib/constants/student-navigation";
 
 export const ROLES = {
   ADMIN: "admin" as const,
@@ -68,6 +71,12 @@ export const ADMIN_NAVIGATION_ITEMS: NavigationItem[] = [
     icon: "Settings",
     roles: ["admin"],
   },
+  {
+    title: "AI Designer",
+    href: "/admin/onboarding",
+    icon: "Sparkles",
+    roles: ["admin"],
+  },
 ];
 
 // Teacher navigation items (main domain)
@@ -114,64 +123,6 @@ export const TEACHER_NAVIGATION_ITEMS: NavigationItem[] = [
     icon: "Users",
     roles: ["teacher"],
   },
-];
-
-// Student navigation items (subdomain)
-export const STUDENT_NAVIGATION_ITEMS: NavigationItem[] = [
-  {
-    title: "My Learning",
-    href: "/student/my-learning",
-    icon: "LayoutDashboard",
-    roles: ["student"],
-  },
-  {
-    title: "Explore",
-    href: "/student/explore",
-    icon: "BookOpen",
-    roles: ["student"],
-  },
-  {
-    title: "Certificates",
-    href: "/student/certificates",
-    icon: "Award",
-    roles: ["student"],
-  },
-  {
-    title: "Live Sessions",
-    href: "/student/live-sessions",
-    icon: "Calendar",
-    roles: ["student"],
-  },
-  {
-    title: "My Profile",
-    href: "/student/profile",
-    icon: "TrendingUp",
-    roles: ["student"],
-  },
-  // {
-  //   title: "Tests",
-  //   href: "/student/tests",
-  //   icon: "FileText",
-  //   roles: ["student"],
-  // },
-  // {
-  //   title: "Assignments",
-  //   href: "/student/assignments",
-  //   icon: "FileText",
-  //   roles: ["student"],
-  // },
-  // {
-  //   title: "Upcoming Classes",
-  //   href: "/student/classes",
-  //   icon: "Calendar",
-  //   roles: ["student"],
-  // },
-  // {
-  //   title: "Grades",
-  //   href: "/student/grades",
-  //   icon: "Award",
-  //   roles: ["student"],
-  // },
 ];
 
 // Legacy navigation items for backward compatibility
@@ -326,12 +277,12 @@ type UserRole = (typeof ROLES)[keyof typeof ROLES];
 
 export const getNavigationItems = (
   hostname: string,
-  role: UserRole
+  role: UserRole,
+  featuresEnabled?: Record<string, boolean>
 ): NavigationItem[] => {
-  console.log("Navigation Debug:", { hostname, role, ROLES });
-
   // Normalize role to lowercase for comparison
   const normalizedRole = role?.toLowerCase();
+  let items: NavigationItem[];
 
   // Main domain (teslaacademy.com) or localhost - admin and teacher
   if (
@@ -341,31 +292,31 @@ export const getNavigationItems = (
   ) {
     switch (normalizedRole) {
       case ROLES.ADMIN:
-        console.log("Returning ADMIN_NAVIGATION_ITEMS");
-        return ADMIN_NAVIGATION_ITEMS;
+        items = ADMIN_NAVIGATION_ITEMS;
+        break;
       case ROLES.TEACHER:
-        console.log("Returning TEACHER_NAVIGATION_ITEMS");
-        return TEACHER_NAVIGATION_ITEMS;
+        items = TEACHER_NAVIGATION_ITEMS;
+        break;
       default:
-        console.log("Returning STUDENT_NAVIGATION_ITEMS (default)");
-        // Students should be redirected to subdomain
-        return STUDENT_NAVIGATION_ITEMS;
+        items = STUDENT_NAVIGATION_ITEMS;
+    }
+  } else {
+    switch (normalizedRole) {
+      case ROLES.STUDENT:
+        items = STUDENT_NAVIGATION_ITEMS;
+        break;
+      case ROLES.TEACHER:
+        items = TEACHER_NAVIGATION_ITEMS;
+        break;
+      case ROLES.ADMIN:
+        items = ADMIN_NAVIGATION_ITEMS;
+        break;
+      default:
+        items = STUDENT_NAVIGATION_ITEMS;
     }
   }
 
-  // Subdomain - students only
-  switch (normalizedRole) {
-    case ROLES.STUDENT:
-      return STUDENT_NAVIGATION_ITEMS;
-    case ROLES.TEACHER:
-      // Teacher on subdomain should redirect to main domain
-      return TEACHER_NAVIGATION_ITEMS;
-    case ROLES.ADMIN:
-      // Admin on subdomain should redirect to main domain
-      return ADMIN_NAVIGATION_ITEMS;
-    default:
-      return STUDENT_NAVIGATION_ITEMS;
-  }
+  return filterNavigationByFeatures(items, featuresEnabled);
 };
 
 // Premium theme presets optimized for both light and dark modes

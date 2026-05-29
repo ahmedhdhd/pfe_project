@@ -2,6 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import * as c from '../controllers/schedule.controller';
 import { authenticate, requireTeacher } from '../middleware/auth';
+import { requireOrgFeature } from '../middleware/orgFeatures';
 
 const r = Router();
 const transcriptChunkUpload = multer({
@@ -9,6 +10,7 @@ const transcriptChunkUpload = multer({
   limits: { fileSize: 25 * 1024 * 1024 },
 });
 r.use(authenticate, requireTeacher);
+r.use(requireOrgFeature('liveSessions'));
 r.post('/', c.createSchedule);
 r.get('/', c.listSchedules);
 r.get('/batch/:batchId', c.getSchedulesByBatch);

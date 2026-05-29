@@ -6,6 +6,7 @@ import {
   useOrgColors,
 } from "@/lib/store/organization-config";
 import { hexToOKLCHString } from "@/lib/utils/color-converter";
+import { isEmbedPreviewMode } from "@/lib/platform-preview";
 
 interface ClientThemeProviderProps {
   children: React.ReactNode;
@@ -14,6 +15,16 @@ interface ClientThemeProviderProps {
 export function ClientThemeProvider({ children }: ClientThemeProviderProps) {
   const colors = useOrgColors();
   const config = useOrganizationConfigStore((state) => state.config);
+  const embedPreview =
+    typeof window !== "undefined" && isEmbedPreviewMode();
+
+  useEffect(() => {
+    if (!embedPreview) return;
+    document.documentElement.setAttribute("data-embed-preview", "true");
+    return () => {
+      document.documentElement.removeAttribute("data-embed-preview");
+    };
+  }, [embedPreview]);
 
   // Apply theme colors to CSS variables
   useEffect(() => {
@@ -70,6 +81,14 @@ export function ClientThemeProvider({ children }: ClientThemeProviderProps) {
 
   // Apply custom JavaScript if provided (with caution)
   useEffect(() => {
+    if (embedPreview || !config?.customJS) {
+      const scriptElement = document.getElementById("custom-org-js");
+      if (scriptElement) {
+        scriptElement.remove();
+      }
+      return;
+    }
+
     if (config?.customJS) {
       const scriptId = "custom-org-js";
       let scriptElement = document.getElementById(
@@ -92,7 +111,7 @@ export function ClientThemeProvider({ children }: ClientThemeProviderProps) {
         scriptElement.remove();
       }
     };
-  }, [config?.customJS]);
+  }, [config?.customJS, embedPreview]);
 
   // Apply favicon if provided
   useEffect(() => {

@@ -4,7 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, tokenManager } from "@/lib/api/client";
 import apiClient from "@/lib/api/client";
 import { setCachedConfig } from "@/lib/config/cache";
-import type { ContentBlockDocument } from "@/lib/content-blocks";
+import { clearPlatformPreviewConfig } from "@/lib/platform-preview";
+import type { OnboardingPartialConfig } from "@/lib/types/onboarding";
 import { useOrganizationConfigStore } from "@/lib/store/organization-config";
 import {
   ApiResponse,
@@ -95,8 +96,23 @@ export const useLogin = () => {
         // Update user cache
         queryClient.setQueryData(queryKeys.user, data.data.user);
 
-        // Redirect to dashboard
-        router.push("/admin/dashboard");
+        // Redirect based on onboarding status
+        const user = data.data.user as {
+          role?: string;
+          hasCompletedOnboarding?: boolean;
+        };
+        if (
+          user.role === "ADMIN" &&
+          user.hasCompletedOnboarding === false
+        ) {
+          router.push("/admin/onboarding");
+        } else if (user.role === "ADMIN") {
+          router.push("/admin/dashboard");
+        } else if (user.role === "TEACHER") {
+          router.push("/teacher/dashboard");
+        } else {
+          router.push("/admin/dashboard");
+        }
       }
     },
     onError: (error) => {
@@ -204,6 +220,110 @@ export const useOrganizationConfigAdmin = () => {
 };
 
 // Update Organization Configuration Hook (Admin endpoint)
+export const useSuggestPlatformCustomization = () => {
+  return useMutation({
+    mutationFn: (prompt: string) =>
+      api.suggestPlatformCustomization(prompt).then((res) => res.data),
+  });
+};
+
+export const useApplyPlatformCustomization = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (patch: import("@/lib/types/api").PlatformCustomizationPatch) =>
+      api.applyPlatformCustomization(patch).then((res) => res.data),
+    onSuccess: (data) => {
+      if (data.success && data.data?.config) {
+        queryClient.invalidateQueries({ queryKey: ["organizationConfig"] });
+        queryClient.setQueryData(["organizationConfig", "admin"], {
+          success: true,
+          data: data.data.config,
+        });
+        queryClient.setQueryData(
+          queryKeys.organizationConfig(data.data.config.slug),
+          { success: true, data: data.data.config }
+        );
+        setCachedConfig(data.data.config.slug, data.data.config);
+        useOrganizationConfigStore.getState().setConfig(data.data.config);
+      }
+    },
+  });
+};
+
+export const useOnboardingChat = () => {
+  return useMutation({
+    mutationFn: (data: {
+      messages: Array<{ role: "user" | "assistant"; content: string }>;
+      organizationId: string;
+    }) => api.onboardingChat(data).then((res) => res.data),
+  });
+};
+
+export const useParseOnboardingAnswer = () => {
+  return useMutation({
+    mutationFn: (data: {
+      messages: Array<{ role: "user" | "assistant"; content: string }>;
+      organizationId: string;
+    }) => api.parseOnboardingAnswer(data).then((res) => res.data),
+  });
+};
+
+export const useSkipOnboarding = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      api.patchCurrentUser({ hasCompletedOnboarding: true }).then((res) => res.data),
+    onSuccess: (data) => {
+      if (data?.success) {
+        tokenManager.updateStoredUser({ hasCompletedOnboarding: true });
+        queryClient.setQueryData(queryKeys.user, (old: unknown) => {
+          if (!old || typeof old !== "object") return old;
+          return { ...old, hasCompletedOnboarding: true };
+        });
+      }
+    },
+  });
+};
+
+export const useLaunchOnboarding = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      organizationId: string;
+      slug: string;
+      partial: OnboardingPartialConfig;
+    }) => {
+      const { onboardingToLaunchPayload } = await import("@/lib/types/onboarding");
+      const payload = onboardingToLaunchPayload(
+        data.partial,
+        data.organizationId,
+        data.slug
+      );
+      await api.updateOrganizationConfigById(data.organizationId, payload);
+      const userRes = await api.patchCurrentUser({
+        hasCompletedOnboarding: true,
+      });
+      return userRes.data;
+    },
+    onSuccess: (data, variables) => {
+      if (data?.success && data.data) {
+        tokenManager.updateStoredUser({
+          hasCompletedOnboarding: true,
+        });
+        queryClient.setQueryData(queryKeys.user, (old: unknown) => {
+          if (!old || typeof old !== "object") return old;
+          return { ...old, hasCompletedOnboarding: true };
+        });
+        queryClient.invalidateQueries({ queryKey: ["organizationConfig"] });
+        clearPlatformPreviewConfig(variables.slug);
+      }
+    },
+  });
+};
+
 export const useUpdateOrganizationConfig = () => {
   const queryClient = useQueryClient();
 
