@@ -296,13 +296,28 @@ export const useLaunchOnboarding = () => {
       slug: string;
       partial: OnboardingPartialConfig;
     }) => {
-      const { onboardingToLaunchPayload } = await import("@/lib/types/onboarding");
+      const { onboardingToLaunchPayload, hasMeaningfulUiPatch } = await import(
+        "@/lib/types/onboarding"
+      );
       const payload = onboardingToLaunchPayload(
         data.partial,
         data.organizationId,
         data.slug
       );
-      await api.updateOrganizationConfigById(data.organizationId, payload);
+
+      if (payload.name || payload.customCSS) {
+        await api.updateOrganizationConfigById(data.organizationId, {
+          organizationId: data.organizationId,
+          name: payload.name,
+          slug: data.slug,
+          customCSS: payload.customCSS,
+        });
+      }
+
+      if (hasMeaningfulUiPatch(payload.uiPatch)) {
+        await api.applyUiCustomization(payload.uiPatch);
+      }
+
       const userRes = await api.patchCurrentUser({
         hasCompletedOnboarding: true,
       });

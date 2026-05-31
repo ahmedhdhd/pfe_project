@@ -5,6 +5,7 @@ import { MobileBottomTabs } from "@/components/common/mobile-bottom-tabs";
 import { useRequireAuth } from "@/hooks";
 import { Loader2 } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { StudentSidebarNav } from "@/components/student/student-sidebar-nav";
 
 interface StudentLayoutProps {
   children: ReactNode;
@@ -30,21 +31,25 @@ export function StudentLayout({ children }: StudentLayoutProps) {
   }
 
   return (
-    <div className="relative flex flex-col min-h-screen bg-background">
-      {/* Full-width content area — no sidebar for students (uses top nav instead) */}
+    <div className="student-layout relative flex flex-col min-h-screen bg-background">
+      {/* Sidebar — only visible when data-ui-student-shell="sidebar" via CSS */}
+      <aside className="student-sidebar hidden">
+        <StudentSidebarNav />
+      </aside>
+
+      {/* Main content */}
       <main
         className={
           !isAttemptRoute
-            ? "relative z-0 flex-1 overflow-x-hidden bg-background"
-            : "flex-1 overflow-auto p-0"
+            ? "student-main relative z-0 flex-1 overflow-x-hidden bg-background"
+            : "student-main flex-1 overflow-auto p-0"
         }
       >
         {children}
       </main>
 
-      {/* Mobile bottom tabs — only show for student routes and not on attempt pages */}
+      {/* Mobile bottom tabs */}
       {isAuthenticated && !isAttemptRoute && <MobileBottomTabs />}
-
     </div>
   );
 }

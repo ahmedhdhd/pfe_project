@@ -146,7 +146,57 @@
   }
 }
 
-/* Onboarding / designer iframe preview — hide learner chat widgets */
+/* Theme engine — variant styles via data-ui-* on html */
+[data-ui-button="pill"] .themed-btn,
+[data-ui-button="pill"] button[data-slot="button"]:not([data-variant="ghost"]) {
+  border-radius: 9999px;
+}
+
+[data-ui-button="sharp"] .themed-btn,
+[data-ui-button="sharp"] button[data-slot="button"]:not([data-variant="ghost"]) {
+  border-radius: 0;
+}
+
+[data-ui-card="glass"] .themed-card,
+[data-ui-card="glass"] [data-slot="card"] {
+  background: color-mix(in oklch, var(--card) 72%, transparent);
+  backdrop-filter: blur(12px);
+  border-color: color-mix(in oklch, var(--border) 60%, transparent);
+}
+
+[data-ui-card="flat"] .themed-card,
+[data-ui-card="flat"] [data-slot="card"] {
+  box-shadow: none;
+  border-color: transparent;
+  background: var(--muted);
+}
+
+[data-ui-density="compact"] {
+  --spacing-scale: 0.85;
+}
+
+[data-ui-density="spacious"] {
+  --spacing-scale: 1.15;
+}
+
+[data-ui-sidebar="dark"] [data-sidebar="sidebar"] {
+  background: oklch(0.18 0.02 264);
+  color: oklch(0.95 0 0);
+}
+
+[data-ui-sidebar="brand"] [data-sidebar="sidebar"] {
+  background: color-mix(in oklch, var(--primary) 12%, var(--sidebar));
+}
+
+[data-ui-admin-shell="sidebar-compact"] [data-sidebar="sidebar"] {
+  width: 4rem;
+}
+
+[data-ui-homepage="hero-center"] main > section:first-of-type {
+  text-align: center;
+}
+
+/* Onboarding iframe preview — hide learner chat widgets */
 [data-embed-preview="true"] #chatbot-trigger,
 [data-embed-preview="true"] [aria-label="Chat assistant"],
 [data-embed-preview="true"] [aria-label="Open chat assistant"],
@@ -156,4 +206,51 @@
 [data-embed-preview="true"] .tawk-min-container {
   display: none !important;
   pointer-events: none !important;
+}
+
+/* ── Student shell layout variants ── */
+
+/* Sidebar mode: student gets a left side nav */
+[data-ui-student-shell="sidebar"] .student-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+[data-ui-student-shell="sidebar"] .student-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 240px;
+  min-height: 100vh;
+  flex-shrink: 0;
+  border-right: 1px solid hsl(var(--border));
+  background: var(--sidebar, hsl(var(--background)));
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+}
+
+[data-ui-student-shell="sidebar"] .student-main {
+  flex: 1;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+/* Topnav mode: default column layout (this is the current default behavior) */
+[data-ui-student-shell="topnav"] .student-layout {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Minimal mode: hide chrome, full-width focus */
+[data-ui-student-shell="minimal"] .student-sidebar {
+  display: none !important;
+}
+
+[data-ui-student-shell="minimal"] .student-header {
+  display: none !important;
+}
+
+[data-ui-student-shell="minimal"] .student-main {
+  padding: 0;
 }

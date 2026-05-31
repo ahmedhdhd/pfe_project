@@ -173,14 +173,41 @@ function normalizeFeaturesEnabled(raw: unknown): Record<string, boolean> | undef
   return Object.keys(out).length > 0 ? out : undefined;
 }
 
-function sanitizeCustomCss(css: unknown): string | undefined {
+export function sanitizeCustomCss(css: unknown): string | undefined {
   const s = optionalString(css, MAX_CSS_LENGTH);
   if (!s) return undefined;
   const lower = s.toLowerCase();
-  if (lower.includes('@import') || lower.includes('javascript:') || lower.includes('expression(')) {
+  if (lower.includes('javascript:') || lower.includes('expression(')) {
     return undefined;
   }
-  return s;
+
+  let normalized = s;
+
+  // Runtime injected CSS cannot compile Tailwind directives, so strip them
+  // and keep only browser-executable rules/variables.
+  normalized = normalized.replace(/@import\s+["'][^"']+["'];?\s*/gi, '');
+  normalized = normalized.replace(/@custom-variant\s+[^;]+;?\s*/gi, '');
+  normalized = normalized.replace(/@theme\s+inline\s*\{[\s\S]*?\}\s*/gi, '');
+
+  // Convert the common base layer from Tailwind @apply into plain CSS.
+  normalized = normalized.replace(
+    /@layer\s+base\s*\{\s*\*\s*\{\s*@apply\s+border-border\s+outline-ring\/50;\s*\}\s*body\s*\{\s*@apply\s+bg-background\s+text-foreground;\s*\}\s*\}\s*/gi,
+    [
+      '* {',
+      '  border-color: var(--border);',
+      '}',
+      'body {',
+      '  background: var(--background);',
+      '  color: var(--foreground);',
+      '}',
+    ].join('\n')
+  );
+
+  // Drop any leftover @apply statements because the browser cannot execute them.
+  normalized = normalized.replace(/@apply\s+[^;]+;/gi, '');
+  normalized = normalized.trim();
+
+  return normalized || undefined;
 }
 
 /** Strip and validate LLM `patch` object. */

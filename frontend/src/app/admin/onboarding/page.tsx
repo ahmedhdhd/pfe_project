@@ -2,12 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bot, Loader2, Rocket, Send, SkipForward, Sparkles, User } from "lucide-react";
+import { Bot, Loader2, RefreshCcw, Rocket, Send, SkipForward, Sparkles, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { OnboardingLivePreview } from "@/components/admin/onboarding/OnboardingLivePreview";
 import { useCurrentUser } from "@/hooks";
 import {
@@ -18,9 +16,7 @@ import {
   useOrganizationConfigAdmin,
 } from "@/hooks/api";
 import {
-  countOnboardingProgress,
   mergeOnboardingPartial,
-  ONBOARDING_TOTAL_STEPS,
   type OnboardingMessage,
   type OnboardingPartialConfig,
 } from "@/lib/types/onboarding";
@@ -33,6 +29,26 @@ function TypingIndicator() {
       <span className="h-2 w-2 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:150ms]" />
       <span className="h-2 w-2 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:300ms]" />
     </div>
+  );
+}
+
+function isApplyConfirmation(text: string): boolean {
+  const trimmed = text.trim();
+  if (!trimmed || trimmed.length > 80) return false;
+  if (/[\n\r{}]/.test(trimmed)) return false;
+
+  const lower = trimmed.toLowerCase();
+  if (
+    lower.includes("@apply") ||
+    lower.includes(":root") ||
+    lower.includes("@theme") ||
+    lower.includes("@layer")
+  ) {
+    return false;
+  }
+
+  return /^(apply|apply it|apply now|confirm|confirm it|yes apply|approved|go ahead|launch now|please apply)\.?$/i.test(
+    trimmed
   );
 }
 
@@ -56,11 +72,10 @@ export default function AdminOnboardingPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
+  const [previewRefreshKey, setPreviewRefreshKey] = useState(0);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
-
-  const progressStep = countOnboardingProgress(partialConfig);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -86,9 +101,16 @@ export default function AdminOnboardingPage() {
           }
         }
       } catch (err: unknown) {
+        const axiosLikeError = err as {
+          code?: string;
+          message?: string;
+          response?: { data?: { message?: string } };
+        };
         const msg =
-          (err as { response?: { data?: { message?: string } } })?.response?.data
-            ?.message || "Could not reach the onboarding assistant.";
+          axiosLikeError?.response?.data?.message ||
+          (axiosLikeError?.code === "ECONNABORTED"
+            ? "The onboarding assistant is taking longer than expected. Please try again in a moment."
+            : "Could not reach the onboarding assistant.");
         setError(msg);
       } finally {
         setIsTyping(false);
@@ -137,6 +159,10 @@ export default function AdminOnboardingPage() {
 
     await parseAndUpdate(nextHistory);
     await runAssistantTurn(nextHistory);
+
+    if (isApplyConfirmation(text)) {
+      setPhase("confirm");
+    }
   };
 
   const handleSkip = async () => {
@@ -195,9 +221,6 @@ export default function AdminOnboardingPage() {
           </span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Badge variant="secondary" className="hidden sm:inline-flex">
-            Step {Math.max(progressStep, 1)} of {ONBOARDING_TOTAL_STEPS}
-          </Badge>
           <Button
             variant="ghost"
             size="sm"
@@ -274,7 +297,7 @@ export default function AdminOnboardingPage() {
             <p className="text-sm text-destructive px-4 pb-2">{error}</p>
           )}
 
-          {phase === "confirm" ? (
+          {phase === "confirm" && (
             <div className="p-4 border-t space-y-4 bg-muted/20">
               <Card>
                 <CardHeader className="pb-2">
@@ -284,24 +307,34 @@ export default function AdminOnboardingPage() {
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
                   <p>
-                    <strong>Name:</strong> {partialConfig.name || "—"}
+                    <strong>Name:</strong>{" "}
+                    {partialConfig.organizationName || "—"}
                   </p>
                   <p>
-                    <strong>Hero:</strong> {partialConfig.heroTitle || "—"}
+                    <strong>Preset:</strong>{" "}
+                    {partialConfig.uiPatch?.preset || "—"}
                   </p>
                   <p>
-                    <strong>Language:</strong> {partialConfig.language || "—"}
+                    <strong>Hero:</strong>{" "}
+                    {partialConfig.uiPatch?.homepage?.heroTitle || "—"}
                   </p>
                   <p>
-                    <strong>Theme:</strong>{" "}
-                    {partialConfig.themeColor ? (
+                    <strong>Primary color:</strong>{" "}
+                    {partialConfig.uiPatch?.tokens?.primaryColor ? (
                       <span
                         className="inline-block h-4 w-4 rounded border align-middle ml-1"
-                        style={{ background: partialConfig.themeColor }}
+                        style={{
+                          background:
+                            partialConfig.uiPatch.tokens.primaryColor,
+                        }}
                       />
                     ) : (
                       "—"
                     )}
+                  </p>
+                  <p>
+                    <strong>Custom CSS theme:</strong>{" "}
+                    {partialConfig.customCSS ? "Generated" : "Not generated"}
                   </p>
                   <Button
                     className="w-full"
@@ -323,43 +356,52 @@ export default function AdminOnboardingPage() {
                 </CardContent>
               </Card>
             </div>
-          ) : (
-            <div className="p-4 border-t flex gap-2 shrink-0">
-              <Textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Type your answer…"
-                rows={2}
-                className="resize-none"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    void handleSend();
-                  }
-                }}
-                disabled={isTyping}
-              />
-              <Button
-                size="icon"
-                className="shrink-0 h-auto"
-                onClick={() => void handleSend()}
-                disabled={!input.trim() || isTyping}
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
           )}
+
+          <div className="p-4 border-t flex gap-2 shrink-0">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Share your preferences, and type 'apply' when you're ready."
+              rows={2}
+              className="resize-none"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  void handleSend();
+                }
+              }}
+              disabled={isTyping}
+            />
+            <Button
+              size="icon"
+              className="shrink-0 h-auto"
+              onClick={() => void handleSend()}
+              disabled={!input.trim() || isTyping}
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Preview column */}
         <div className="flex-1 p-4 md:p-6 overflow-y-auto bg-muted/20 md:sticky md:top-0 md:h-[calc(100vh-57px)]">
           <div className="space-y-3 max-w-2xl mx-auto">
             <div className="space-y-1">
-              <p className="text-sm font-medium">Live preview</p>
-              <Progress
-                value={(progressStep / ONBOARDING_TOTAL_STEPS) * 100}
-                className="h-2"
-              />
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-medium">Live preview</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setPreviewRefreshKey((current) => current + 1)
+                  }
+                >
+                  <RefreshCcw className="mr-2 h-4 w-4" />
+                  Refresh
+                </Button>
+              </div>
               <p className="text-xs text-muted-foreground">
                 Real public homepage — updates as you chat
               </p>
@@ -370,6 +412,7 @@ export default function AdminOnboardingPage() {
                 organizationId={user?.organizationId || ""}
                 partial={partialConfig}
                 baseConfig={baseConfig}
+                refreshKey={previewRefreshKey}
               />
             </div>
           </div>

@@ -11,7 +11,10 @@ export function organizationConfigSignature(
   return JSON.stringify({
     name: config.name,
     slug: config.slug,
+    uiConfig: config.uiConfig,
     theme: config.theme,
+    customCSS: config.customCSS,
+    customJS: config.customJS,
     heroTitle: config.heroTitle,
     heroSubtitle: config.heroSubtitle,
     description: config.description,

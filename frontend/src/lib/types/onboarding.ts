@@ -1,25 +1,13 @@
 import type { OrganizationConfig } from "@/lib/types/api";
+import type { OrganizationUiConfig, UiConfigPatch } from "@/lib/theme/schema";
+import { resolveUiConfig } from "@/lib/theme/resolve-ui-config";
+import { legacyConfigToUiConfig } from "@/lib/theme/legacy-adapter";
 
-export interface OnboardingFeaturesEnabled {
-  liveSessionsEnabled?: boolean;
-  aiChatEnabled?: boolean;
-  certificatesEnabled?: boolean;
-  quizEnabled?: boolean;
-  assignmentsEnabled?: boolean;
-  catalogPublicEnabled?: boolean;
-  qaModuleEnabled?: boolean;
-  announcementsEnabled?: boolean;
-}
-
+/** UI-only onboarding state accumulated from chat parsing. */
 export interface OnboardingPartialConfig {
-  name?: string;
-  language?: string;
-  heroTitle?: string;
-  heroSubtitle?: string;
-  themeColor?: string;
-  featuresEnabled?: OnboardingFeaturesEnabled;
-  audienceType?: string;
-  platformType?: string;
+  organizationName?: string;
+  uiPatch?: UiConfigPatch;
+  customCSS?: string;
 }
 
 export interface OnboardingMessage {
@@ -40,48 +28,47 @@ export interface OnboardingParseResponse {
   data: OnboardingPartialConfig;
 }
 
-export const ONBOARDING_FEATURE_LIST = [
-  { key: "liveSessionsEnabled" as const, label: "Live sessions" },
-  { key: "aiChatEnabled" as const, label: "AI assistant" },
-  { key: "certificatesEnabled" as const, label: "Certificates" },
-  { key: "quizEnabled" as const, label: "Quizzes" },
-  { key: "assignmentsEnabled" as const, label: "Assignments" },
-  { key: "catalogPublicEnabled" as const, label: "Public catalog" },
-  { key: "qaModuleEnabled" as const, label: "Q&A module" },
-  { key: "announcementsEnabled" as const, label: "Announcements" },
-];
-
-export const ONBOARDING_TOTAL_STEPS = 9;
+export const ONBOARDING_TOTAL_STEPS = 6;
 
 export function mergeOnboardingPartial(
   prev: OnboardingPartialConfig,
   next: OnboardingPartialConfig
 ): OnboardingPartialConfig {
+  const uiPatch: UiConfigPatch = {
+    ...prev.uiPatch,
+    ...next.uiPatch,
+    tokens: { ...prev.uiPatch?.tokens, ...next.uiPatch?.tokens },
+    variants: { ...prev.uiPatch?.variants, ...next.uiPatch?.variants },
+    layout: { ...prev.uiPatch?.layout, ...next.uiPatch?.layout },
+    homepage: { ...prev.uiPatch?.homepage, ...next.uiPatch?.homepage },
+  };
+  if (next.uiPatch?.homepage?.features)
+    uiPatch.homepage = {
+      ...uiPatch.homepage,
+      features: next.uiPatch.homepage.features,
+    };
+  if (next.uiPatch?.homepage?.sections)
+    uiPatch.homepage = {
+      ...uiPatch.homepage,
+      sections: next.uiPatch.homepage.sections,
+    };
+
   return {
-    ...prev,
-    ...next,
-    featuresEnabled: {
-      ...prev.featuresEnabled,
-      ...next.featuresEnabled,
-    },
+    organizationName: next.organizationName ?? prev.organizationName,
+    customCSS: next.customCSS ?? prev.customCSS,
+    uiPatch: Object.keys(uiPatch).length ? uiPatch : prev.uiPatch,
   };
 }
 
 export function countOnboardingProgress(partial: OnboardingPartialConfig): number {
+  const p = partial.uiPatch || {};
   let n = 0;
-  if (partial.name) n++;
-  if (partial.platformType) n++;
-  if (partial.audienceType) n++;
-  if (partial.language) n++;
-  if (partial.themeColor) n++;
-  if (partial.featuresEnabled && Object.keys(partial.featuresEnabled).length >= 4) n++;
-  if (
-    partial.featuresEnabled &&
-    typeof partial.featuresEnabled.catalogPublicEnabled === "boolean"
-  )
-    n++;
-  if (partial.heroTitle) n++;
-  if (partial.heroSubtitle) n++;
+  if (partial.organizationName) n++;
+  if (p.preset) n++;
+  if (p.tokens?.primaryColor) n++;
+  if (p.tokens?.fontFamily || p.variants?.button) n++;
+  if (p.homepage?.heroTitle) n++;
+  if (p.homepage?.heroSubtitle) n++;
   return Math.min(n, ONBOARDING_TOTAL_STEPS);
 }
 
@@ -90,114 +77,34 @@ export function onboardingToLaunchPayload(
   organizationId: string,
   slug: string
 ) {
-  const primary = partial.themeColor || "#6366f1";
-  const secondary = deriveSecondaryColor(primary);
-  const fe = partial.featuresEnabled || {};
-
-  const featuresEnabled: Record<string, boolean> = {};
-  if (typeof fe.liveSessionsEnabled === "boolean")
-    featuresEnabled.liveSessions = fe.liveSessionsEnabled;
-  if (typeof fe.aiChatEnabled === "boolean")
-    featuresEnabled.aiTutor = fe.aiChatEnabled;
-  if (typeof fe.certificatesEnabled === "boolean")
-    featuresEnabled.certificates = fe.certificatesEnabled;
-  if (typeof fe.quizEnabled === "boolean")
-    featuresEnabled.testSeries = fe.quizEnabled;
-  if (typeof fe.assignmentsEnabled === "boolean")
-    featuresEnabled.assignments = fe.assignmentsEnabled;
-  if (typeof fe.announcementsEnabled === "boolean")
-    featuresEnabled.announcements = fe.announcementsEnabled;
-  if (typeof fe.qaModuleEnabled === "boolean")
-    featuresEnabled.qaModule = fe.qaModuleEnabled;
-  featuresEnabled.courses = true;
-
   return {
     organizationId,
-    name: partial.name || "My Academy",
     slug,
-    themeColor: primary,
-    theme: { primaryColor: primary, secondaryColor: secondary },
-    language: partial.language,
-    audienceType: partial.audienceType,
-    platformType: partial.platformType,
-    heroTitle: partial.heroTitle,
-    heroSubtitle: partial.heroSubtitle,
-    ctaText: "Get Started",
-    ctaUrl: "/login",
-    featuresEnabled,
-    paymentMode: fe.catalogPublicEnabled === false ? "free" : "per_course",
-    description: [
-      partial.platformType,
-      partial.audienceType && `for ${partial.audienceType}`,
-      partial.language && `(${partial.language})`,
-    ]
-      .filter(Boolean)
-      .join(" "),
-    features: buildPreviewHomepageFeatures(partial),
+    name: partial.organizationName,
+    uiPatch: partial.uiPatch || {},
+    customCSS: partial.customCSS,
   };
 }
 
-function deriveSecondaryColor(hex: string): string {
-  const h = hex.replace("#", "");
-  if (h.length !== 6) return "#ec4899";
-  const r = Math.min(255, parseInt(h.slice(0, 2), 16) + 30);
-  const g = Math.min(255, parseInt(h.slice(2, 4), 16) + 20);
-  const b = Math.min(255, parseInt(h.slice(4, 6), 16) + 40);
-  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+export function hasMeaningfulUiPatch(patch?: UiConfigPatch): boolean {
+  if (!patch) return false;
+
+  if (patch.preset) return true;
+  if (patch.tokens && Object.values(patch.tokens).some(Boolean)) return true;
+  if (patch.variants && Object.values(patch.variants).some(Boolean)) return true;
+  if (patch.layout && Object.values(patch.layout).some(Boolean)) return true;
+  if (!patch.homepage) return false;
+
+  const hp = patch.homepage;
+  if (hp.heroTitle || hp.heroSubtitle || hp.ctaText || hp.ctaUrl) return true;
+  if (Array.isArray(hp.sections) && hp.sections.length > 0) return true;
+  if (Array.isArray(hp.features) && hp.features.length > 0) return true;
+  if (Array.isArray(hp.testimonials) && hp.testimonials.length > 0) return true;
+  if (Array.isArray(hp.faq) && hp.faq.length > 0) return true;
+
+  return false;
 }
 
-function buildPreviewHomepageFeatures(partial: OnboardingPartialConfig) {
-  const fe = partial.featuresEnabled || {};
-  const audience = partial.audienceType || "learners";
-  const items: Array<{ title: string; description: string; icon: string }> = [];
-
-  if (fe.liveSessionsEnabled !== false) {
-    items.push({
-      title: "Live sessions",
-      description: `Interactive classes and workshops for ${audience}.`,
-      icon: "calendar",
-    });
-  }
-  if (fe.aiChatEnabled === true) {
-    items.push({
-      title: "AI learning assistant",
-      description: "Instant help while studying course material.",
-      icon: "brain",
-    });
-  }
-  if (fe.quizEnabled !== false) {
-    items.push({
-      title: "Quizzes & assessments",
-      description: "Measure progress with structured tests.",
-      icon: "award",
-    });
-  }
-  if (fe.assignmentsEnabled !== false) {
-    items.push({
-      title: "Assignments",
-      description: "Practice tasks with teacher feedback.",
-      icon: "file",
-    });
-  }
-  if (fe.certificatesEnabled !== false) {
-    items.push({
-      title: "Certificates",
-      description: "Recognize achievements when courses are completed.",
-      icon: "award",
-    });
-  }
-  if (fe.catalogPublicEnabled !== false) {
-    items.push({
-      title: "Public course catalog",
-      description: "Browse and enroll in published courses online.",
-      icon: "book",
-    });
-  }
-
-  return items.slice(0, 6);
-}
-
-/** Build a full OrganizationConfig for live iframe preview */
 export function buildOnboardingPreviewConfig(
   partial: OnboardingPartialConfig,
   options: {
@@ -206,52 +113,71 @@ export function buildOnboardingPreviewConfig(
     base?: OrganizationConfig | null;
   }
 ): OrganizationConfig {
-  const payload = onboardingToLaunchPayload(
-    partial,
-    options.organizationId,
-    options.slug
-  );
   const base = options.base;
+  const baseUi = legacyConfigToUiConfig(base);
+  const resolvedUi = resolveUiConfig(baseUi, partial.uiPatch);
+
+  const primary =
+    resolvedUi.tokens?.primaryColor ||
+    base?.theme?.primaryColor ||
+    "#6366f1";
+  const secondary =
+    resolvedUi.tokens?.secondaryColor ||
+    base?.theme?.secondaryColor ||
+    "#ec4899";
+
+  const hp = resolvedUi.homepage || {};
 
   return {
     id: base?.id || options.organizationId,
     organizationId: options.organizationId,
     slug: options.slug,
-    name: partial.name || base?.name || "Your Academy",
+    name: partial.organizationName || base?.name || "Your Academy",
     domain: base?.domain,
     logoUrl: base?.logoUrl,
     faviconUrl: base?.faviconUrl,
     bannerUrls: base?.bannerUrls,
-    motto: partial.platformType || base?.motto,
-    description: payload.description || base?.description,
-    theme: payload.theme,
+    motto: base?.motto,
+    description: base?.description,
+    theme: {
+      primaryColor: primary,
+      secondaryColor: secondary,
+      fontFamily: base?.theme?.fontFamily,
+    },
+    uiConfig: resolvedUi,
     heroTitle:
-      partial.heroTitle ||
+      hp.heroTitle ||
       base?.heroTitle ||
-      `Welcome to ${partial.name || base?.name || "Your Academy"}`,
+      `Welcome to ${partial.organizationName || base?.name || "Your Academy"}`,
     heroSubtitle:
-      partial.heroSubtitle ||
+      hp.heroSubtitle ||
       base?.heroSubtitle ||
-      (partial.audienceType
-        ? `Learning built for ${partial.audienceType}`
-        : undefined),
-    ctaText: payload.ctaText,
-    ctaUrl: payload.ctaUrl,
+      "Transform your learning experience.",
+    ctaText: hp.ctaText || base?.ctaText || "Get Started",
+    ctaUrl: hp.ctaUrl || base?.ctaUrl || "/login",
     features:
-      (payload.features && payload.features.length > 0
-        ? payload.features
-        : base?.features) || [],
-    testimonials: base?.testimonials || [],
-    faq: base?.faq || [],
+      hp.features?.map((f) => ({
+        title: f.title,
+        description: f.description,
+        icon: f.icon,
+      })) ||
+      base?.features ||
+      [],
+    testimonials:
+      hp.testimonials?.map((t) => ({
+        name: t.name,
+        message: t.message,
+      })) ||
+      base?.testimonials ||
+      [],
+    faq: hp.faq || base?.faq || [],
     socialLinks: base?.socialLinks,
-    metaTitle: partial.name || base?.metaTitle,
-    metaDescription: payload.description || base?.metaDescription,
-    featuresEnabled: payload.featuresEnabled,
-    paymentMode: payload.paymentMode as OrganizationConfig["paymentMode"],
+    metaTitle: partial.organizationName || base?.metaTitle,
+    metaDescription: base?.metaDescription,
+    paymentMode: base?.paymentMode,
     currency: base?.currency || "TND",
     maintenanceMode: false,
-    customCSS: base?.customCSS,
-    // Never inject third-party chat/widgets into onboarding iframe preview
+    customCSS: partial.customCSS || base?.customCSS,
     customJS: undefined,
   };
 }

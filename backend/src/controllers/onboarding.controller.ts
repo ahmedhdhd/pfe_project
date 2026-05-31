@@ -6,6 +6,7 @@ import {
   runOnboardingChat,
   parseOnboardingAnswer,
   type OnboardingMessage,
+  type OnboardingContext,
 } from '../utils/onboarding-ai';
 
 async function resolveOpenRouterKey(organizationId: string): Promise<string> {
@@ -33,6 +34,27 @@ function normalizeMessages(raw: unknown): OnboardingMessage[] {
     .filter((m) => m.content.length > 0);
 }
 
+async function loadOnboardingContext(
+  organizationId: string
+): Promise<OnboardingContext> {
+  const config = await prisma.organizationConfig.findUnique({
+    where: { organizationId },
+    select: {
+      name: true,
+      heroTitle: true,
+      heroSubtitle: true,
+      ctaText: true,
+    },
+  });
+
+  return {
+    organizationName: config?.name || undefined,
+    heroTitle: config?.heroTitle || undefined,
+    heroSubtitle: config?.heroSubtitle || undefined,
+    ctaText: config?.ctaText || undefined,
+  };
+}
+
 export const onboardingChat = async (
   req: AuthRequest,
   res: Response,
@@ -49,6 +71,7 @@ export const onboardingChat = async (
     }
 
     const messages = normalizeMessages(req.body?.messages);
+    const context = await loadOnboardingContext(organizationId);
     const apiKey = await resolveOpenRouterKey(organizationId);
     if (!apiKey) {
       sendError(
@@ -59,7 +82,7 @@ export const onboardingChat = async (
       return;
     }
 
-    const result = await runOnboardingChat(apiKey, messages);
+    const result = await runOnboardingChat(apiKey, messages, context);
     sendSuccess(res, result);
   } catch (e) {
     next(e);
@@ -87,13 +110,14 @@ export const parseOnboardingAnswerHandler = async (
       return;
     }
 
+    const context = await loadOnboardingContext(organizationId);
     const apiKey = await resolveOpenRouterKey(organizationId);
     if (!apiKey) {
       sendError(res, 'OpenRouter API key is not configured', 400);
       return;
     }
 
-    const partial = await parseOnboardingAnswer(apiKey, messages);
+    const partial = await parseOnboardingAnswer(apiKey, messages, context);
     sendSuccess(res, partial);
   } catch (e) {
     next(e);

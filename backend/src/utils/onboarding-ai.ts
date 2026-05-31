@@ -1,6 +1,11 @@
 import { buildOpenRouterHeaders } from './openrouter';
+import {
+  sanitizeUiConfigPatch,
+  type UiConfigPatch,
+} from './ui-customization';
+import { sanitizeCustomCss } from './platform-customization';
 
-export const ONBOARDING_TOTAL_STEPS = 9;
+export const ONBOARDING_TOTAL_STEPS = 6;
 
 export const ONBOARDING_MODEL =
   process.env.OPENROUTER_ONBOARDING_MODEL?.trim() ||
@@ -12,26 +17,174 @@ export interface OnboardingMessage {
   content: string;
 }
 
-export interface OnboardingFeaturesEnabled {
-  liveSessionsEnabled?: boolean;
-  aiChatEnabled?: boolean;
-  certificatesEnabled?: boolean;
-  quizEnabled?: boolean;
-  assignmentsEnabled?: boolean;
-  catalogPublicEnabled?: boolean;
-  qaModuleEnabled?: boolean;
-  announcementsEnabled?: boolean;
+export interface OnboardingPartialConfig {
+  organizationName?: string;
+  uiPatch?: UiConfigPatch;
+  customCSS?: string;
 }
 
-export interface OnboardingPartialConfig {
-  name?: string;
-  language?: string;
+export interface OnboardingContext {
+  organizationName?: string;
   heroTitle?: string;
   heroSubtitle?: string;
-  themeColor?: string;
-  featuresEnabled?: OnboardingFeaturesEnabled;
-  audienceType?: string;
-  platformType?: string;
+  ctaText?: string;
+}
+
+function isApplyConfirmation(text: string): boolean {
+  const trimmed = text.trim();
+  if (!trimmed || trimmed.length > 80) return false;
+  if (/[\n\r{}]/.test(trimmed)) return false;
+
+  const lower = trimmed.toLowerCase();
+  if (
+    lower.includes('@apply') ||
+    lower.includes(':root') ||
+    lower.includes('@theme') ||
+    lower.includes('@layer')
+  ) {
+    return false;
+  }
+
+  return /^(apply|apply it|apply now|confirm|confirm it|yes apply|approved|go ahead|launch now|please apply|yes|yep|yeah|ok|okay|sure|do it|let's go|allons-y|oui|نعم|نفذ|طبق|موافق)\.?!?$/i.test(
+    trimmed
+  );
+}
+
+function normalizeForMatch(value: string | undefined): string {
+  return (value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+}
+
+function extractQuotedReplacement(
+  text: string
+): { from: string; to: string } | null {
+  const patterns = [
+    /(?:change|replace)\s+(?:this\s+)?[""]([^""]+)[""]\s+(?:to|with)\s+[""]([^""]+)[""]/i,
+    /(?:change|replace)\s+(?:this\s+)?[“]([^”]+)[”]\s+(?:to|with)\s+[“]([^”]+)[”]/i,
+    /(?:change|replace)\s+(?:this\s+)?[']([^']+)[']\s+(?:to|with)\s+[']([^']+)[']/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match?.[1] && match?.[2]) {
+      return {
+        from: match[1].trim(),
+        to: match[2].trim(),
+      };
+    }
+  }
+
+  return null;
+}
+
+function extractRawCssBlock(text: string): string | null {
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+
+  const fencedMatch = trimmed.match(/```(?:css)?\s*([\s\S]*?)```/i);
+  const candidate = fencedMatch?.[1]?.trim() || trimmed;
+
+  if (
+    !candidate.includes(':root') &&
+    !candidate.includes('.dark') &&
+    !candidate.includes('--background')
+  ) {
+    return null;
+  }
+
+  const firstCssTokenIndex = [
+    candidate.indexOf('@import'),
+    candidate.indexOf('@custom-variant'),
+    candidate.indexOf(':root'),
+    candidate.indexOf('.dark'),
+    candidate.indexOf('@theme'),
+    candidate.indexOf('@layer'),
+  ]
+    .filter((index) => index >= 0)
+    .sort((a, b) => a - b)[0];
+
+  if (firstCssTokenIndex === undefined) {
+    return null;
+  }
+
+  const css = candidate.slice(firstCssTokenIndex).trim();
+  return css || null;
+}
+
+function inferPatchFromLatestMessage(
+  messages: OnboardingMessage[],
+  context?: OnboardingContext
+): OnboardingPartialConfig {
+  const latestUserMessage = [...messages]
+    .reverse()
+    .find((message) => message.role === 'user')?.content;
+
+  if (!latestUserMessage) {
+    return {};
+  }
+
+  const inferred: OnboardingPartialConfig = {};
+  const rawCss = extractRawCssBlock(latestUserMessage);
+  if (rawCss) {
+    const sanitizedCss = sanitizeCustomCss(rawCss);
+    if (sanitizedCss) {
+      inferred.customCSS = sanitizedCss;
+    }
+  }
+
+  const replacement = extractQuotedReplacement(latestUserMessage);
+  if (!replacement) {
+    return inferred;
+  }
+
+  const source = normalizeForMatch(replacement.from);
+  const target = replacement.to;
+
+  if (source && source === normalizeForMatch(context?.heroTitle)) {
+    inferred.uiPatch = {
+      homepage: {
+        heroTitle: target,
+      },
+    };
+  } else if (source && source === normalizeForMatch(context?.heroSubtitle)) {
+    inferred.uiPatch = {
+      homepage: {
+        heroSubtitle: target,
+      },
+    };
+  } else if (source && source === normalizeForMatch(context?.organizationName)) {
+    inferred.organizationName = target;
+  }
+
+  return inferred;
+}
+
+function mergePartialConfigs(
+  base: OnboardingPartialConfig,
+  inferred: OnboardingPartialConfig
+): OnboardingPartialConfig {
+  const mergedUiPatch =
+    base.uiPatch || inferred.uiPatch
+      ? {
+          ...base.uiPatch,
+          ...inferred.uiPatch,
+          tokens: { ...base.uiPatch?.tokens, ...inferred.uiPatch?.tokens },
+          variants: { ...base.uiPatch?.variants, ...inferred.uiPatch?.variants },
+          layout: { ...base.uiPatch?.layout, ...inferred.uiPatch?.layout },
+          homepage: {
+            ...base.uiPatch?.homepage,
+            ...inferred.uiPatch?.homepage,
+          },
+        }
+      : undefined;
+
+  return {
+    organizationName: inferred.organizationName ?? base.organizationName,
+    customCSS: inferred.customCSS ?? base.customCSS,
+    uiPatch: mergedUiPatch,
+  };
 }
 
 function stripCodeFences(text: string): string {
@@ -94,22 +247,18 @@ export function parseOnboardingChatResponse(content: string): {
   let reply = stripCodeFences(content.trim());
   reply = reply.replace(/^\{[\s\S]*\}$/m, '').trim();
   if (!reply) {
-    reply = 'Welcome! What is the name of your organisation?';
+    reply =
+      'Welcome. Share any branding and homepage details you want, and I will review them before applying.';
   }
 
-  const done =
-    /\b(done|ready to launch|all set|finished|that'?s everything)\b/i.test(
-      reply
-    );
-
-  return { reply, done };
+  return { reply, done: false };
 }
 
 async function callOpenRouterChat(
   apiKey: string,
   systemPrompt: string,
   messages: Array<{ role: string; content: string }>,
-  options?: { temperature?: number; maxTokens?: number }
+  options?: { temperature?: number; maxTokens?: number; jsonMode?: boolean }
 ): Promise<string> {
   const fallbackModel =
     process.env.OPENROUTER_MODEL?.trim() || 'deepseek/deepseek-chat-v3-0324';
@@ -174,33 +323,51 @@ async function callOpenRouterChat(
 
 export async function runOnboardingChat(
   apiKey: string,
-  messages: OnboardingMessage[]
+  messages: OnboardingMessage[],
+  context?: OnboardingContext
 ): Promise<{ reply: string; done: boolean }> {
-  const systemPrompt = `You are a friendly onboarding assistant for Tesla Academy (QueztLearn LMS).
-Your job is to guide a new admin through setting up their learning platform via natural conversation.
+  const contextJson = JSON.stringify(context || {});
+  const systemPrompt = `You are a concise, decisive UI theme assistant for Tesla Academy (LMS admin onboarding).
+Your job: help the admin pick a look and feel, then apply it immediately when they're ready.
 
-Ask ONE question at a time. Be warm and concise (2-4 sentences max per reply).
-Collect these topics in order (skip if already clearly answered in the conversation):
-1. Organisation name
-2. Platform type (LMS, training center, bootcamp, school, etc.)
-3. Subject or domain (math, medicine, IT, languages, etc.)
-4. Target audience (students, professionals, children, etc.)
-5. Primary language (Arabic, French, English, etc.)
-6. Color theme (ask them to pick or describe — suggest a hex if they describe a mood)
-7. Features to enable — list all and ask which they want:
-   Live sessions, AI assistant, Certificates, Quizzes, Assignments, Public catalog, Q&A module, Announcements
-8. Public catalog (B2C) vs private organisation-only platform
-9. Hero title and subtitle for the homepage
+## Named platform themes — recognize and implement these instantly:
+- "claude theme" / "anthropic theme" → clean neutral grayscale, system-sans font, minimal preset, subtle shadows, rounded-md radius, light sidebar. Primary: #1a1a1a, secondary: #666666.
+- "shadcn theme" / "shadcn/ui theme" → neutral zinc palette, sharp radius, flat shadows, clean minimal. Primary: #18181b, secondary: #71717a.
+- "vercel theme" → pure black/white contrast, sharp corners, bold typography, futuristic preset. Primary: #000000, secondary: #888888.
+- "notion theme" → warm off-white, serif font option, soft shadows, comfortable density. Primary: #37352f, secondary: #9b9b9b.
+- "linear theme" → indigo/purple palette, bold preset, pill buttons, elevated shadows. Primary: #5e6ad2, secondary: #a8b1ff.
+- "github theme" → blue accent on white, default preset, system font. Primary: #0969da, secondary: #57606a.
+If the user names any well-known design system or product, map it to the closest sensible CSS token set and apply it directly.
 
-When listing features in step 7, show the full list clearly as bullet points.
-After the hero title and subtitle are confirmed, set done to true in your JSON response.
+## Behavior rules:
+1. When the user names a theme ("claude theme", "mechanical", "minimal") → propose it in ONE sentence summary + set done:true if they already said any form of yes/ok/sure earlier, or just confirm and wait one turn.
+2. When the user says "you choose" / "choose for me" / "decide yourself" / "i dont know" → pick something good immediately, announce what you chose in 1-2 sentences, set done:true. Do NOT ask for another confirmation — they already gave you permission.
+3. When the user says yes/ok/sure/apply/go ahead/do it → set done:true immediately. Never ask "are you sure?" after a confirmation.
+4. When the user says "no, i want X instead" → acknowledge the switch, summarize the new theme, set done:true if X is clear enough to apply.
+5. When the user pastes raw CSS → confirm you will use it, set done:true.
+6. Never repeat a confirmation question more than once. If you already asked "shall I apply?" and the user says anything affirmative, apply it.
+7. Keep replies SHORT — 1-4 sentences max. No bullet lists unless showing a theme summary.
+8. Never ask for information the user hasn't offered. Don't interrogate.
+9. If the user sends an empty or unclear message, reply with one short open question maximum.
 
-CRITICAL: Your entire response must be a single valid JSON object with keys "reply" (string) and "done" (boolean). No markdown, no code fences, no text before or after the JSON.
+## Theme vocabulary you can propose:
+- Presets: default, minimal, bold, academic, futuristic
+- Colors: any valid hex
+- Fonts: inter, geist, source-serif, dm-sans
+- Radius: none (sharp), sm, md, lg, full (pill)
+- Density: compact, comfortable, spacious
+- Button style: default, pill, sharp
+- Card style: default, bordered, glass, flat
+- Sidebar: light, dark, brand
 
-Example:
-{"reply":"Welcome! What is your organisation called?","done":false}
+## Opening message (when conversation is empty):
+Reply with exactly: "What style do you want for your platform? You can name a theme (minimal, bold, academic, futuristic, claude theme…), describe a mood, paste CSS, or just say 'surprise me'."
 
-Set "done": true only when all 9 topics have clear answers (especially hero title and subtitle).`;
+Current config:
+${contextJson}
+
+CRITICAL: Respond with JSON only — {"reply":"...","done":false}
+Set done:true when: user confirms (yes/ok/sure/apply/go ahead/do it), user said "you choose", user said "surprise me", or user approved a specific theme with any affirmative signal.`;
 
   const chatMessages = messages.map((m) => ({
     role: m.role,
@@ -208,10 +375,11 @@ Set "done": true only when all 9 topics have clear answers (especially hero titl
   }));
 
   if (chatMessages.length === 0) {
-    chatMessages.push({
-      role: 'user',
-      content: 'Start the onboarding. Greet me and ask the first question.',
-    });
+    return {
+      reply:
+        "What style do you want for your platform? You can name a theme (minimal, bold, academic, futuristic, claude theme…), describe a mood, paste CSS, or just say 'surprise me'.",
+      done: false,
+    };
   }
 
   const content = await callOpenRouterChat(apiKey, systemPrompt, chatMessages, {
@@ -220,41 +388,100 @@ Set "done": true only when all 9 topics have clear answers (especially hero titl
     jsonMode: true,
   });
 
-  return parseOnboardingChatResponse(content);
+  const parsed = parseOnboardingChatResponse(content);
+  const lastUserMessage = [...messages]
+    .reverse()
+    .find((m) => m.role === 'user')?.content;
+  const userConfirmed = Boolean(lastUserMessage && isApplyConfirmation(lastUserMessage));
+
+  return {
+    reply: parsed.reply,
+    done: userConfirmed && parsed.done,
+  };
 }
 
 export async function parseOnboardingAnswer(
   apiKey: string,
-  messages: OnboardingMessage[]
+  messages: OnboardingMessage[],
+  context?: OnboardingContext
 ): Promise<OnboardingPartialConfig> {
-  const systemPrompt = `Extract organisation setup data from the onboarding conversation.
-Return JSON only — no markdown. Include ONLY fields that have been clearly determined so far.
-Use this exact shape (omit unknown fields):
+  const contextJson = JSON.stringify(context || {});
+  const systemPrompt = `Extract the final agreed UI customization from this onboarding conversation.
+Return JSON only — no markdown, no explanation.
+
+JSON shape:
 {
-  "name": "string",
-  "language": "string",
-  "heroTitle": "string",
-  "heroSubtitle": "string",
-  "themeColor": "#hex",
-  "featuresEnabled": {
-    "liveSessionsEnabled": true,
-    "aiChatEnabled": true,
-    "certificatesEnabled": false,
-    "quizEnabled": true,
-    "assignmentsEnabled": true,
-    "catalogPublicEnabled": true,
-    "qaModuleEnabled": false,
-    "announcementsEnabled": true
+  "organizationName": "string or omit",
+  "uiPatch": {
+    "preset": "default|minimal|bold|academic|futuristic",
+    "tokens": {
+      "primaryColor": "#hex",
+      "secondaryColor": "#hex",
+      "fontFamily": "inter|geist|source-serif|dm-sans",
+      "radius": "none|sm|md|lg|full",
+      "density": "compact|comfortable|spacious",
+      "shadow": "flat|soft|elevated",
+      "surface": "solid|muted|glass"
+    },
+    "variants": {
+      "button": "default|pill|sharp",
+      "card": "default|bordered|glass|flat",
+      "sidebar": "light|dark|brand",
+      "header": "default|transparent|solid"
+    },
+    "layout": { "homepage": "classic|hero-center|split", "adminShell": "sidebar-default|sidebar-compact" },
+    "homepage": {
+      "heroTitle": "...",
+      "heroSubtitle": "...",
+      "ctaText": "Get Started",
+      "ctaUrl": "/login",
+      "sections": ["hero","features","testimonials","faq","cta"],
+      "features": [{ "title": "...", "description": "...", "icon": "brain|book|calendar|award|file|users|graduation-cap" }]
+    }
   },
-  "audienceType": "string",
-  "platformType": "string"
+  "customCSS": "optional full :root { } .dark { } @theme inline { } block — omit if not needed"
 }
 
-Rules:
-- themeColor must be a valid hex like #6366f1 when mentioned
-- Booleans in featuresEnabled: true only if admin explicitly wanted the feature; false if they declined; omit if not discussed yet
-- catalogPublicEnabled: true for B2C/public catalog, false for private org-only
-- Do not invent hero text — only include if stated in conversation`;
+## Named theme mappings — when the user named one of these, output these exact tokens:
+
+"claude theme" or "anthropic theme":
+  preset: "minimal", tokens: { primaryColor: "#1a1a1a", secondaryColor: "#666666", fontFamily: "inter", radius: "md", density: "comfortable", shadow: "soft", surface: "solid" }, variants: { button: "default", card: "default", sidebar: "light", header: "default" }
+
+"shadcn theme" or "shadcn/ui":
+  preset: "minimal", tokens: { primaryColor: "#18181b", secondaryColor: "#71717a", fontFamily: "inter", radius: "sm", density: "comfortable", shadow: "flat", surface: "solid" }, variants: { button: "sharp", card: "flat", sidebar: "light" }
+
+"vercel theme":
+  preset: "futuristic", tokens: { primaryColor: "#000000", secondaryColor: "#888888", fontFamily: "geist", radius: "none", density: "compact", shadow: "flat", surface: "solid" }, variants: { button: "sharp", card: "bordered", sidebar: "dark", header: "solid" }
+
+"notion theme":
+  preset: "minimal", tokens: { primaryColor: "#37352f", secondaryColor: "#9b9b9b", fontFamily: "source-serif", radius: "sm", density: "comfortable", shadow: "soft", surface: "muted" }, variants: { button: "default", card: "flat", sidebar: "light" }
+
+"linear theme":
+  preset: "bold", tokens: { primaryColor: "#5e6ad2", secondaryColor: "#a8b1ff", fontFamily: "inter", radius: "md", density: "comfortable", shadow: "elevated", surface: "solid" }, variants: { button: "pill", card: "bordered", sidebar: "dark" }
+
+"github theme":
+  preset: "default", tokens: { primaryColor: "#0969da", secondaryColor: "#57606a", fontFamily: "inter", radius: "sm", density: "comfortable", shadow: "soft", surface: "solid" }, variants: { button: "default", card: "default", sidebar: "light" }
+
+"mechanical theme" or "blueprint theme":
+  preset: "futuristic", tokens: { primaryColor: "#808080", secondaryColor: "#0077cc", fontFamily: "dm-sans", radius: "none", density: "compact", shadow: "elevated", surface: "solid" }, variants: { button: "sharp", card: "bordered", sidebar: "dark" }
+
+"academic theme":
+  preset: "academic", tokens: { primaryColor: "#1e3a5f", secondaryColor: "#c9a227", fontFamily: "source-serif", radius: "sm", density: "comfortable", shadow: "soft", surface: "muted" }, variants: { button: "default", card: "bordered", sidebar: "dark" }
+
+## Priority rules:
+1. Use the LAST theme the user requested — if they changed their mind ("no, i want X instead"), X wins.
+2. If the user pasted a raw CSS block AND did NOT cancel it, preserve it as customCSS verbatim (strip @import lines only).
+3. If the user said "you choose" / "surprise me" → output a complete set of tokens using the "minimal" preset as a sensible default.
+4. Include ONLY fields that have a clear value. Do NOT invent hero text unless the conversation explicitly mentioned it.
+5. Do NOT mix themes — if user ended on "claude theme", output claude theme tokens only, not mechanical.
+
+Rules for customCSS (only when user pasted raw CSS):
+- Strip @import lines
+- No javascript: or expression(
+- Preserve the rest exactly
+
+Current config context:
+${contextJson}`;
 
   const chatMessages = messages.map((m) => ({
     role: m.role,
@@ -269,154 +496,29 @@ Rules:
 
   try {
     const parsed = extractJsonObject(content);
-    return sanitizePartialConfig(parsed);
+    const out: OnboardingPartialConfig = {};
+    const orgName =
+      typeof parsed.organizationName === 'string'
+        ? parsed.organizationName.trim().slice(0, 120)
+        : typeof parsed.name === 'string'
+          ? parsed.name.trim().slice(0, 120)
+          : '';
+    if (orgName) out.organizationName = orgName;
+
+    const rawPatch = parsed.uiPatch ?? parsed;
+    try {
+      out.uiPatch = sanitizeUiConfigPatch(rawPatch);
+    } catch {
+      // partial parse - ignore invalid empty patch
+    }
+
+    const css = sanitizeCustomCss(parsed.customCSS);
+    if (css) {
+      out.customCSS = css;
+    }
+    const inferred = inferPatchFromLatestMessage(messages, context);
+    return mergePartialConfigs(out, inferred);
   } catch {
-    return {};
+    return inferPatchFromLatestMessage(messages, context);
   }
-}
-
-function optionalString(value: unknown, max: number): string | undefined {
-  if (value === undefined || value === null) return undefined;
-  const s = String(value).trim();
-  return s ? s.slice(0, max) : undefined;
-}
-
-function normalizeHex(value: unknown): string | undefined {
-  const s = optionalString(value, 32);
-  if (!s) return undefined;
-  if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(s)) return s;
-  return undefined;
-}
-
-function sanitizePartialConfig(raw: Record<string, unknown>): OnboardingPartialConfig {
-  const out: OnboardingPartialConfig = {};
-
-  const name = optionalString(raw.name, 120);
-  if (name) out.name = name;
-  const language = optionalString(raw.language, 40);
-  if (language) out.language = language;
-  const heroTitle = optionalString(raw.heroTitle, 200);
-  if (heroTitle) out.heroTitle = heroTitle;
-  const heroSubtitle = optionalString(raw.heroSubtitle, 400);
-  if (heroSubtitle) out.heroSubtitle = heroSubtitle;
-  const themeColor = normalizeHex(raw.themeColor);
-  if (themeColor) out.themeColor = themeColor;
-  const audienceType = optionalString(raw.audienceType, 80);
-  if (audienceType) out.audienceType = audienceType;
-  const platformType = optionalString(raw.platformType, 80);
-  if (platformType) out.platformType = platformType;
-
-  if (raw.featuresEnabled && typeof raw.featuresEnabled === 'object') {
-    const fe = raw.featuresEnabled as Record<string, unknown>;
-    const featuresEnabled: OnboardingFeaturesEnabled = {};
-    const keys = [
-      'liveSessionsEnabled',
-      'aiChatEnabled',
-      'certificatesEnabled',
-      'quizEnabled',
-      'assignmentsEnabled',
-      'catalogPublicEnabled',
-      'qaModuleEnabled',
-      'announcementsEnabled',
-    ] as const;
-    for (const key of keys) {
-      if (typeof fe[key] === 'boolean') {
-        featuresEnabled[key] = fe[key];
-      }
-    }
-    if (Object.keys(featuresEnabled).length > 0) {
-      out.featuresEnabled = featuresEnabled;
-    }
-  }
-
-  return out;
-}
-
-/** Map onboarding partial config → OrganizationConfig DB/API fields */
-export function onboardingToOrganizationPayload(
-  partial: OnboardingPartialConfig,
-  organizationId: string,
-  existing?: { slug?: string; name?: string }
-): Record<string, unknown> {
-  const primary = partial.themeColor || '#6366f1';
-  const secondary = shiftHexColor(primary);
-
-  const featuresEnabled: Record<string, boolean> = {};
-  const fe = partial.featuresEnabled || {};
-  if (typeof fe.liveSessionsEnabled === 'boolean') {
-    featuresEnabled.liveSessions = fe.liveSessionsEnabled;
-  }
-  if (typeof fe.aiChatEnabled === 'boolean') {
-    featuresEnabled.aiTutor = fe.aiChatEnabled;
-  }
-  if (typeof fe.certificatesEnabled === 'boolean') {
-    featuresEnabled.certificates = fe.certificatesEnabled;
-  }
-  if (typeof fe.quizEnabled === 'boolean') {
-    featuresEnabled.testSeries = fe.quizEnabled;
-  }
-  if (typeof fe.assignmentsEnabled === 'boolean') {
-    featuresEnabled.assignments = fe.assignmentsEnabled;
-  }
-  if (typeof fe.announcementsEnabled === 'boolean') {
-    featuresEnabled.announcements = fe.announcementsEnabled;
-  }
-  if (typeof fe.qaModuleEnabled === 'boolean') {
-    featuresEnabled.qaModule = fe.qaModuleEnabled;
-  }
-  if (typeof fe.catalogPublicEnabled === 'boolean') {
-    featuresEnabled.courses = true;
-  }
-
-  const payload: Record<string, unknown> = {
-    organizationId,
-    name: partial.name || existing?.name || 'My Academy',
-    slug: existing?.slug || 'academy',
-    themeColor: primary,
-    theme: { primaryColor: primary, secondaryColor: secondary },
-    language: partial.language,
-    audienceType: partial.audienceType,
-    platformType: partial.platformType,
-    heroTitle: partial.heroTitle,
-    heroSubtitle: partial.heroSubtitle,
-    ctaText: 'Get Started',
-    ctaUrl: '/login',
-    featuresEnabled,
-    paymentMode: fe.catalogPublicEnabled === false ? 'free' : 'per_course',
-  };
-
-  if (partial.platformType || partial.audienceType) {
-    payload.description = [
-      partial.platformType && `${partial.platformType} platform`,
-      partial.audienceType && `for ${partial.audienceType}`,
-      partial.language && `in ${partial.language}`,
-    ]
-      .filter(Boolean)
-      .join(' ');
-  }
-
-  return payload;
-}
-
-function shiftHexColor(hex: string): string {
-  const h = hex.replace('#', '');
-  if (h.length !== 6) return '#ec4899';
-  const r = Math.min(255, parseInt(h.slice(0, 2), 16) + 30);
-  const g = Math.min(255, parseInt(h.slice(2, 4), 16) + 20);
-  const b = Math.min(255, parseInt(h.slice(4, 6), 16) + 40);
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-}
-
-export function countOnboardingProgress(partial: OnboardingPartialConfig): number {
-  let n = 0;
-  if (partial.name) n++;
-  if (partial.platformType) n++;
-  if (partial.audienceType) n++; // domain often in platformType/audience - also check language
-  if (partial.language) n++;
-  if (partial.themeColor) n++;
-  if (partial.featuresEnabled && Object.keys(partial.featuresEnabled).length >= 3) n++;
-  if (partial.featuresEnabled && typeof partial.featuresEnabled.catalogPublicEnabled === 'boolean') n++;
-  if (partial.heroTitle) n++;
-  if (partial.heroSubtitle) n++;
-  return Math.min(n, ONBOARDING_TOTAL_STEPS);
 }

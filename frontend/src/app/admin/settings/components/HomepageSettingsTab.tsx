@@ -17,6 +17,15 @@ import { Plus, X } from "lucide-react";
 import { CreateOrganizationConfigData } from "@/lib/types/api";
 import { FileUpload } from "@/components/common/file-upload";
 
+function isImageSource(value?: string): boolean {
+  if (!value) return false;
+  return (
+    value.startsWith("/") ||
+    value.startsWith("http://") ||
+    value.startsWith("https://")
+  );
+}
+
 interface HomepageSettingsTabProps {
   formData: CreateOrganizationConfigData;
   setFormData: Dispatch<SetStateAction<CreateOrganizationConfigData>>;
@@ -266,18 +275,24 @@ export function HomepageSettingsTab({
                 <Label>Icon image</Label>
                 {feature.icon ? (
                   <div className="flex items-center gap-3 rounded-lg border bg-muted/20 p-3">
-                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md border bg-background">
-                      <Image
-                        src={feature.icon}
-                        alt={`${feature.title || "Feature"} icon`}
-                        fill
-                        sizes="56px"
-                        className="object-contain p-1"
-                      />
-                    </div>
+                    {isImageSource(feature.icon) ? (
+                      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md border bg-background">
+                        <Image
+                          src={feature.icon}
+                          alt={`${feature.title || "Feature"} icon`}
+                          fill
+                          sizes="56px"
+                          className="object-contain p-1"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border bg-background px-2 text-center text-[11px] font-medium uppercase text-muted-foreground">
+                        {feature.icon}
+                      </div>
+                    )}
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">
-                        Icon uploaded
+                        {isImageSource(feature.icon) ? "Icon uploaded" : "Icon key"}
                       </p>
                       <p className="truncate text-xs text-muted-foreground">
                         {feature.icon}

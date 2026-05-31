@@ -519,13 +519,25 @@ export const api = {
 
   suggestPlatformCustomization: (prompt: string) =>
     apiClient.post<PlatformCustomizationSuggestResponse>(
-      "/admin/organization-config/config/ai-suggest",
+      "/admin/organization-config/config/ui/suggest",
       { prompt }
     ),
 
-  applyPlatformCustomization: (patch: PlatformCustomizationPatch) =>
-    apiClient.post<PlatformCustomizationApplyResponse>(
-      "/admin/organization-config/config/ai-apply",
+  applyPlatformCustomization: (patch: Record<string, unknown>) =>
+    apiClient.post<UiCustomizationApplyResponse>(
+      "/admin/organization-config/config/ui/apply",
+      { patch }
+    ),
+
+  suggestUiCustomization: (prompt: string) =>
+    apiClient.post<UiCustomizationSuggestResponse>(
+      "/admin/organization-config/config/ui/suggest",
+      { prompt }
+    ),
+
+  applyUiCustomization: (patch: Record<string, unknown>) =>
+    apiClient.post<UiCustomizationApplyResponse>(
+      "/admin/organization-config/config/ui/apply",
       { patch }
     ),
 
@@ -535,7 +547,8 @@ export const api = {
   }) =>
     apiClient.post<OnboardingChatResponse>(
       "/api/ai/onboarding-chat",
-      data
+      data,
+      { timeout: 180000 }
     ),
 
   parseOnboardingAnswer: (data: {
@@ -544,7 +557,8 @@ export const api = {
   }) =>
     apiClient.post<OnboardingParseResponse>(
       "/api/ai/parse-onboarding-answer",
-      data
+      data,
+      { timeout: 180000 }
     ),
 
   updateOrganizationConfigById: (

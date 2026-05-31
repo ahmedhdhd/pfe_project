@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useOrganizationConfig } from "@/hooks/api";
 import { useOrganizationConfigStore } from "@/lib/store/organization-config";
 import { ClientThemeProvider } from "./theme-provider";
+import { ThemeEngineProvider } from "@/components/theme/ThemeEngineProvider";
 import { OptimisticConfigProvider } from "./optimistic-config-provider";
 import { getCachedConfig, setCachedConfig } from "@/lib/config/cache";
 import {
@@ -150,7 +151,9 @@ export function ClientConfigWrapper({ children }: ClientConfigWrapperProps) {
           Homepage preview — setup chat is on the left panel only
         </div>
       )}
-      <ClientThemeProvider>{children}</ClientThemeProvider>
+      <ThemeEngineProvider>
+        <ClientThemeProvider>{children}</ClientThemeProvider>
+      </ThemeEngineProvider>
     </OptimisticConfigProvider>
   );
 }

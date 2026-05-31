@@ -17,6 +17,9 @@ import { ClientCTASection } from "./components/client-cta-section";
 import { ClientFooter } from "./components/client-footer";
 import type { ClientHomepageData } from "./types";
 import { formatCurrency } from "@/lib/utils/format";
+import {
+  useHomepageSectionVisible,
+} from "@/lib/theme/use-ui-config";
 
 // Client Homepage Component
 function ClientHomepageContent({ slug }: { slug: string }) {
@@ -63,6 +66,12 @@ function ClientHomepageContent({ slug }: { slug: string }) {
     socialLinks: config?.socialLinks || {},
   };
   const showSubscriptionCard = config?.paymentMode === "subscription";
+  const showFeatures = useHomepageSectionVisible("features");
+  const showPricing =
+    useHomepageSectionVisible("pricing") && showSubscriptionCard;
+  const showTestimonials = useHomepageSectionVisible("testimonials");
+  const showFaq = useHomepageSectionVisible("faq");
+  const showCta = useHomepageSectionVisible("cta");
   const subscriptionPrice = config?.subscriptionPrice || 0;
   const subscriptionType = config?.subscriptionType || "onetime";
   const currency = config?.currency || "TND";
@@ -101,8 +110,10 @@ function ClientHomepageContent({ slug }: { slug: string }) {
       />
       <main className="flex flex-col">
         <ClientHeroSection homepage={homepage} />
-        <ClientFeaturesSection homepage={homepage} client={client} />
-        {showSubscriptionCard && (
+        {showFeatures && (
+          <ClientFeaturesSection homepage={homepage} client={client} />
+        )}
+        {showPricing && (
           <section id="pricing" className="bg-muted/20 px-4 py-20">
             <div className="container mx-auto max-w-5xl">
               <div className="mx-auto mb-10 max-w-2xl text-center">
@@ -160,9 +171,11 @@ function ClientHomepageContent({ slug }: { slug: string }) {
             </div>
           </section>
         )}
-        <ClientTestimonialsSection homepage={homepage} />
-        <ClientFAQSection homepage={homepage} client={client} />
-        <ClientCTASection homepage={homepage} client={client} />
+        {showTestimonials && (
+          <ClientTestimonialsSection homepage={homepage} />
+        )}
+        {showFaq && <ClientFAQSection homepage={homepage} client={client} />}
+        {showCta && <ClientCTASection homepage={homepage} client={client} />}
       </main>
       <ClientFooter homepage={homepage} client={client} />
     </div>

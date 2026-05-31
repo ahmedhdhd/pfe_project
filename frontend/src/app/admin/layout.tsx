@@ -3,8 +3,19 @@
 import { AdminTeacherLayout } from "@/components/common/admin-teacher-layout";
 import { RouteGuard } from "@/components/common/route-guard";
 import { AdminOnboardingGuard } from "@/components/admin/AdminOnboardingGuard";
+import { AdminOrgConfigSync } from "@/components/theme/AdminOrgConfigSync";
+import { ThemeEngineProvider } from "@/components/theme/ThemeEngineProvider";
 import { ROLES } from "@/lib/constants";
 import { usePathname } from "next/navigation";
+
+function AdminThemeShell({ children }: { children: React.ReactNode }) {
+  return (
+    <ThemeEngineProvider>
+      <AdminOrgConfigSync />
+      {children}
+    </ThemeEngineProvider>
+  );
+}
 
 export default function AdminLayout({
   children,
@@ -17,7 +28,9 @@ export default function AdminLayout({
   if (isOnboarding) {
     return (
       <RouteGuard allowedRoles={[ROLES.ADMIN]}>
-        <AdminOnboardingGuard>{children}</AdminOnboardingGuard>
+        <AdminOnboardingGuard>
+          <AdminThemeShell>{children}</AdminThemeShell>
+        </AdminOnboardingGuard>
       </RouteGuard>
     );
   }
@@ -25,7 +38,9 @@ export default function AdminLayout({
   return (
     <RouteGuard allowedRoles={[ROLES.ADMIN]}>
       <AdminOnboardingGuard>
-        <AdminTeacherLayout>{children}</AdminTeacherLayout>
+        <AdminThemeShell>
+          <AdminTeacherLayout>{children}</AdminTeacherLayout>
+        </AdminThemeShell>
       </AdminOnboardingGuard>
     </RouteGuard>
   );

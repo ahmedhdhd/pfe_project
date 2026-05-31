@@ -5,11 +5,22 @@ import { AuthRequest } from '../middleware/auth';
 import { buildOpenRouterHeaders } from '../utils/openrouter';
 import {
   buildPlatformCustomizationSystemPrompt,
-  extractJsonObject,
+  extractJsonObject as extractPlatformJson,
   mergePlatformPatch,
+  sanitizeCustomCss,
   sanitizePlatformPatch,
   summarizePatchDiff,
 } from '../utils/platform-customization';
+import {
+  buildUiCustomizationSystemPrompt,
+  extractJsonObject as extractUiJson,
+  mergeUiConfig,
+  resolveUiConfigFromPreset,
+  sanitizeUiConfigPatch,
+  summarizeUiPatchDiff,
+  uiConfigToLegacyFields,
+  type OrganizationUiConfig,
+} from '../utils/ui-customization';
 
 const SUPPORTED_CURRENCIES = new Set(['TND', 'USD', 'EUR']);
 
@@ -113,10 +124,12 @@ export const createOrUpdateConfig = async (req: AuthRequest, res: Response, next
   try {
     const organizationId = req.user!.organizationId;
     const { theme, features, testimonials, faq, socialLinks, smtpConfig, ...rest } = req.body;
+    const customCSS = sanitizeCustomCss(rest.customCSS);
     const data = {
       ...rest,
       organizationId,
       currency: normalizeCurrency(rest.currency),
+      customCSS: customCSS ?? null,
       themeJson: theme || undefined,
       themeColor: theme?.primaryColor || rest.themeColor || undefined,
       featuresJson: features || undefined,
@@ -153,12 +166,14 @@ export const updateOrganizationConfigById = async (
     }
 
     const { theme, features, testimonials, faq, socialLinks, smtpConfig, ...rest } = req.body;
+    const customCSS = sanitizeCustomCss(rest.customCSS);
     const data = {
       ...rest,
       organizationId,
       name: rest.name || org.name,
       slug: rest.slug || org.slug,
       currency: normalizeCurrency(rest.currency),
+      customCSS: customCSS ?? null,
       themeJson: theme || undefined,
       themeColor: theme?.primaryColor || rest.themeColor || undefined,
       featuresJson: features || undefined,
@@ -269,7 +284,7 @@ export const aiSuggestPlatformCustomization = async (
 
     const payload = JSON.parse(raw) as { choices?: Array<{ message?: { content?: string } }> };
     const content = payload.choices?.[0]?.message?.content?.trim() || '';
-    const parsed = extractJsonObject(content);
+    const parsed = extractPlatformJson(content);
     const rawPatch = parsed.patch ?? parsed;
     const patch = sanitizePlatformPatch(rawPatch);
     const summary =
@@ -354,16 +369,142 @@ export const aiApplyPlatformCustomization = async (
   }
 };
 
+async function resolveOpenRouterKey(organizationId: string): Promise<string> {
+  const row = await prisma.organizationConfig.findUnique({
+    where: { organizationId },
+    select: { openRouterApiKey: true },
+  });
+  return row?.openRouterApiKey?.trim() || process.env.OPENROUTER_API_KEY?.trim() || '';
+}
+
+export const aiSuggestUiCustomization = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const prompt = typeof req.body?.prompt === 'string' ? req.body.prompt.trim() : '';
+    if (!prompt || prompt.length < 10) {
+      sendError(res, 'prompt is required (at least 10 characters)', 400);
+      return;
+    }
+
+    const organizationId = req.user!.organizationId;
+    const config = await prisma.organizationConfig.findUnique({ where: { organizationId } });
+    if (!config) {
+      sendError(res, 'Organization config not found. Save basic settings first.', 404);
+      return;
+    }
+
+    const openRouterApiKey = await resolveOpenRouterKey(organizationId);
+    if (!openRouterApiKey) {
+      sendError(res, 'OpenRouter API key is not configured.', 400);
+      return;
+    }
+
+    const currentUi = (config.uiConfigJson as OrganizationUiConfig | null) || { version: 1 };
+    const model = process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat-v3-0324';
+    const userMessage = `Admin request:\n${prompt.slice(0, 4000)}\n\nCurrent UI config:\n${JSON.stringify(currentUi).slice(0, 8000)}`;
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: buildOpenRouterHeaders(openRouterApiKey),
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: buildUiCustomizationSystemPrompt() },
+          { role: 'user', content: userMessage },
+        ],
+        temperature: 0.35,
+        max_tokens: Number(process.env.OPENROUTER_UI_DESIGN_MAX_TOKENS || 2000),
+        response_format: { type: 'json_object' },
+      }),
+    });
+
+    const raw = await response.text();
+    if (!response.ok) {
+      sendError(res, `OpenRouter failed: ${raw.slice(0, 300)}`, 502);
+      return;
+    }
+
+    const payload = JSON.parse(raw) as { choices?: Array<{ message?: { content?: string } }> };
+    const content = payload.choices?.[0]?.message?.content?.trim() || '';
+    const parsed = extractUiJson(content);
+    const rawPatch = parsed.patch ?? parsed;
+    const patch = sanitizeUiConfigPatch(rawPatch);
+    const preview = resolveUiConfigFromPreset(currentUi, patch);
+    const summary =
+      typeof parsed.summary === 'string'
+        ? parsed.summary.slice(0, 1000)
+        : 'UI customization suggestion generated.';
+    const warnings = Array.isArray(parsed.warnings)
+      ? (parsed.warnings as unknown[]).map((w) => String(w).slice(0, 300)).slice(0, 10)
+      : [];
+    const changedFields = summarizeUiPatchDiff(currentUi, preview);
+
+    sendSuccess(res, { summary, patch, preview, warnings, changedFields });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const aiApplyUiCustomization = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const organizationId = req.user!.organizationId;
+    const config = await prisma.organizationConfig.findUnique({ where: { organizationId } });
+    if (!config) {
+      sendError(res, 'Organization config not found', 404);
+      return;
+    }
+
+    let patch: ReturnType<typeof sanitizeUiConfigPatch>;
+    try {
+      patch = sanitizeUiConfigPatch(req.body?.patch);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Invalid patch';
+      sendError(res, message, 400);
+      return;
+    }
+
+    const currentUi = (config.uiConfigJson as OrganizationUiConfig | null) || { version: 1 };
+    const mergedUi = resolveUiConfigFromPreset(currentUi, patch);
+    const legacy = uiConfigToLegacyFields(mergedUi);
+
+    const updated = await prisma.organizationConfig.update({
+      where: { organizationId },
+      data: legacy as Parameters<typeof prisma.organizationConfig.update>[0]['data'],
+    });
+
+    sendSuccess(res, {
+      config: formatConfig(updated as Record<string, unknown>),
+      uiConfig: mergedUi,
+      changedFields: summarizeUiPatchDiff(currentUi, mergedUi),
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
 function formatConfig(config: Record<string, unknown>) {
   return {
     ...config,
     theme: config.themeJson,
+    uiConfig: config.uiConfigJson,
     features: config.featuresJson,
     testimonials: config.testimonialsJson,
     faq: config.faqJson,
     socialLinks: config.socialLinksJson,
     smtpConfig: config.smtpConfigJson,
-    themeJson: undefined, featuresJson: undefined, testimonialsJson: undefined,
-    faqJson: undefined, socialLinksJson: undefined, smtpConfigJson: undefined,
+    themeJson: undefined,
+    uiConfigJson: undefined,
+    featuresJson: undefined,
+    testimonialsJson: undefined,
+    faqJson: undefined,
+    socialLinksJson: undefined,
+    smtpConfigJson: undefined,
   };
 }

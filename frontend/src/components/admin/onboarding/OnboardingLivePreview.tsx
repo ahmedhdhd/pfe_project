@@ -14,6 +14,7 @@ interface OnboardingLivePreviewProps {
   organizationId: string;
   partial: OnboardingPartialConfig;
   baseConfig?: OrganizationConfig | null;
+  refreshKey?: number;
 }
 
 export function OnboardingLivePreview({
@@ -21,6 +22,7 @@ export function OnboardingLivePreview({
   organizationId,
   partial,
   baseConfig,
+  refreshKey = 0,
 }: OnboardingLivePreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const previewConfig = useMemo(
@@ -42,8 +44,10 @@ export function OnboardingLivePreview({
     }
     const origin =
       typeof window !== "undefined" ? window.location.origin : "";
-    setIframeSrc(`${origin}/${encodeURIComponent(slug)}?embed=preview`);
-  }, [slug]);
+    setIframeSrc(
+      `${origin}/${encodeURIComponent(slug)}?embed=preview&refresh=${refreshKey}`
+    );
+  }, [slug, refreshKey]);
 
   const previewSrc = iframeSrc ?? undefined;
 

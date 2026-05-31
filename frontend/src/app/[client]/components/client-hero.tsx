@@ -8,6 +8,7 @@ import type { ClientHomepageData } from "../types";
 import { BannerCarousel } from "./banner-carousel";
 import { TypewriterText } from "./typewriter-text";
 import { cn } from "@/lib/utils";
+import { useHomepageLayout } from "@/lib/theme/use-ui-config";
 
 interface ClientHeroSectionProps {
   homepage: ClientHomepageData;
@@ -66,8 +67,18 @@ function Spotlight({
 }
 
 export function ClientHeroSection({ homepage }: ClientHeroSectionProps) {
+  const layout = useHomepageLayout();
+  const isCenter = layout === "hero-center";
+  const isSplit = layout === "split";
+
   return (
-    <section className="relative pb-20 md:pb-32 overflow-hidden bg-background/96 antialiased bg-grid-white/[0.02]">
+    <section
+      className={cn(
+        "relative pb-20 md:pb-32 overflow-hidden bg-background/96 antialiased bg-grid-white/[0.02]",
+        isCenter && "text-center",
+        isSplit && "md:grid md:grid-cols-2 md:items-center md:gap-12"
+      )}
+    >
       {/* Spotlight Effect */}
       <Spotlight
         className="-top-40 left-0 md:left-60 md:-top-20"
@@ -89,7 +100,12 @@ export function ClientHeroSection({ homepage }: ClientHeroSectionProps) {
 
       {/* Text + CTA */}
       <div className="px-4 relative z-10">
-        <div className="container mx-auto max-w-6xl pt-10 md:pt-20">
+        <div
+          className={cn(
+            "container mx-auto max-w-6xl pt-10 md:pt-20",
+            isCenter && "flex flex-col items-center"
+          )}
+        >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

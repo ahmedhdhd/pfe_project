@@ -78,6 +78,7 @@ model OrganizationConfig {
   // Theme (stored as JSON)
   themeJson  Json?    // { primaryColor, secondaryColor, fontFamily }
   themeColor String?  // Primary brand hex (mirrors themeJson.primaryColor)
+  uiConfigJson Json?  // Structured UI config: tokens, variants, layout, homepage sections
 
   // Onboarding / platform metadata
   language     String?

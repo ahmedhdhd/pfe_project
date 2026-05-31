@@ -271,6 +271,7 @@ export interface OrganizationConfig {
   maintenanceMode?: boolean;
   customCSS?: string;
   customJS?: string;
+  uiConfig?: import("@/lib/theme/schema").OrganizationUiConfig;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -372,6 +373,26 @@ export interface PlatformCustomizationApplyResponse {
   success: boolean;
   data: {
     config: OrganizationConfig;
+    changedFields: string[];
+  };
+}
+
+export interface UiCustomizationSuggestResponse {
+  success: boolean;
+  data: {
+    summary: string;
+    patch: Record<string, unknown>;
+    preview?: Record<string, unknown>;
+    warnings: string[];
+    changedFields: string[];
+  };
+}
+
+export interface UiCustomizationApplyResponse {
+  success: boolean;
+  data: {
+    config: OrganizationConfig;
+    uiConfig?: Record<string, unknown>;
     changedFields: string[];
   };
 }

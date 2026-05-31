@@ -17,6 +17,8 @@ import {
   Search,
   ShoppingCart,
   Trash2,
+  TrendingUp,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
