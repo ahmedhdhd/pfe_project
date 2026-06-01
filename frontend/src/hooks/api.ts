@@ -1247,22 +1247,13 @@ export interface TopicQuiz {
   questions: TopicQuizQuestion[];
 }
 
-export interface TopicQuizAiQuestionFeedback {
+export interface TopicQuizQuestionResult {
   questionId: string;
-  isCorrect?: boolean;
-  feedback?: string;
-  whyCorrectAnswer?: string;
-  studyHint?: string;
-}
-
-export interface TopicQuizAiFeedback {
-  id: string;
-  weakConcepts: unknown[];
-  strengths: unknown[];
-  recommendations: unknown[];
-  questionFeedback: TopicQuizAiQuestionFeedback[];
-  feedbackText: string;
-  generatedAt: string;
+  questionText: string;
+  isCorrect: boolean;
+  selectedAnswer: string;
+  correctAnswer: string;
+  explanation: string;
 }
 
 export interface TopicQuizAttemptSummary {
@@ -1274,7 +1265,7 @@ export interface TopicQuizAttemptSummary {
   totalQuestions: number;
   isPassed: boolean;
   completedAt: string;
-  aiFeedback?: TopicQuizAiFeedback | null;
+  questionResults?: TopicQuizQuestionResult[];
 }
 
 // Create Topic

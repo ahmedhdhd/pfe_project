@@ -166,7 +166,6 @@ model User {
   batchQuestions   BatchQuestion[]
   batchQuestionResponses BatchQuestionResponse[]
   scheduleAttendances ScheduleAttendance[]
-  quizAiFeedbacks QuizAiFeedback[]
 
   @@unique([email, organizationId])
   @@unique([phoneNumber, countryCode, organizationId])
@@ -269,7 +268,6 @@ model Batch {
   announcements Announcement[]
   certificateIssues BatchCertificateIssue[]
   aiPlaygrounds     AiPlayground[]
-  quizAiFeedbacks   QuizAiFeedback[]
   assignmentAiFeedbacks AssignmentAiFeedback[]
   assignments       Assignment[]
   notes             BatchNote[]
@@ -449,7 +447,6 @@ model Topic {
   schedules Schedule[]
   quizAttempts TopicQuizAttempt[]
   aiPlaygrounds AiPlayground[]
-  quizAiFeedbacks QuizAiFeedback[]
 
   @@map("topics")
 }
@@ -471,36 +468,9 @@ model TopicQuizAttempt {
 
   topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  aiFeedback QuizAiFeedback?
 
   @@index([topicId, userId])
   @@map("topic_quiz_attempts")
-}
-
-model QuizAiFeedback {
-  id                  String   @id @default(cuid())
-  quizAttemptId       String   @unique
-  userId              String
-  topicId             String
-  batchId             String
-  scorePercent        Float
-  weakConceptsJson    Json     @default("[]")
-  strengthsJson       Json     @default("[]")
-  recommendationsJson Json     @default("[]")
-  questionFeedbackJson Json    @default("[]")
-  feedbackText        String
-  generatedAt         DateTime @default(now())
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-
-  attempt TopicQuizAttempt @relation(fields: [quizAttemptId], references: [id], onDelete: Cascade)
-  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  topic   Topic            @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  batch   Batch            @relation(fields: [batchId], references: [id], onDelete: Cascade)
-
-  @@index([userId, topicId])
-  @@index([batchId])
-  @@map("quiz_ai_feedbacks")
 }
 
 enum ContentType {
@@ -514,6 +484,13 @@ enum ContentType {
 enum VideoType {
   YOUTUBE
   HLS
+}
+
+enum ContentEmbeddingStatus {
+  PENDING
+  READY
+  FAILED
+  SKIPPED
 }
 
 model Content {
@@ -541,6 +518,8 @@ model Content {
 
   // AI — auto-extracted text from video transcript / PDF / markdown
   extractedText  String?   @db.Text
+  embeddingIndexStatus ContentEmbeddingStatus @default(PENDING)
+  embeddingIndexError  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -690,6 +669,13 @@ enum ScheduleAudienceType {
   COURSE
 }
 
+enum ScheduleSummaryStatus {
+  NONE
+  PENDING
+  READY
+  FAILED
+}
+
 model Schedule {
   id                   String         @id @default(cuid())
   organizationId       String
@@ -712,6 +698,8 @@ model Schedule {
   transcriptDraft      String?
   aiSummary            String?
   summaryGeneratedAt   DateTime?
+  summaryStatus        ScheduleSummaryStatus @default(NONE)
+  summaryError         String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

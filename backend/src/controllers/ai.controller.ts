@@ -4,16 +4,9 @@ import prisma from '../utils/prisma';
 import { logger } from '../utils/logger';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../middleware/auth';
-import {
-  buildSystemPromptWithRAG,
-  SystemPromptContext,
-} from '../utils/ai-prompts';
-import {
-  generateEmbedding,
-  searchSimilarChunks,
-} from '../utils/embeddings';
-import { buildOpenRouterHeaders } from '../utils/openrouter';
-import { generatePlaygroundHtmlOpenRouter } from '../utils/openrouter-playground';
+import { SystemPromptContext } from '../utils/ai-prompts';
+import { sanitizeChatHistory } from '../utils/ai-chat-history';
+import { aiService, AiServiceError } from '../utils/ai-service-client';
 import { ensureBatchReadAccess } from './misc.helpers';
 
 const TEMP_PLAYGROUND_ID_PREFIX = 'temp-playground-';
@@ -58,27 +51,13 @@ export const aiChat = async (
       return;
     }
 
-    const userId = req.user!.userId;
-    const orgId = req.user!.organizationId;
-    const openRouterModel = process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat-v3-0324';
-
-    const orgAiConfig = await prisma.organizationConfig.findUnique({
-      where: { organizationId: orgId },
-      select: { openRouterApiKey: true },
-    });
-
-    const openRouterApiKey =
-      orgAiConfig?.openRouterApiKey?.trim() || process.env.OPENROUTER_API_KEY?.trim() || '';
-
-    if (!openRouterApiKey) {
-      sendError(
-        res,
-        'OpenRouter API key is not configured. Add it in Admin → Settings → AI, or set OPENROUTER_API_KEY in the backend environment.',
-        400
-      );
+    if (!(await ensureBatchReadAccess(req, res, context.batchId))) {
       return;
     }
 
+    const userId = req.user!.userId;
+    const sanitizedHistory = sanitizeChatHistory(history);
+    const orgId = req.user!.organizationId;
     // 1. Fetch batch and student context
     const [batch, student] = await Promise.all([
       prisma.batch.findUnique({
@@ -189,66 +168,34 @@ export const aiChat = async (
       student: { firstName: student?.username?.split(' ')[0] || 'Student' },
     };
 
-    // 2. RAG: same OpenRouter key + embedding model as content indexing
-    let retrievedChunks: Array<{ chunk_text: string; similarity: number; metadata: any }> = [];
+    let chatResult: { replyText: string; ragChunksUsed?: number; ragStatus?: string };
     try {
-      const queryEmbedding = await generateEmbedding(message, openRouterApiKey);
-      retrievedChunks = await searchSimilarChunks(queryEmbedding, context.batchId, 5);
-    } catch (ragError: any) {
-      console.warn(`RAG retrieval failed: ${ragError.message}`);
+      chatResult = await aiService.chat({
+        organizationId: orgId,
+        message,
+        history: sanitizedHistory,
+        promptContext: promptCtx as unknown as Record<string, unknown>,
+        batchId: context.batchId,
+      });
+    } catch (error: any) {
+      if (error instanceof AiServiceError) {
+        sendError(res, error.message.slice(0, 800), error.statusCode);
+        return;
+      }
+      throw error;
     }
 
-    // 3. Build system prompt WITH retrieved context
-    const systemPrompt = buildSystemPromptWithRAG(promptCtx, retrievedChunks);
-
-    // 4. DeepSeek (or any OpenRouter chat model)
-    const openRouterMessages = [
-      { role: 'system', content: systemPrompt },
-      ...history.map((m) => ({
-        role: m.role === 'assistant' ? 'assistant' : 'user',
-        content: m.content || '(no text)',
-      })),
-      { role: 'user', content: message },
-    ];
-
-    const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: buildOpenRouterHeaders(openRouterApiKey),
-      body: JSON.stringify({
-        model: openRouterModel,
-        messages: openRouterMessages,
-        temperature: 0.3,
-      }),
-    });
-
-    if (!openRouterResponse.ok) {
-      const openRouterErr = await openRouterResponse.text();
-      sendError(
-        res,
-        `OpenRouter request failed (${openRouterResponse.status}): ${openRouterErr.slice(0, 800)}`,
-        502
-      );
-      return;
-    }
-
-    const openRouterPayload = (await openRouterResponse.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
-    const replyText = openRouterPayload?.choices?.[0]?.message?.content?.trim() || '';
+    const replyText = chatResult.replyText?.trim() || '';
     if (!replyText) {
-      sendError(
-        res,
-        'OpenRouter returned an empty reply. Set OPENROUTER_MODEL (e.g. deepseek/deepseek-chat-v3-0324) or check the API response.',
-        502
-      );
+      sendError(res, 'AI service returned an empty reply.', 502);
       return;
     }
 
     const debugRag =
       process.env.NODE_ENV === 'development'
         ? {
-            ragChunksUsed: retrievedChunks.length,
-            ragStatus: retrievedChunks.length > 0 ? 'ok' : 'no_chunks',
+            ragChunksUsed: chatResult.ragChunksUsed ?? 0,
+            ragStatus: chatResult.ragStatus ?? 'no_chunks',
           }
         : {};
 
@@ -394,24 +341,28 @@ export const teacherGeneratePlayground = async (
       return;
     }
 
-    const orgCfg = await prisma.organizationConfig.findUnique({
-      where: { organizationId: orgId },
-      select: { openRouterApiKey: true },
-    });
-    const orKey = orgCfg?.openRouterApiKey?.trim() || process.env.OPENROUTER_API_KEY?.trim() || '';
-    if (!orKey) {
-      sendError(res, 'OpenRouter API key is not configured for AI playground generation.', 400);
+    if (!(await ensureBatchReadAccess(req, res, batchId))) {
       return;
     }
 
-    const html = await generatePlaygroundHtmlOpenRouter(orKey, {
-      concept,
-      instruction: userPrompt || `Visualize the concept of ${concept} interactively`,
-      complexity: 'detailed',
-      batchName: batch.name,
-      exam: batch.exam,
-      language: batch.language,
-    });
+    let html: string;
+    try {
+      const generated = await aiService.generatePlayground({
+        organizationId: orgId,
+        concept,
+        instruction: userPrompt || `Visualize the concept of ${concept} interactively`,
+        batchName: batch.name,
+        exam: batch.exam,
+        language: batch.language,
+      });
+      html = generated.html;
+    } catch (error: any) {
+      if (error instanceof AiServiceError) {
+        sendError(res, error.message.slice(0, 800), error.statusCode);
+        return;
+      }
+      throw error;
+    }
 
     const fallbackRefinementCount = refineFromId
       ? Math.min(baseRefinementCount + 1, 10)
@@ -701,6 +652,10 @@ export const getWeakConcepts = async (
   try {
     const { batchId } = req.params;
 
+    if (!(await ensureBatchReadAccess(req, res, batchId))) {
+      return;
+    }
+
     // Group by concept and count students
     const flags = await (prisma as any).weakConceptFlag.groupBy({
       by: ['concept', 'suggestedReviewTopic'],
@@ -731,52 +686,25 @@ export const testOpenRouterApiKey = async (
     const { apiKey, model, testEmbeddings } = req.body as {
       apiKey: string;
       model?: string;
-      /** Also verify embedding API (RAG) with OPENROUTER_EMBEDDING_MODEL */
       testEmbeddings?: boolean;
     };
-    const testModel = model?.trim() || process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat-v3-0324';
 
     if (!apiKey?.trim()) {
       sendError(res, 'apiKey is required', 400);
       return;
     }
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: buildOpenRouterHeaders(apiKey),
-      body: JSON.stringify({
-        model: testModel,
-        messages: [{ role: 'user', content: 'ping' }],
-        max_tokens: 8,
-      }),
+    const result = await aiService.testOpenRouterKey({
+      apiKey: apiKey.trim(),
+      model: model?.trim(),
+      testEmbeddings: !!testEmbeddings,
     });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      sendError(res, `Invalid OpenRouter API key or model: ${errText}`, 400);
+    sendSuccess(res, result);
+  } catch (error: any) {
+    if (error instanceof AiServiceError) {
+      sendError(res, error.message.slice(0, 800), error.statusCode);
       return;
     }
-
-    if (testEmbeddings) {
-      try {
-        await generateEmbedding('test', apiKey.trim());
-      } catch (embedErr: any) {
-        sendError(
-          res,
-          `Chat OK but embeddings (RAG) failed: ${embedErr?.message || embedErr}. Check OPENROUTER_EMBEDDING_MODEL.`,
-          400
-        );
-        return;
-      }
-    }
-
-    sendSuccess(res, {
-      valid: true,
-      message: testEmbeddings
-        ? 'OpenRouter chat and embeddings API are working.'
-        : 'OpenRouter API key is valid for chat.',
-    });
-  } catch (error: any) {
     sendError(res, `Invalid OpenRouter API key: ${error.message}`, 400);
   }
 };
@@ -788,46 +716,13 @@ export const getEmbeddingHealth = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const [
-      totalContentCount,
-      contentWithExtractedTextCount,
-      contentWithoutExtractedText,
-      embeddedContentCountRows,
-    ] = await Promise.all([
-      prisma.content.count(),
-      prisma.content.count({
-        where: {
-          extractedText: {
-            not: '',
-          },
-        },
-      }),
-      prisma.content.findMany({
-        where: {
-          OR: [{ extractedText: null }, { extractedText: '' }],
-        },
-        select: {
-          id: true,
-          title: true,
-          type: true,
-          topicId: true,
-        },
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.$queryRawUnsafe<Array<{ count: string | number }>>(
-        `SELECT COUNT(DISTINCT content_id) AS count FROM content_embeddings`
-      ),
-    ]);
-
-    const contentWithEmbeddingsCount = Number(embeddedContentCountRows?.[0]?.count ?? 0);
-
-    sendSuccess(res, {
-      totalContentCount,
-      contentWithExtractedTextCount,
-      contentWithEmbeddingsCount,
-      contentWithoutExtractedText,
-    });
-  } catch (e) {
-    next(e);
+    const health = await aiService.embeddingHealth();
+    sendSuccess(res, health);
+  } catch (error: any) {
+    if (error instanceof AiServiceError) {
+      sendError(res, error.message.slice(0, 800), error.statusCode);
+      return;
+    }
+    next(error);
   }
 };

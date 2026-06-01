@@ -166,4 +166,6 @@ export interface ScheduleAiSummary {
   status: ScheduleStatus;
   aiSummary?: string | null;
   summaryGeneratedAt?: string | null;
+  summaryStatus?: "NONE" | "PENDING" | "READY" | "FAILED" | null;
+  summaryError?: string | null;
 }

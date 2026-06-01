@@ -11,7 +11,7 @@ import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../middleware/auth';
 import { normalizeOptionalString, ensureBatchReadAccess } from './misc.helpers';
 import { transcribeLocalMediaFileWithGroq } from '../utils/text-extraction';
-import { buildOpenRouterHeaders } from '../utils/openrouter';
+import { aiService, AiServiceError } from '../utils/ai-service-client';
 
 const normalizeScheduleTags = (tags: unknown): string[] => {
   if (!Array.isArray(tags)) return [];
@@ -118,46 +118,41 @@ const isScheduleTerminated = (schedule: { status: 'SCHEDULED' | 'LIVE' | 'COMPLE
   return schedule.status === 'COMPLETED' || schedule.status === 'CANCELLED';
 };
 
-const isSummaryGenerationError = (value: string | null | undefined): boolean =>
-  typeof value === 'string' && value.startsWith('=== SUMMARY GENERATION ERROR ===');
-
-const generateAiSummaryFromTranscript = async (organizationId: string, title: string, transcript: string): Promise<string> => {
-  const orgAiConfig = await prisma.organizationConfig.findUnique({
-    where: { organizationId },
-    select: { openRouterApiKey: true },
-  });
-  const openRouterApiKey = orgAiConfig?.openRouterApiKey?.trim() || process.env.OPENROUTER_API_KEY?.trim() || '';
-  if (!openRouterApiKey) {
-    throw new Error('OpenRouter API key is not configured for summary generation');
+const generateAiSummaryFromTranscript = async (
+  organizationId: string,
+  title: string,
+  transcript: string
+): Promise<string> => {
+  try {
+    const result = await aiService.summarizeSchedule({
+      organizationId,
+      title,
+      transcript,
+    });
+    if (!result.summary?.trim()) {
+      throw new Error('AI service returned an empty summary');
+    }
+    return result.summary.trim();
+  } catch (error: any) {
+    if (error instanceof AiServiceError) {
+      throw new Error(error.message);
+    }
+    throw error;
   }
-
-  const openRouterModel = process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat-v3-0324';
-  const summaryMaxTokens = Number(process.env.OPENROUTER_SUMMARY_MAX_TOKENS || 1200);
-  const trimmedTranscript = transcript.length > 24000 ? `${transcript.slice(0, 24000)}\n\n[Transcript truncated for summary generation]` : transcript;
-  const prompt = `This is a transcript of a live class titled ${title}. Summarize: main topics explained, questions students asked, and key takeaways.\n\nTranscript:\n${trimmedTranscript}`;
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: buildOpenRouterHeaders(openRouterApiKey),
-    body: JSON.stringify({
-      model: openRouterModel,
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.2,
-      max_tokens: Number.isFinite(summaryMaxTokens) && summaryMaxTokens > 0 ? summaryMaxTokens : 1200,
-    }),
-  });
-
-  const raw = await response.text();
-  if (!response.ok) throw new Error(`OpenRouter summary request failed (${response.status}): ${raw.slice(0, 500)}`);
-  const payload = JSON.parse(raw) as { choices?: Array<{ message?: { content?: string } }> };
-  const summary = payload?.choices?.[0]?.message?.content?.trim() || '';
-  if (!summary) throw new Error('OpenRouter returned an empty summary');
-  return summary;
 };
 
 const generateScheduleSummaryForCompletedSession = async (scheduleId: string): Promise<void> => {
   const schedule = await prisma.schedule.findUnique({ where: { id: scheduleId } });
   if (!schedule || schedule.status !== 'COMPLETED') return;
-  if (schedule.summaryGeneratedAt && schedule.aiSummary && !isSummaryGenerationError(schedule.aiSummary)) return;
+  if (schedule.summaryStatus === 'READY' && schedule.aiSummary?.trim()) return;
+
+  await prisma.schedule.update({
+    where: { id: scheduleId },
+    data: {
+      summaryStatus: 'PENDING',
+      summaryError: null,
+    },
+  });
 
   try {
     const transcript = schedule.transcriptDraft?.trim() || '';
@@ -172,6 +167,8 @@ const generateScheduleSummaryForCompletedSession = async (scheduleId: string): P
       data: {
         aiSummary,
         summaryGeneratedAt: new Date(),
+        summaryStatus: 'READY',
+        summaryError: null,
       },
     });
   } catch (error: any) {
@@ -181,8 +178,10 @@ const generateScheduleSummaryForCompletedSession = async (scheduleId: string): P
       await prisma.schedule.update({
         where: { id: scheduleId },
         data: {
-          aiSummary: `=== SUMMARY GENERATION ERROR ===\n${message}`,
+          aiSummary: null,
           summaryGeneratedAt: new Date(),
+          summaryStatus: 'FAILED',
+          summaryError: message.slice(0, 2000),
         },
       });
     } catch (persistErr: any) {
@@ -305,6 +304,8 @@ export const updateScheduleStatus = async (req: Request, res: Response, next: Ne
             transcriptDraft: null,
             aiSummary: null,
             summaryGeneratedAt: null,
+            summaryStatus: 'NONE',
+            summaryError: null,
           }
         : { status: nextStatus },
     });
@@ -329,6 +330,8 @@ export const getScheduleSummary = async (req: AuthRequest, res: Response, next: 
         status: true,
         aiSummary: true,
         summaryGeneratedAt: true,
+        summaryStatus: true,
+        summaryError: true,
       },
     });
     if (!schedule) { sendError(res, 'Live session not found', 404); return; }
@@ -340,6 +343,8 @@ export const getScheduleSummary = async (req: AuthRequest, res: Response, next: 
       status: schedule.status,
       aiSummary: schedule.aiSummary,
       summaryGeneratedAt: schedule.summaryGeneratedAt,
+      summaryStatus: schedule.summaryStatus,
+      summaryError: schedule.summaryError,
     });
   } catch (e) { next(e); }
 };
@@ -397,6 +402,8 @@ export const getScheduleJoinToken = async (req: AuthRequest, res: Response, next
             transcriptDraft: null,
             aiSummary: null,
             summaryGeneratedAt: null,
+            summaryStatus: 'NONE',
+            summaryError: null,
           },
           include: { batch: { select: { name: true } }, subject: { select: { name: true } } },
         });

@@ -3,7 +3,9 @@ import prisma from '../utils/prisma';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../middleware/auth';
 import { sendAssignmentResultEmail } from '../utils/email';
-import { buildOpenRouterHeaders } from '../utils/openrouter';
+import { validateGeneratedAssignmentQuestion } from '../utils/assignment-ai-validation';
+import { recordWeakConceptFlags } from '../utils/weak-concepts';
+import { aiService, AiServiceError } from '../utils/ai-service-client';
 import { logger } from '../utils/logger';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -48,16 +50,6 @@ const stripHtml = (value: unknown) =>
     .replace(/&nbsp;/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-
-const extractJsonObject = (text: string): Record<string, unknown> => {
-  try {
-    return JSON.parse(text) as Record<string, unknown>;
-  } catch {
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('AI response did not contain JSON');
-    return JSON.parse(match[0]) as Record<string, unknown>;
-  }
-};
 
 const getCorrectAnswerLabel = (question: any) => {
   const correct = normalizeJsonObject(question.correctAnswerJson);
@@ -175,19 +167,11 @@ const generateAssignmentAiFeedbackPayload = async ({
   scorePercent: number | null;
 }) => {
   const fallback = buildRuleBasedAssignmentFeedback({ assignment, answers, scorePercent });
-  const orgAiConfig = await prisma.organizationConfig.findUnique({
-    where: { organizationId },
-    select: { openRouterApiKey: true },
-  });
-  const openRouterApiKey =
-    orgAiConfig?.openRouterApiKey?.trim() || process.env.OPENROUTER_API_KEY?.trim() || '';
-  if (!openRouterApiKey) return fallback;
-
-  const model = process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat-v3-0324';
   const prompt = `You are an educational tutor. Analyze this assignment submission for "${assignment.title}".
 Return JSON only with keys: overallFeedback, weakConcepts, strengths, recommendations, questionFeedback.
 Each questionFeedback item must include: questionId, isCorrect, feedback, whyCorrectAnswer, studyHint.
 Be concise, supportive, and explain what the student got wrong and why. If a question needs manual grading, say what to improve without inventing a score.
+Use the provided correctAnswer and isCorrect fields — do not invent scores or answers.
 
 Assignment attempt:
 ${JSON.stringify({
@@ -198,22 +182,7 @@ ${JSON.stringify({
 }).slice(0, 18000)}`;
 
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: buildOpenRouterHeaders(openRouterApiKey),
-      body: JSON.stringify({
-        model,
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.2,
-        max_tokens: Number(process.env.OPENROUTER_ASSIGNMENT_FEEDBACK_MAX_TOKENS || 1400),
-      }),
-    });
-    const raw = await response.text();
-    if (!response.ok) {
-      throw new Error(`OpenRouter assignment feedback failed (${response.status}): ${raw.slice(0, 400)}`);
-    }
-    const payload = JSON.parse(raw) as { choices?: Array<{ message?: { content?: string } }> };
-    const parsed = extractJsonObject(payload.choices?.[0]?.message?.content?.trim() || '');
+    const parsed = await aiService.assignmentFeedback({ organizationId, prompt });
     return {
       overallFeedback:
         typeof parsed.overallFeedback === 'string'
@@ -236,6 +205,7 @@ const upsertAssignmentAiFeedback = async (submissionId: string) => {
     include: {
       assignment: {
         include: {
+          topic: { select: { name: true } },
           questions: { orderBy: { order: 'asc' } },
         },
       },
@@ -257,7 +227,7 @@ const upsertAssignmentAiFeedback = async (submissionId: string) => {
     scorePercent,
   });
 
-  return (prisma as any).assignmentAiFeedback.upsert({
+  const feedbackRecord = await (prisma as any).assignmentAiFeedback.upsert({
     where: { submissionId: submission.id },
     create: {
       submissionId: submission.id,
@@ -282,6 +252,16 @@ const upsertAssignmentAiFeedback = async (submissionId: string) => {
       generatedAt: new Date(),
     },
   });
+
+  await recordWeakConceptFlags({
+    studentId: submission.studentId,
+    batchId: submission.assignment.batchId,
+    concepts: payload.weakConcepts,
+    suggestedReviewTopic:
+      submission.assignment.topic?.name || submission.assignment.title || 'Assignment review',
+  });
+
+  return feedbackRecord;
 };
 
 const ensureBatchAccess = async (req: AuthRequest, res: Response, batchId: string) => {
@@ -605,17 +585,6 @@ export const generateAssignmentWithAi = async (
       return;
     }
 
-    const orgAiConfig = await prisma.organizationConfig.findUnique({
-      where: { organizationId: req.user!.organizationId },
-      select: { openRouterApiKey: true },
-    });
-    const openRouterApiKey =
-      orgAiConfig?.openRouterApiKey?.trim() || process.env.OPENROUTER_API_KEY?.trim() || '';
-    if (!openRouterApiKey) {
-      sendError(res, 'OpenRouter API key is not configured', 400);
-      return;
-    }
-
     const count = Math.min(Math.max(Number(req.body?.count) || 5, 1), 12);
     const level = normalizeQuestionLevel(req.body?.level);
     const levelInstruction =
@@ -624,7 +593,6 @@ export const generateAssignmentWithAi = async (
         : level === 'HARD'
         ? 'Hard: require analysis, application, edge cases, or multi-step reasoning. Avoid trick questions, but make distractors plausible.'
         : 'Medium: mix understanding and application. Questions should be clear but require more than memorization.';
-    const model = process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat-v3-0324';
     const generationPrompt = `Generate ${count} ${level.toLowerCase()} assignment questions for this LMS assignment.
 Return JSON only:
 {
@@ -652,36 +620,34 @@ ${JSON.stringify({
   teacherPrompt: promptText,
 }).slice(0, 8000)}`;
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: buildOpenRouterHeaders(openRouterApiKey),
-      body: JSON.stringify({
-        model,
-        messages: [{ role: 'user', content: generationPrompt }],
-        temperature: 0.35,
-        max_tokens: Number(process.env.OPENROUTER_ASSIGNMENT_GENERATION_MAX_TOKENS || 2200),
-      }),
-    });
-    const raw = await response.text();
-    if (!response.ok) {
-      sendError(res, `OpenRouter assignment generation failed: ${raw.slice(0, 300)}`, 502);
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = await aiService.assignmentGenerateQuestions({
+        organizationId: req.user!.organizationId,
+        generationPrompt,
+      });
+    } catch (error: any) {
+      const message =
+        error instanceof AiServiceError
+          ? error.message
+          : String(error?.message || error);
+      sendError(res, `Assignment generation failed: ${message.slice(0, 300)}`, 502);
       return;
     }
 
-    const payload = JSON.parse(raw) as { choices?: Array<{ message?: { content?: string } }> };
-    const parsed = extractJsonObject(payload.choices?.[0]?.message?.content?.trim() || '');
     const questions = normalizeJsonArray(parsed.questions)
       .map((question: any) => {
         const type = normalizeQuestionType(question?.type);
+        const normalizedType = type === 'FILE_SUBMISSION' ? 'SHORT_ANSWER' : type;
         return {
-          type: type === 'FILE_SUBMISSION' ? 'SHORT_ANSWER' : type,
+          type: normalizedType,
           title: optionalString(question?.title) || null,
           prompt: optionalString(question?.prompt) || 'Generated question',
           points: Number(question?.points) > 0 ? Number(question.points) : 1,
           options:
-            type === 'QUIZ'
+            normalizedType === 'QUIZ'
               ? normalizeJsonArray(question?.options).slice(0, 6)
-              : type === 'TRUE_FALSE'
+              : normalizedType === 'TRUE_FALSE'
               ? [
                   { id: 'true', text: 'True' },
                   { id: 'false', text: 'False' },
@@ -690,7 +656,15 @@ ${JSON.stringify({
           correctAnswer: normalizeJsonObject(question?.correctAnswer),
         };
       })
-      .filter((question: any) => question.prompt);
+      .filter((question: any) => {
+        if (!question.prompt) return false;
+        const validationError = validateGeneratedAssignmentQuestion(question);
+        if (validationError) {
+          logger.warn(`Skipping invalid generated question: ${validationError}`);
+          return false;
+        }
+        return true;
+      });
 
     if (questions.length === 0) {
       sendError(res, 'AI did not return valid questions. Try a more specific prompt.', 502);

@@ -173,9 +173,16 @@ export function LiveSessionRoom({
   const attendanceRows = attendanceQuery.data?.data ?? [];
   const attendanceSummary = attendanceQuery.data?.summary;
   const aiSummary = summaryQuery.data;
-  const summaryDisplay = formatScheduleAiSummaryDisplay(aiSummary?.aiSummary);
+  const summaryDisplay = formatScheduleAiSummaryDisplay(aiSummary?.aiSummary, {
+    summaryStatus: aiSummary?.summaryStatus,
+    summaryError: aiSummary?.summaryError,
+  });
   const summaryStillPending =
-    schedule?.status === "COMPLETED" && !aiSummary?.summaryGeneratedAt;
+    schedule?.status === "COMPLETED" &&
+    (aiSummary?.summaryStatus === "PENDING" ||
+      (!aiSummary?.summaryGeneratedAt &&
+        aiSummary?.summaryStatus !== "FAILED" &&
+        aiSummary?.summaryStatus !== "READY"));
 
   const markAttendance = async (action: "join" | "leave") => {
     if (!isStudentPortal || attendanceMutation.isPending) return;

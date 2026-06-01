@@ -219,6 +219,27 @@ export const serializeTopicQuizForStudent = (value: unknown) => {
   };
 };
 
+export const buildTopicQuizQuestionResults = (
+  quiz: TopicQuiz,
+  answers: Record<string, unknown>
+) =>
+  quiz.questions.map((question) => {
+    const selectedOptionId =
+      typeof answers[question.id] === 'string' ? String(answers[question.id]) : '';
+    const selectedOption = question.options?.find((option) => option.id === selectedOptionId);
+    const correctOption = question.options?.find((option) => option.id === question.correctOptionId);
+    const isCorrect = selectedOptionId === question.correctOptionId;
+
+    return {
+      questionId: question.id,
+      questionText: question.text,
+      isCorrect,
+      selectedAnswer: selectedOption?.text || '',
+      correctAnswer: correctOption?.text || question.explanation || '',
+      explanation: question.explanation || '',
+    };
+  });
+
 export const serializeTopicQuizAttempt = (
   attempt:
     | {
@@ -230,22 +251,22 @@ export const serializeTopicQuizAttempt = (
         totalQuestions: number;
         isPassed: boolean;
         completedAt: Date;
-        aiFeedback?: {
-          id: string;
-          weakConceptsJson: unknown;
-          strengthsJson: unknown;
-          recommendationsJson: unknown;
-          questionFeedbackJson: unknown;
-          feedbackText: string;
-          generatedAt: Date;
-        } | null;
+        answersJson?: unknown;
       }
     | null
-    | undefined
+    | undefined,
+  quiz?: TopicQuiz | null
 ) => {
   if (!attempt) {
     return null;
   }
+
+  const answers =
+    attempt.answersJson &&
+    typeof attempt.answersJson === 'object' &&
+    !Array.isArray(attempt.answersJson)
+      ? (attempt.answersJson as Record<string, unknown>)
+      : {};
 
   return {
     id: attempt.id,
@@ -256,25 +277,7 @@ export const serializeTopicQuizAttempt = (
     totalQuestions: attempt.totalQuestions,
     isPassed: attempt.isPassed,
     completedAt: attempt.completedAt,
-    aiFeedback: attempt.aiFeedback
-      ? {
-          id: attempt.aiFeedback.id,
-          weakConcepts: Array.isArray(attempt.aiFeedback.weakConceptsJson)
-            ? attempt.aiFeedback.weakConceptsJson
-            : [],
-          strengths: Array.isArray(attempt.aiFeedback.strengthsJson)
-            ? attempt.aiFeedback.strengthsJson
-            : [],
-          recommendations: Array.isArray(attempt.aiFeedback.recommendationsJson)
-            ? attempt.aiFeedback.recommendationsJson
-            : [],
-          questionFeedback: Array.isArray(attempt.aiFeedback.questionFeedbackJson)
-            ? attempt.aiFeedback.questionFeedbackJson
-            : [],
-          feedbackText: attempt.aiFeedback.feedbackText,
-          generatedAt: attempt.aiFeedback.generatedAt,
-        }
-      : null,
+    questionResults: quiz ? buildTopicQuizQuestionResults(quiz, answers) : [],
   };
 };
 
@@ -291,29 +294,26 @@ export const serializeTopicRecord = <
       totalQuestions: number;
       isPassed: boolean;
       completedAt: Date;
-      aiFeedback?: {
-        id: string;
-        weakConceptsJson: unknown;
-        strengthsJson: unknown;
-        recommendationsJson: unknown;
-        questionFeedbackJson: unknown;
-        feedbackText: string;
-        generatedAt: Date;
-      } | null;
+      answersJson?: unknown;
     }>;
   },
 >(
   topic: T,
-  role?: string
+  role?: string,
+  studentQuiz?: TopicQuiz | null
 ) => {
   const { quizJson, assignments, quizAttempts, ...rest } = topic;
+  const quizForStudent =
+    studentQuiz ?? (role === 'STUDENT' ? sanitizeTopicQuiz(quizJson) : null);
 
   return {
     ...rest,
     assignments: Array.isArray(assignments) ? assignments : [],
-    quiz: null,
+    quiz: role === 'STUDENT' ? serializeTopicQuizForStudent(quizJson) : null,
     latestQuizAttempt:
-      role === 'STUDENT' ? serializeTopicQuizAttempt(quizAttempts?.[0]) : null,
+      role === 'STUDENT'
+        ? serializeTopicQuizAttempt(quizAttempts?.[0], quizForStudent)
+        : null,
   };
 };
 

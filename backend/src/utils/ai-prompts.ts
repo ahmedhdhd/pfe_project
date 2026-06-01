@@ -24,10 +24,16 @@ export interface SystemPromptContext {
   student: { firstName: string };
 }
 
-export function buildSystemPrompt(ctx: SystemPromptContext): string {
+export function buildSystemPrompt(
+  ctx: SystemPromptContext,
+  options?: { omitInlineLessonText?: boolean }
+): string {
   const lang = ctx.batch.language || "French";
+  const omitInline = options?.omitInlineLessonText === true;
   const extracted =
-    typeof ctx.content.extractedText === "string" && ctx.content.extractedText.trim()
+    !omitInline &&
+    typeof ctx.content.extractedText === "string" &&
+    ctx.content.extractedText.trim()
       ? `\nEXTRACTED LESSON MATERIAL (video transcript, PDF text, etc.):\n${ctx.content.extractedText.slice(0, 12000)}`
       : "";
 
@@ -38,6 +44,11 @@ export function buildSystemPrompt(ctx: SystemPromptContext): string {
       ? "\nNote: Lesson text may still be indexing in the background — answer from title/description/video link if transcript is not listed yet."
       : "";
 
+  const markdownSection =
+    !omitInline && ctx.content.markdownBody
+      ? `\nLESSON CONTENT (markdown):\n${ctx.content.markdownBody.slice(0, 12000)}`
+      : "";
+
   return `You are an expert tutor for ${ctx.batch.name}, a ${ctx.batch.exam || "university"} preparation course for ${ctx.batch.class || "students"}.
 
 CURRENT LESSON CONTEXT:
@@ -45,7 +56,7 @@ Chapter: ${ctx.chapter.title} (Chapter ${ctx.chapter.order} of ${ctx.chapter.tot
 Topic: ${ctx.topic.title}
 Lesson: ${ctx.content.title} (${ctx.content.type})${ctx.content.description ? "\n" + ctx.content.description : ""}${ctx.content.videoUrl ? `\nVideo URL: ${ctx.content.videoUrl}` : ""}${indexingNote}
 ${extracted}
-${ctx.content.markdownBody ? `\nLESSON CONTENT (markdown):\n${ctx.content.markdownBody.slice(0, 12000)}` : ""}
+${markdownSection}
 ${ctx.content.externalUrl ? `\nEXTERNAL RESOURCE URL:\n${ctx.content.externalUrl}` : ""}
 
 OTHER LESSONS IN THIS CHAPTER:
@@ -73,7 +84,12 @@ export function buildSystemPromptWithRAG(
   ctx: SystemPromptContext,
   retrievedChunks: Array<{ chunk_text: string; similarity: number; metadata: any }>
 ): string {
-  const basePrompt = buildSystemPrompt(ctx);
+  const hasStrongRag =
+    retrievedChunks.length >= 2 &&
+    retrievedChunks.some((chunk) => chunk.similarity >= 0.65);
+  const basePrompt = buildSystemPrompt(ctx, {
+    omitInlineLessonText: hasStrongRag,
+  });
 
   if (!retrievedChunks || retrievedChunks.length === 0) return basePrompt;
 

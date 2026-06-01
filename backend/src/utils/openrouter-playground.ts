@@ -74,5 +74,16 @@ Complexity: ${opts.complexity} (${opts.complexity === "simple" ? "one primary in
     if (htmlStart > -1) html = html.slice(htmlStart);
   }
 
+  const lower = html.toLowerCase();
+  if (/<script[\s>]/i.test(html) && /\bsrc\s*=/i.test(html)) {
+    throw new Error("Generated playground HTML must not load external scripts");
+  }
+  if (/\b(src|href)\s*=\s*["']https?:\/\//i.test(html)) {
+    throw new Error("Generated playground HTML must not reference external URLs");
+  }
+  if (!lower.includes("<html")) {
+    throw new Error("Generated playground HTML is not a complete document");
+  }
+
   return html;
 }

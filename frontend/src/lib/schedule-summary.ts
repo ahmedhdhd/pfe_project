@@ -1,7 +1,20 @@
-export function formatScheduleAiSummaryDisplay(raw?: string | null): {
+export function formatScheduleAiSummaryDisplay(
+  raw?: string | null,
+  options?: {
+    summaryStatus?: string | null;
+    summaryError?: string | null;
+  }
+): {
   text: string;
   isError: boolean;
 } {
+  if (options?.summaryStatus === "FAILED") {
+    return {
+      text: options.summaryError?.trim() || "Summary generation failed.",
+      isError: true,
+    };
+  }
+
   if (!raw?.trim()) {
     return { text: "", isError: false };
   }

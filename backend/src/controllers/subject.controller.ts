@@ -2,7 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import prisma from '../utils/prisma';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../middleware/auth';
-import { ensureBatchReadAccess, serializeTopicRecord } from './misc.helpers';
+import {
+  ensureBatchReadAccess,
+  sanitizeTopicQuiz,
+  serializeTopicRecord,
+} from './misc.helpers';
 
 // ── Subjects ──────────────────────────────────────────────
 
@@ -107,7 +111,6 @@ export const getCourseHierarchyByBatch = async (req: AuthRequest, res: Response,
                         where: { userId: req.user.userId },
                         orderBy: { completedAt: 'desc' },
                         take: 1,
-                        include: { aiFeedback: true },
                       }
                     : false,
               },
@@ -123,7 +126,11 @@ export const getCourseHierarchyByBatch = async (req: AuthRequest, res: Response,
         chapters: subject.chapters.map((chapter) => ({
           ...chapter,
           topics: chapter.topics.map((topic) =>
-            serializeTopicRecord(topic, req.user?.role)
+            serializeTopicRecord(
+              topic,
+              req.user?.role,
+              sanitizeTopicQuiz(topic.quizJson)
+            )
           ),
         })),
       }))
@@ -184,7 +191,6 @@ export const getCourseOutlineByBatch = async (req: AuthRequest, res: Response, n
                         where: { userId: req.user.userId },
                         orderBy: { completedAt: 'desc' },
                         take: 1,
-                        include: { aiFeedback: true },
                       }
                     : false,
               },
@@ -203,7 +209,11 @@ export const getCourseOutlineByBatch = async (req: AuthRequest, res: Response, n
           legacySubjectId: subject.id,
           legacySubjectName: subject.name,
           topics: chapter.topics.map((topic) =>
-            serializeTopicRecord(topic, req.user?.role)
+            serializeTopicRecord(
+              topic,
+              req.user?.role,
+              sanitizeTopicQuiz(topic.quizJson)
+            )
           ),
         }))
       )

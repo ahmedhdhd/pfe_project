@@ -6,9 +6,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
-  Lightbulb,
   RotateCcw,
-  Sparkles,
+  XCircle,
 } from "lucide-react";
 import { QuestionRenderer } from "@/components/test-engine/question-renderer";
 import { Badge } from "@/components/ui/badge";
@@ -16,15 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSubmitTopicQuizAttempt } from "@/hooks";
 import type { TopicQuiz, TopicQuizAttemptSummary } from "@/hooks/api";
-
-const stringifyFeedbackItem = (value: unknown) => {
-  if (typeof value === "string") return value;
-  if (value && typeof value === "object") {
-    const record = value as Record<string, unknown>;
-    return String(record.reason || record.title || record.concept || record.type || "").trim();
-  }
-  return "";
-};
 
 interface TopicQuizPanelProps {
   topicId: string;
@@ -104,13 +94,8 @@ export function TopicQuizPanel({
   const currentQuestion = quiz.questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === questionCount - 1;
   const isFirstQuestion = currentQuestionIndex === 0;
-  const aiFeedback = latestResult?.aiFeedback;
-  const weakConcepts = aiFeedback?.weakConcepts
-    ?.map(stringifyFeedbackItem)
-    .filter(Boolean) ?? [];
-  const recommendations = aiFeedback?.recommendations
-    ?.map(stringifyFeedbackItem)
-    .filter(Boolean) ?? [];
+  const incorrectResults =
+    latestResult?.questionResults?.filter((item) => !item.isCorrect) ?? [];
 
   return (
     <div
@@ -157,78 +142,43 @@ export function TopicQuizPanel({
 
         {!hasStarted ? (
           <div className="space-y-4">
-            {latestResult && aiFeedback ? (
+            {latestResult && incorrectResults.length > 0 ? (
               <div className="rounded-lg border bg-background p-4">
-                <div className="mb-3 flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-semibold">AI feedback</h3>
-                </div>
-                <p className="text-sm leading-6 text-muted-foreground">
-                  {aiFeedback.feedbackText}
-                </p>
-
-                <div className="mt-4 grid gap-3 md:grid-cols-2">
-                  <div className="rounded-md border bg-muted/10 p-3">
-                    <div className="mb-2 flex items-center gap-2 text-sm font-medium">
-                      <Lightbulb className="h-4 w-4 text-amber-600" />
-                      Review next
-                    </div>
-                    {weakConcepts.length > 0 ? (
-                      <ul className="space-y-1 text-sm text-muted-foreground">
-                        {weakConcepts.map((item, index) => (
-                          <li key={`${item}-${index}`}>{item}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">
-                        No major weak concept was detected in this attempt.
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="rounded-md border bg-muted/10 p-3">
-                    <div className="mb-2 text-sm font-medium">Recommended action</div>
-                    {recommendations.length > 0 ? (
-                      <ul className="space-y-1 text-sm text-muted-foreground">
-                        {recommendations.map((item, index) => (
-                          <li key={`${item}-${index}`}>{item}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">
-                        Review missed questions, then retake when ready.
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {aiFeedback.questionFeedback?.length ? (
-                  <div className="mt-4 space-y-2">
-                    <div className="text-sm font-medium">Mistakes explained</div>
-                    {aiFeedback.questionFeedback
-                      .filter((item) => item && item.isCorrect === false)
-                      .slice(0, 4)
-                      .map((item) => (
-                        <div
-                          key={item.questionId}
-                          className="rounded-md border bg-muted/10 p-3 text-sm"
-                        >
-                          <p className="font-medium">
-                            {quiz.questions.find((question) => question.id === item.questionId)?.text ||
-                              "Question"}
-                          </p>
-                          {item.feedback ? (
-                            <p className="mt-1 text-muted-foreground">{item.feedback}</p>
+                <div className="mb-3 text-sm font-semibold">Review missed questions</div>
+                <div className="space-y-2">
+                  {incorrectResults.slice(0, 4).map((item) => (
+                    <div
+                      key={item.questionId}
+                      className="rounded-md border bg-muted/10 p-3 text-sm"
+                    >
+                      <div className="flex items-start gap-2">
+                        <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                        <div>
+                          <p className="font-medium">{item.questionText}</p>
+                          {item.selectedAnswer ? (
+                            <p className="mt-1 text-muted-foreground">
+                              Your answer: {item.selectedAnswer}
+                            </p>
                           ) : null}
-                          {item.studyHint ? (
+                          {item.correctAnswer ? (
+                            <p className="mt-1 text-muted-foreground">
+                              Correct: {item.correctAnswer}
+                            </p>
+                          ) : null}
+                          {item.explanation ? (
                             <p className="mt-1 text-xs text-muted-foreground">
-                              {item.studyHint}
+                              {item.explanation}
                             </p>
                           ) : null}
                         </div>
-                      ))}
-                  </div>
-                ) : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : latestResult ? (
+              <div className="rounded-lg border bg-background p-4 text-sm text-muted-foreground">
+                Great work — you answered every question correctly on your latest attempt.
               </div>
             ) : null}
 
@@ -312,17 +262,17 @@ export function TopicQuizPanel({
                 </div>
 
                 <div className="flex flex-wrap justify-end gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setHasStarted(false);
-                    setCurrentQuestionIndex(0);
-                    notifyQuizState(Boolean(latestResult), false);
-                  }}
-                >
-                  Cancel
-                </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setHasStarted(false);
+                      setCurrentQuestionIndex(0);
+                      notifyQuizState(Boolean(latestResult), false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
                   {isLastQuestion ? (
                     <Button
                       type="button"
