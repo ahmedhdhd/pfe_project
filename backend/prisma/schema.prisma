@@ -246,11 +246,14 @@ model Batch {
   faqJson            Json?   @default("[]")  // Array<{ title, description }>
   certificateEnabled       Boolean @default(false)
   certificateTitle         String?
+  certificateHeading       String?
   certificateTemplateId    String?
   certificateTemplateUrl   String?
   certificateIssuerName    String?
   certificateSignerName    String?
   certificateSignerTitle   String?
+  certificatePrimaryColor  String?
+  certificateSecondaryColor String?
   certificateLinkedInOrgId String?
 
   createdAt DateTime @default(now())

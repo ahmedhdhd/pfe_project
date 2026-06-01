@@ -1,18 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Award, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Award, Loader2, Palette, ShieldCheck, Type } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { useUpdateBatchCertificateConfig } from "@/hooks";
+import { useOrganizationConfigAdmin, useUpdateBatchCertificateConfig } from "@/hooks";
 import {
   CERTIFICATE_TEMPLATES,
+  DEFAULT_CERTIFICATE_HEADING,
   DEFAULT_CERTIFICATE_TEMPLATE_ID,
+  getCertificateTemplate,
+  normalizeCertificateTemplateId,
   type CertificateTemplateId,
 } from "@/lib/certificate-templates";
+import { CertificateTemplatePreview } from "./certificate-template-preview";
 import type { Batch } from "./types";
 
 interface CourseCertificateTabProps {
@@ -24,28 +30,87 @@ interface CourseCertificateTabProps {
 interface CertificateFormState {
   enabled: boolean;
   templateId: CertificateTemplateId;
+  title: string;
+  heading: string;
+  issuerName: string;
+  signerName: string;
+  signerTitle: string;
+  primaryColor: string;
+  secondaryColor: string;
 }
 
-const createInitialState = (course: Batch): CertificateFormState => ({
-  enabled: Boolean(course.certificate?.enabled),
-  templateId:
-    (course.certificate?.templateId as CertificateTemplateId | undefined) ||
-    DEFAULT_CERTIFICATE_TEMPLATE_ID,
-});
+const createInitialState = (
+  course: Batch,
+  orgName: string,
+  themePrimary?: string,
+  themeSecondary?: string
+): CertificateFormState => {
+  const templateId = normalizeCertificateTemplateId(course.certificate?.templateId);
+  const template = getCertificateTemplate(templateId);
+
+  return {
+    enabled: Boolean(course.certificate?.enabled),
+    templateId,
+    title: course.certificate?.title || `${course.name} Certificate`,
+    heading: course.certificate?.heading || DEFAULT_CERTIFICATE_HEADING,
+    issuerName: course.certificate?.issuerName || orgName || "TeslaAcademy",
+    signerName: course.certificate?.signerName || "",
+    signerTitle: course.certificate?.signerTitle || "Course Creator",
+    primaryColor:
+      course.certificate?.primaryColor ||
+      themePrimary ||
+      template.defaultPrimaryColor,
+    secondaryColor:
+      course.certificate?.secondaryColor ||
+      themeSecondary ||
+      template.defaultSecondaryColor,
+  };
+};
 
 export function CourseCertificateTab({
   courseId,
   course,
   canManageCourse,
 }: CourseCertificateTabProps) {
+  const { data: orgConfigData } = useOrganizationConfigAdmin();
+  const orgName = orgConfigData?.data?.name || "TeslaAcademy";
+  const themePrimary = orgConfigData?.data?.theme?.primaryColor;
+  const themeSecondary = orgConfigData?.data?.theme?.secondaryColor;
+
   const [form, setForm] = useState<CertificateFormState>(() =>
-    createInitialState(course)
+    createInitialState(course, orgName, themePrimary, themeSecondary)
   );
   const updateCertificate = useUpdateBatchCertificateConfig();
 
   useEffect(() => {
-    setForm(createInitialState(course));
-  }, [course]);
+    setForm(createInitialState(course, orgName, themePrimary, themeSecondary));
+  }, [course, orgName, themePrimary, themeSecondary]);
+
+  const previewContent = useMemo(
+    () => ({
+      organizationName: form.issuerName || orgName,
+      heading: form.heading || DEFAULT_CERTIFICATE_HEADING,
+      recipientName: "Student Name",
+      courseTitle: form.title || `${course.name} Certificate`,
+      batchName: course.name,
+      issuerName: form.issuerName || orgName,
+      signerName: form.signerName || "Course Instructor",
+      signerTitle: form.signerTitle || "Course Creator",
+      primaryColor: form.primaryColor,
+      secondaryColor: form.secondaryColor,
+    }),
+    [form, course.name, orgName]
+  );
+
+  const applyTemplateDefaults = (templateId: CertificateTemplateId) => {
+    const template = getCertificateTemplate(templateId);
+    setForm((current) => ({
+      ...current,
+      templateId,
+      primaryColor: template.defaultPrimaryColor,
+      secondaryColor: template.defaultSecondaryColor,
+    }));
+  };
 
   const handleSave = async () => {
     try {
@@ -54,6 +119,13 @@ export function CourseCertificateTab({
         data: {
           enabled: form.enabled,
           templateId: form.templateId,
+          title: form.title.trim() || undefined,
+          heading: form.heading.trim() || undefined,
+          issuerName: form.issuerName.trim() || undefined,
+          signerName: form.signerName.trim() || undefined,
+          signerTitle: form.signerTitle.trim() || undefined,
+          primaryColor: form.primaryColor,
+          secondaryColor: form.secondaryColor,
         },
       });
       toast.success("Certificate settings saved.");
@@ -77,200 +149,316 @@ export function CourseCertificateTab({
   };
 
   const isSaving = updateCertificate.isPending;
+  const selectedTemplate = getCertificateTemplate(form.templateId);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.55fr,0.95fr]">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Award className="h-5 w-5 text-primary" />
-            Course Certificate
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-border/60 bg-muted/30 px-4 py-4">
-            <div className="space-y-1">
-              <p className="font-medium text-foreground">Enable certificates</p>
-              <p className="text-sm text-muted-foreground">
-                Students can claim a downloadable certificate after completing
-                every video lesson in this course.
-              </p>
-            </div>
-            <Switch
-              checked={form.enabled}
-              onCheckedChange={(checked) =>
-                setForm((current) => ({ ...current, enabled: checked }))
-              }
-              disabled={!canManageCourse || isSaving}
-            />
-          </div>
-
-          <div className="space-y-3">
-            <div>
-              <p className="font-medium text-foreground">
-                Choose a certificate template
-              </p>
-              <p className="text-sm text-muted-foreground">
-                The final PDF automatically uses your platform name and colors.
-                The signer name is taken from the teacher or admin who created
-                the course.
-              </p>
+    <div className="grid gap-6 xl:grid-cols-[1.4fr,1fr]">
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Award className="h-5 w-5 text-primary" />
+              Course Certificate
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center justify-between gap-4 rounded-xl border border-border/60 bg-muted/30 px-4 py-4">
+              <div className="space-y-1">
+                <p className="font-medium text-foreground">Enable certificates</p>
+                <p className="text-sm text-muted-foreground">
+                  Students can claim a downloadable certificate after completing
+                  every video lesson in this course.
+                </p>
+              </div>
+              <Switch
+                checked={form.enabled}
+                onCheckedChange={(checked) =>
+                  setForm((current) => ({ ...current, enabled: checked }))
+                }
+                disabled={!canManageCourse || isSaving}
+              />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              {CERTIFICATE_TEMPLATES.map((template, index) => {
-                const isSelected = form.templateId === template.id;
+            <div className="space-y-4 rounded-xl border border-border/60 p-4">
+              <div className="flex items-center gap-2">
+                <Type className="h-4 w-4 text-primary" />
+                <p className="font-medium text-foreground">Certificate text</p>
+              </div>
 
-                return (
-                  <button
-                    key={template.id}
-                    type="button"
-                    onClick={() =>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="cert-heading">Main heading</Label>
+                  <Input
+                    id="cert-heading"
+                    value={form.heading}
+                    onChange={(event) =>
                       setForm((current) => ({
                         ...current,
-                        templateId: template.id,
+                        heading: event.target.value,
                       }))
                     }
+                    placeholder={DEFAULT_CERTIFICATE_HEADING}
                     disabled={!canManageCourse || isSaving}
-                    className={cn(
-                      "group rounded-2xl border p-4 text-left transition",
-                      "hover:border-primary/60 hover:bg-muted/20",
-                      isSelected
-                        ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                        : "border-border/70"
-                    )}
-                  >
-                    <div className="relative overflow-hidden rounded-xl border border-border/60 bg-white">
-                      <div
-                        className={cn(
-                          "h-36 w-full relative",
-                          index === 0 &&
-                            "bg-slate-950 before:absolute before:inset-1 before:border before:border-amber-500/50",
-                          index === 1 &&
-                            "bg-gradient-to-br from-cyan-500 to-blue-600",
-                          index === 2 &&
-                            "bg-gradient-to-tr from-orange-500 via-rose-500 to-purple-600",
-                          index === 3 &&
-                            "bg-emerald-950 before:absolute before:inset-0 before:bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] before:from-emerald-400/20 before:to-transparent"
-                        )}
-                      >
-                        <div className="relative flex h-full flex-col justify-between p-4 z-10">
-                          <div className={cn(
-                            "flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.24em]",
-                            index === 0 ? "text-amber-500" : "text-white/80"
-                          )}>
-                            <span>TeslaAcademy</span>
-                            {isSelected ? (
-                              <CheckCircle2 className={cn("h-4 w-4", index === 0 ? "text-amber-500" : "text-white")} />
-                            ) : null}
-                          </div>
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cert-title">Course line on certificate</Label>
+                  <Input
+                    id="cert-title"
+                    value={form.title}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        title: event.target.value,
+                      }))
+                    }
+                    placeholder={`${course.name} Certificate`}
+                    disabled={!canManageCourse || isSaving}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cert-issuer">Issuer name</Label>
+                  <Input
+                    id="cert-issuer"
+                    value={form.issuerName}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        issuerName: event.target.value,
+                      }))
+                    }
+                    placeholder={orgName}
+                    disabled={!canManageCourse || isSaving}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cert-signer">Signer name</Label>
+                  <Input
+                    id="cert-signer"
+                    value={form.signerName}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        signerName: event.target.value,
+                      }))
+                    }
+                    placeholder="Leave empty to use course creator"
+                    disabled={!canManageCourse || isSaving}
+                  />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="cert-signer-title">Signer role</Label>
+                  <Input
+                    id="cert-signer-title"
+                    value={form.signerTitle}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        signerTitle: event.target.value,
+                      }))
+                    }
+                    placeholder="Course Creator"
+                    disabled={!canManageCourse || isSaving}
+                  />
+                </div>
+              </div>
+            </div>
 
-                          <div className="space-y-2 text-center">
-                            <div className={cn(
-                              "text-xs uppercase tracking-[0.25em]",
-                              index === 0 ? "text-amber-500/70" : "text-white/70"
-                            )}>
-                              Certificate
-                            </div>
-                            <div className={cn(
-                              "text-lg font-semibold",
-                              index === 0 ? "text-amber-50" : "text-white"
-                            )}>
-                              {template.name}
-                            </div>
-                            <div className={cn(
-                              "text-xs",
-                              index === 0 ? "text-amber-500/80" : "text-white/80"
-                            )}>
-                              Student Name
-                            </div>
-                          </div>
+            <div className="space-y-4 rounded-xl border border-border/60 p-4">
+              <div className="flex items-center gap-2">
+                <Palette className="h-4 w-4 text-primary" />
+                <p className="font-medium text-foreground">Colors</p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="cert-primary">Accent color</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="cert-primary"
+                      type="color"
+                      value={form.primaryColor}
+                      onChange={(event) =>
+                        setForm((current) => ({
+                          ...current,
+                          primaryColor: event.target.value,
+                        }))
+                      }
+                      className="h-10 w-14 cursor-pointer px-1 py-1"
+                      disabled={!canManageCourse || isSaving}
+                    />
+                    <Input
+                      value={form.primaryColor}
+                      onChange={(event) =>
+                        setForm((current) => ({
+                          ...current,
+                          primaryColor: event.target.value,
+                        }))
+                      }
+                      disabled={!canManageCourse || isSaving}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cert-secondary">Secondary color</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="cert-secondary"
+                      type="color"
+                      value={form.secondaryColor}
+                      onChange={(event) =>
+                        setForm((current) => ({
+                          ...current,
+                          secondaryColor: event.target.value,
+                        }))
+                      }
+                      className="h-10 w-14 cursor-pointer px-1 py-1"
+                      disabled={!canManageCourse || isSaving}
+                    />
+                    <Input
+                      value={form.secondaryColor}
+                      onChange={(event) =>
+                        setForm((current) => ({
+                          ...current,
+                          secondaryColor: event.target.value,
+                        }))
+                      }
+                      disabled={!canManageCourse || isSaving}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
 
-                          <div className={cn(
-                            "flex items-center justify-between text-xs",
-                            index === 0 ? "text-amber-500/60" : "text-white/60"
-                          )}>
-                            <span>Course Title</span>
-                            <span>Signer</span>
-                          </div>
-                        </div>
+            <div className="space-y-3">
+              <div>
+                <p className="font-medium text-foreground">Choose a template</p>
+                <p className="text-sm text-muted-foreground">
+                  Pick a layout, then fine-tune the text and colors above.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {CERTIFICATE_TEMPLATES.map((template) => {
+                  const isSelected = form.templateId === template.id;
+
+                  return (
+                    <button
+                      key={template.id}
+                      type="button"
+                      onClick={() => applyTemplateDefaults(template.id)}
+                      disabled={!canManageCourse || isSaving}
+                      className={cn(
+                        "group rounded-2xl border p-4 text-left transition",
+                        "hover:border-primary/60 hover:bg-muted/20",
+                        isSelected
+                          ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                          : "border-border/70"
+                      )}
+                    >
+                      <CertificateTemplatePreview
+                        templateId={template.id}
+                        content={{
+                          ...previewContent,
+                          primaryColor: isSelected
+                            ? form.primaryColor
+                            : template.defaultPrimaryColor,
+                          secondaryColor: isSelected
+                            ? form.secondaryColor
+                            : template.defaultSecondaryColor,
+                        }}
+                        selected={isSelected}
+                        compact
+                      />
+                      <div className="mt-3 space-y-1">
+                        <p className="font-medium text-foreground">
+                          {template.name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {template.description}
+                        </p>
                       </div>
-                    </div>
-
-                    <div className="mt-3 space-y-1">
-                      <p className="font-medium text-foreground">
-                        {template.name}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {template.description}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
 
-          <div className="flex justify-end">
-            <Button
-              type="button"
-              onClick={handleSave}
-              disabled={!canManageCourse || isSaving}
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save Certificate Settings"
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <ShieldCheck className="h-4 w-4 text-primary" />
-            Automatic Certificate Data
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-sm text-muted-foreground">
-          <div className="rounded-xl border border-border/60 bg-muted/20 px-4 py-4">
-            <p className="font-medium text-foreground">Filled automatically</p>
-            <ul className="mt-3 space-y-2">
-              <li>Platform name comes from your organization settings.</li>
-              <li>Certificate colors follow the platform theme colors.</li>
-              <li>The signer name comes from the teacher or admin who created the course.</li>
-              <li>Students unlock the certificate after finishing all video lessons.</li>
-            </ul>
-          </div>
-
-          <div className="rounded-xl border border-border/60 bg-background px-4 py-4">
-            <p className="font-medium text-foreground">Current status</p>
-            <div className="mt-3 space-y-2">
-              <p>
-                Template:{" "}
-                <span className="text-foreground">
-                  {
-                    CERTIFICATE_TEMPLATES.find(
-                      (template) => template.id === form.templateId
-                    )?.name
-                  }
-                </span>
-              </p>
-              <p>
-                Live for students:{" "}
-                <span className="text-foreground">
-                  {form.enabled ? "Enabled" : "Disabled"}
-                </span>
-              </p>
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                onClick={handleSave}
+                disabled={!canManageCourse || isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Certificate Settings"
+                )}
+              </Button>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="space-y-6">
+        <Card className="overflow-hidden">
+          <CardHeader>
+            <CardTitle className="text-base">Live preview</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <CertificateTemplatePreview
+              templateId={form.templateId}
+              content={previewContent}
+              className="h-56"
+            />
+            <p className="text-sm text-muted-foreground">
+              Previewing <span className="text-foreground">{selectedTemplate.name}</span>{" "}
+              with your current text and colors. The downloaded PDF uses the student&apos;s
+              real name when they claim the certificate.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              How it works
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm text-muted-foreground">
+            <div className="rounded-xl border border-border/60 bg-muted/20 px-4 py-4">
+              <p className="font-medium text-foreground">Automatic fields</p>
+              <ul className="mt-3 space-y-2">
+                <li>Student name is filled when they claim the certificate.</li>
+                <li>Issue date is generated automatically.</li>
+                <li>
+                  If signer name is empty, the course creator is used on the PDF.
+                </li>
+              </ul>
+            </div>
+
+            <div className="rounded-xl border border-border/60 bg-background px-4 py-4">
+              <p className="font-medium text-foreground">Current status</p>
+              <div className="mt-3 space-y-2">
+                <p>
+                  Template:{" "}
+                  <span className="text-foreground">{selectedTemplate.name}</span>
+                </p>
+                <p>
+                  Live for students:{" "}
+                  <span className="text-foreground">
+                    {form.enabled ? "Enabled" : "Disabled"}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
-}
+};

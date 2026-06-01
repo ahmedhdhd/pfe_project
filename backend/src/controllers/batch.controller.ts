@@ -149,17 +149,25 @@ const normalizeFaq = (value: unknown): Array<{ title: string; description: strin
 };
 
 const CERTIFICATE_TEMPLATE_IDS = [
-  'classic-border',
-  'modern-ribbon',
-  'seal-elegant',
-  'minimal-grid',
+  'prestige-ivory',
+  'executive-navy',
+  'modern-minimal',
+  'royal-burgundy',
 ] as const;
 
 type CertificateTemplateId = (typeof CERTIFICATE_TEMPLATE_IDS)[number];
 
-const DEFAULT_CERTIFICATE_TEMPLATE_ID: CertificateTemplateId = 'classic-border';
-const DEFAULT_CERTIFICATE_PRIMARY_COLOR = '#4f46e5';
-const DEFAULT_CERTIFICATE_SECONDARY_COLOR = '#0ea5e9';
+const LEGACY_CERTIFICATE_TEMPLATE_IDS: Record<string, CertificateTemplateId> = {
+  'classic-border': 'prestige-ivory',
+  'modern-ribbon': 'executive-navy',
+  'seal-elegant': 'royal-burgundy',
+  'minimal-grid': 'modern-minimal',
+};
+
+const DEFAULT_CERTIFICATE_TEMPLATE_ID: CertificateTemplateId = 'prestige-ivory';
+const DEFAULT_CERTIFICATE_PRIMARY_COLOR = '#1e3a5f';
+const DEFAULT_CERTIFICATE_SECONDARY_COLOR = '#c9a227';
+const DEFAULT_CERTIFICATE_HEADING = 'Certificate of Completion';
 
 const normalizeCertificateTemplateId = (
   value: unknown
@@ -168,8 +176,25 @@ const normalizeCertificateTemplateId = (
     return undefined;
   }
 
-  const trimmed = value.trim() as CertificateTemplateId;
-  return CERTIFICATE_TEMPLATE_IDS.includes(trimmed) ? trimmed : undefined;
+  const trimmed = value.trim();
+  if (CERTIFICATE_TEMPLATE_IDS.includes(trimmed as CertificateTemplateId)) {
+    return trimmed as CertificateTemplateId;
+  }
+
+  return LEGACY_CERTIFICATE_TEMPLATE_IDS[trimmed];
+};
+
+const normalizeHexColor = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  if (!/^#?[0-9a-fA-F]{6}$/.test(trimmed)) {
+    return undefined;
+  }
+
+  return trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
 };
 
 const parseThemeColors = (
@@ -295,6 +320,7 @@ type BatchCertificateIssueRecord = {
   recipientNameSnapshot: string;
   batchNameSnapshot: string;
   certificateTitleSnapshot?: string | null;
+  certificateHeading?: string | null;
   templateUrlSnapshot?: string | null;
   issuerNameSnapshot?: string | null;
   signerNameSnapshot?: string | null;
@@ -322,6 +348,10 @@ const serializeCertificateIssue = (issue: BatchCertificateIssueRecord) => ({
   certificateTitle:
     issue.certificateTitleSnapshot ||
     resolveCertificateTitle(issue.batchNameSnapshot, issue.certificateTitleSnapshot),
+  heading:
+    typeof issue.certificateHeading === 'string' && issue.certificateHeading.trim() !== ''
+      ? issue.certificateHeading
+      : DEFAULT_CERTIFICATE_HEADING,
   templateId: resolveCertificateTemplateId(issue.templateId),
   issuerName: issue.issuerNameSnapshot || issue.organizationName || 'TeslaAcademy',
   signerName: issue.signerNameSnapshot || null,
@@ -341,7 +371,31 @@ const serializeCertificateIssue = (issue: BatchCertificateIssueRecord) => ({
 const serializeCertificateConfig = <T extends Record<string, unknown>>(batch: T) => ({
   enabled: Boolean(batch.certificateEnabled),
   title: resolveCertificateTitle(batch.name, batch.certificateTitle),
+  heading:
+    typeof batch.certificateHeading === 'string' && batch.certificateHeading.trim() !== ''
+      ? batch.certificateHeading
+      : DEFAULT_CERTIFICATE_HEADING,
   templateId: resolveCertificateTemplateId(batch.certificateTemplateId),
+  issuerName:
+    typeof batch.certificateIssuerName === 'string' &&
+    batch.certificateIssuerName.trim() !== ''
+      ? batch.certificateIssuerName
+      : null,
+  signerName:
+    typeof batch.certificateSignerName === 'string' &&
+    batch.certificateSignerName.trim() !== ''
+      ? batch.certificateSignerName
+      : null,
+  signerTitle:
+    typeof batch.certificateSignerTitle === 'string' &&
+    batch.certificateSignerTitle.trim() !== ''
+      ? batch.certificateSignerTitle
+      : null,
+  primaryColor:
+    normalizeHexColor(batch.certificatePrimaryColor) || DEFAULT_CERTIFICATE_PRIMARY_COLOR,
+  secondaryColor:
+    normalizeHexColor(batch.certificateSecondaryColor) ||
+    DEFAULT_CERTIFICATE_SECONDARY_COLOR,
   linkedInOrgId:
     typeof batch.certificateLinkedInOrgId === 'string' &&
     batch.certificateLinkedInOrgId.trim() !== ''
@@ -357,7 +411,13 @@ const certificateConfigIsReady = (batch: {
 type CertificateContextBatch = {
   name: string;
   certificateTitle?: string | null;
+  certificateHeading?: string | null;
   certificateTemplateId?: string | null;
+  certificateIssuerName?: string | null;
+  certificateSignerName?: string | null;
+  certificateSignerTitle?: string | null;
+  certificatePrimaryColor?: string | null;
+  certificateSecondaryColor?: string | null;
   certificateLinkedInOrgId?: string | null;
   organization?: {
     name?: string | null;
@@ -381,26 +441,40 @@ const buildCertificateIssuePayload = (
   issue: BatchCertificateIssueRecord,
   batch: CertificateContextBatch
 ) => {
-  const { primaryColor, secondaryColor } = parseThemeColors(
-    batch.organization?.config?.themeJson
-  );
+  const themeColors = parseThemeColors(batch.organization?.config?.themeJson);
+  const primaryColor =
+    normalizeHexColor(batch.certificatePrimaryColor) || themeColors.primaryColor;
+  const secondaryColor =
+    normalizeHexColor(batch.certificateSecondaryColor) || themeColors.secondaryColor;
   const signerName =
+    batch.certificateSignerName?.trim() ||
     batch.createdByUser?.username ||
     batch.teachers?.[0]?.teacher?.name ||
     issue.signerNameSnapshot ||
     batch.organization?.name ||
+    'Academic Team';
+  const signerTitle =
+    batch.certificateSignerTitle?.trim() || issue.signerTitleSnapshot || 'Course Creator';
+  const issuerName =
+    batch.certificateIssuerName?.trim() ||
+    batch.organization?.name ||
+    issue.issuerNameSnapshot ||
     'TeslaAcademy';
+  const heading =
+    batch.certificateHeading?.trim() || DEFAULT_CERTIFICATE_HEADING;
 
   return {
     ...issue,
     certificateTitleSnapshot:
       issue.certificateTitleSnapshot ||
       resolveCertificateTitle(batch.name, batch.certificateTitle),
+    certificateHeading: heading,
     templateId: batch.certificateTemplateId,
     linkedInOrgIdSnapshot:
       issue.linkedInOrgIdSnapshot || batch.certificateLinkedInOrgId || null,
-    issuerNameSnapshot: batch.organization?.name || issue.issuerNameSnapshot || 'TeslaAcademy',
+    issuerNameSnapshot: issuerName,
     signerNameSnapshot: signerName,
+    signerTitleSnapshot: signerTitle,
     organizationName: batch.organization?.name || 'TeslaAcademy',
     organizationSlug: batch.organization?.slug || null,
     logoUrl: batch.organization?.config?.logoUrl || null,
@@ -673,6 +747,20 @@ export const updateBatchCertificateConfig = async (
     const enabled = Boolean(req.body?.enabled);
     const certificateTemplateId =
       normalizeCertificateTemplateId(req.body?.templateId) || null;
+    const certificateTitle = normalizeOptionalString(req.body?.title) ?? null;
+    const certificateHeading = normalizeOptionalString(req.body?.heading) ?? null;
+    const certificateIssuerName =
+      normalizeOptionalString(req.body?.issuerName) ?? null;
+    const certificateSignerName =
+      normalizeOptionalString(req.body?.signerName) ?? null;
+    const certificateSignerTitle =
+      normalizeOptionalString(req.body?.signerTitle) ?? null;
+    const certificateLinkedInOrgId =
+      normalizeOptionalString(req.body?.linkedInOrgId) ?? null;
+    const certificatePrimaryColor =
+      normalizeHexColor(req.body?.primaryColor) ?? null;
+    const certificateSecondaryColor =
+      normalizeHexColor(req.body?.secondaryColor) ?? null;
 
     if (enabled && !certificateTemplateId) {
       sendError(
@@ -688,12 +776,14 @@ export const updateBatchCertificateConfig = async (
       data: {
         certificateEnabled: enabled,
         certificateTemplateId,
-        certificateTitle: null,
-        certificateTemplateUrl: null,
-        certificateIssuerName: null,
-        certificateSignerName: null,
-        certificateSignerTitle: null,
-        certificateLinkedInOrgId: null,
+        certificateTitle,
+        certificateHeading,
+        certificateIssuerName,
+        certificateSignerName,
+        certificateSignerTitle,
+        certificateLinkedInOrgId,
+        certificatePrimaryColor,
+        certificateSecondaryColor,
       },
     });
 
@@ -1080,13 +1170,14 @@ export const claimBatchCertificate = async (
           batch.certificateTitle
         ),
         templateUrlSnapshot: null,
-        issuerNameSnapshot: batch.organization.name,
+        issuerNameSnapshot:
+          batch.certificateIssuerName?.trim() || batch.organization.name,
         signerNameSnapshot:
+          batch.certificateSignerName?.trim() ||
           batch.createdByUser?.username ||
           batch.teachers?.[0]?.teacher?.name ||
-          batch.certificateSignerName ||
           batch.organization.name,
-        signerTitleSnapshot: null,
+        signerTitleSnapshot: batch.certificateSignerTitle?.trim() || 'Course Creator',
         linkedInOrgIdSnapshot: batch.certificateLinkedInOrgId,
         progressPercentage: progress.progressPercentage,
       },

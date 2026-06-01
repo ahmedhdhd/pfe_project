@@ -56,7 +56,13 @@ export interface Batch {
   certificate?: {
     enabled: boolean;
     title?: string | null;
+    heading?: string | null;
     templateId?: string | null;
+    issuerName?: string | null;
+    signerName?: string | null;
+    signerTitle?: string | null;
+    primaryColor?: string | null;
+    secondaryColor?: string | null;
     linkedInOrgId?: string | null;
   } | null;
   createdAt?: string;

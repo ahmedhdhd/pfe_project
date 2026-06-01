@@ -762,7 +762,13 @@ export const useUpdateBatch = () => {
 export interface BatchCertificateConfigPayload {
   enabled: boolean;
   title?: string;
+  heading?: string;
   templateId?: string;
+  issuerName?: string;
+  signerName?: string;
+  signerTitle?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
   linkedInOrgId?: string;
 }
 
@@ -774,6 +780,7 @@ export interface BatchCertificateIssuePayload {
   recipientName: string;
   batchName: string;
   certificateTitle?: string | null;
+  heading?: string | null;
   templateId?: string | null;
   issuerName?: string | null;
   signerName?: string | null;

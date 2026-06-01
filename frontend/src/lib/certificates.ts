@@ -9,8 +9,9 @@ import {
 } from "pdf-lib";
 import type { BatchCertificateIssuePayload } from "@/hooks/api";
 import {
-  DEFAULT_CERTIFICATE_TEMPLATE_ID,
+  DEFAULT_CERTIFICATE_HEADING,
   getCertificateTemplate,
+  normalizeCertificateTemplateId,
 } from "@/lib/certificate-templates";
 
 const A4_LANDSCAPE: [number, number] = [842, 595];
@@ -35,7 +36,7 @@ const drawCenteredText = ({
   page.drawText(text, { x, y, size, font, color });
 };
 
-const hexToRgb = (hex?: string | null, fallback = "#4f46e5") => {
+const hexToRgb = (hex?: string | null, fallback = "#1e3a5f") => {
   const normalized = (hex && /^#?[0-9a-fA-F]{6}$/.test(hex)
     ? hex.replace("#", "")
     : fallback.replace("#", "")) as string;
@@ -46,20 +47,6 @@ const hexToRgb = (hex?: string | null, fallback = "#4f46e5") => {
     parseInt(normalized.slice(4, 6), 16) / 255
   );
 };
-
-const lighten = (color: RGB, amount: number) =>
-  rgb(
-    Math.min(1, color.red + (1 - color.red) * amount),
-    Math.min(1, color.green + (1 - color.green) * amount),
-    Math.min(1, color.blue + (1 - color.blue) * amount)
-  );
-
-const darken = (color: RGB, amount: number) =>
-  rgb(
-    Math.max(0, color.red * (1 - amount)),
-    Math.max(0, color.green * (1 - amount)),
-    Math.max(0, color.blue * (1 - amount))
-  );
 
 const getCertificateFileName = (certificate: BatchCertificateIssuePayload) =>
   `${certificate.batchName.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-certificate.pdf`;
@@ -82,7 +69,12 @@ const loadLogoImage = async (
     const contentType = response.headers.get("content-type") || "";
 
     let image: PDFImage;
-    if (contentType.includes("jpeg") || contentType.includes("jpg") || logoUrl.toLowerCase().includes(".jpg") || logoUrl.toLowerCase().includes(".jpeg")) {
+    if (
+      contentType.includes("jpeg") ||
+      contentType.includes("jpg") ||
+      logoUrl.toLowerCase().includes(".jpg") ||
+      logoUrl.toLowerCase().includes(".jpeg")
+    ) {
       image = await pdfDoc.embedJpg(arrayBuffer);
     } else {
       image = await pdfDoc.embedPng(arrayBuffer);
@@ -91,8 +83,12 @@ const loadLogoImage = async (
     const imgDims = image.scale(1);
     const maxWidth = 92;
     const maxHeight = 58;
-    const scale = Math.min(maxWidth / imgDims.width, maxHeight / imgDims.height, 1);
-    
+    const scale = Math.min(
+      maxWidth / imgDims.width,
+      maxHeight / imgDims.height,
+      1
+    );
+
     return {
       image,
       width: Math.max(1, Math.round(imgDims.width * scale)),
@@ -104,113 +100,159 @@ const loadLogoImage = async (
   }
 };
 
-const drawClassicBorder = (
-  page: PDFPage,
-  primary: RGB,
-  secondary: RGB
-) => {
+const drawPrestigeIvory = (page: PDFPage, primary: RGB, secondary: RGB) => {
   const width = page.getWidth();
   const height = page.getHeight();
 
-  // Full dark background (Midnight)
   page.drawRectangle({
-    x: 0, y: 0, width, height,
-    color: rgb(0.05, 0.07, 0.1),
+    x: 0,
+    y: 0,
+    width,
+    height,
+    color: rgb(0.97, 0.96, 0.93),
   });
 
-  // Gold borders
-  const gold = rgb(0.85, 0.65, 0.13);
   page.drawRectangle({
-    x: 14, y: 14, width: width - 28, height: height - 28,
-    borderWidth: 4, borderColor: gold, color: undefined
+    x: 18,
+    y: 18,
+    width: width - 36,
+    height: height - 36,
+    borderWidth: 3,
+    borderColor: secondary,
+    color: undefined,
   });
   page.drawRectangle({
-    x: 24, y: 24, width: width - 48, height: height - 48,
-    borderWidth: 1, borderColor: rgb(0.6, 0.4, 0.1), color: undefined
+    x: 30,
+    y: 30,
+    width: width - 60,
+    height: height - 60,
+    borderWidth: 1,
+    borderColor: primary,
+    color: undefined,
+    opacity: 0.35,
   });
 };
 
-const drawModernRibbon = (
-  page: PDFPage,
-  primary: RGB,
-  secondary: RGB
-) => {
+const drawExecutiveNavy = (page: PDFPage, primary: RGB, secondary: RGB) => {
   const width = page.getWidth();
   const height = page.getHeight();
 
-  // Ocean Blue background
   page.drawRectangle({
-    x: 0, y: 0, width, height,
-    color: rgb(0.08, 0.25, 0.45),
+    x: 0,
+    y: 0,
+    width,
+    height,
+    color: rgb(0.06, 0.12, 0.22),
   });
 
-  // Cyan geometric ribbon
   page.drawRectangle({
-    x: 0, y: height - 60, width, height: 60,
-    color: rgb(0.15, 0.75, 0.85),
+    x: 0,
+    y: height - 8,
+    width,
+    height: 8,
+    color: secondary,
+    opacity: 0.85,
   });
-  page.drawRectangle({
-    x: 0, y: 0, width, height: 30,
-    color: rgb(0.1, 0.5, 0.7),
+
+  const corner = 56;
+  page.drawLine({
+    start: { x: 24, y: height - 24 },
+    end: { x: 24 + corner, y: height - 24 },
+    color: primary,
+    thickness: 3,
+  });
+  page.drawLine({
+    start: { x: 24, y: height - 24 },
+    end: { x: 24, y: height - 24 - corner },
+    color: primary,
+    thickness: 3,
+  });
+  page.drawLine({
+    start: { x: width - 24, y: 24 },
+    end: { x: width - 24 - corner, y: 24 },
+    color: primary,
+    thickness: 3,
+  });
+  page.drawLine({
+    start: { x: width - 24, y: 24 },
+    end: { x: width - 24, y: 24 + corner },
+    color: primary,
+    thickness: 3,
   });
 };
 
-const drawElegantSeal = (
-  page: PDFPage,
-  primary: RGB,
-  secondary: RGB
-) => {
+const drawModernMinimal = (page: PDFPage, primary: RGB, secondary: RGB) => {
   const width = page.getWidth();
   const height = page.getHeight();
 
-  // Sunset Dark background
   page.drawRectangle({
-    x: 0, y: 0, width, height,
-    color: rgb(0.15, 0.05, 0.1),
+    x: 0,
+    y: 0,
+    width,
+    height,
+    color: rgb(1, 1, 1),
   });
 
-  // Orange/Rose geometric accents
-  const rose = rgb(0.9, 0.2, 0.4);
-  page.drawCircle({
-    x: 0, y: height, size: 200, color: rose, opacity: 0.15
-  });
-  page.drawCircle({
-    x: width, y: 0, size: 300, color: rgb(0.9, 0.5, 0.1), opacity: 0.1
-  });
-  
   page.drawRectangle({
-    x: 24, y: 24, width: width - 48, height: height - 48,
-    borderWidth: 2, borderColor: rose, color: undefined
+    x: 0,
+    y: 0,
+    width: 18,
+    height,
+    color: primary,
+  });
+
+  page.drawRectangle({
+    x: 0,
+    y: height - 6,
+    width,
+    height: 6,
+    color: secondary,
+    opacity: 0.9,
+  });
+
+  page.drawRectangle({
+    x: 36,
+    y: 36,
+    width: width - 72,
+    height: height - 72,
+    borderWidth: 1,
+    borderColor: rgb(0.88, 0.9, 0.93),
+    color: undefined,
   });
 };
 
-const drawMinimalGrid = (
-  page: PDFPage,
-  primary: RGB,
-  secondary: RGB
-) => {
+const drawRoyalBurgundy = (page: PDFPage, primary: RGB, secondary: RGB) => {
   const width = page.getWidth();
   const height = page.getHeight();
 
-  // Emerald Dark background
   page.drawRectangle({
-    x: 0, y: 0, width, height,
-    color: rgb(0.02, 0.15, 0.08),
-  });
-
-  // Emerald green subtle grid lines
-  const emeraldLine = rgb(0.1, 0.4, 0.2);
-  [100, 200, width - 200, width - 100].forEach((offset) => {
-    page.drawLine({
-      start: { x: offset, y: 0 },
-      end: { x: offset, y: height },
-      color: emeraldLine, thickness: 1, opacity: 0.3,
-    });
+    x: 0,
+    y: 0,
+    width,
+    height,
+    color: rgb(0.22, 0.05, 0.1),
   });
 
   page.drawRectangle({
-    x: 40, y: 40, width: width - 80, height: height - 80,
-    borderWidth: 1, borderColor: rgb(0.2, 0.8, 0.4), color: undefined, opacity: 0.5
+    x: 28,
+    y: 28,
+    width: width - 56,
+    height: height - 56,
+    borderWidth: 2,
+    borderColor: secondary,
+    color: undefined,
+    opacity: 0.9,
+  });
+
+  page.drawRectangle({
+    x: 40,
+    y: 40,
+    width: width - 80,
+    height: height - 80,
+    borderWidth: 1,
+    borderColor: primary,
+    color: undefined,
+    opacity: 0.25,
   });
 };
 
@@ -225,19 +267,50 @@ const applyTemplateChrome = ({
   primary: RGB;
   secondary: RGB;
 }) => {
-  switch (templateId || DEFAULT_CERTIFICATE_TEMPLATE_ID) {
-    case "modern-ribbon":
-      drawModernRibbon(page, primary, secondary);
+  const normalized = normalizeCertificateTemplateId(templateId);
+
+  switch (normalized) {
+    case "executive-navy":
+      drawExecutiveNavy(page, primary, secondary);
       break;
-    case "seal-elegant":
-      drawElegantSeal(page, primary, secondary);
+    case "modern-minimal":
+      drawModernMinimal(page, primary, secondary);
       break;
-    case "minimal-grid":
-      drawMinimalGrid(page, primary, secondary);
+    case "royal-burgundy":
+      drawRoyalBurgundy(page, primary, secondary);
       break;
     default:
-      drawClassicBorder(page, primary, secondary);
+      drawPrestigeIvory(page, primary, secondary);
       break;
+  }
+};
+
+const getTemplateTextColors = (templateId: string) => {
+  switch (normalizeCertificateTemplateId(templateId)) {
+    case "executive-navy":
+      return {
+        title: rgb(1, 1, 1),
+        muted: rgb(0.82, 0.87, 0.94),
+        accentFromPrimary: true,
+      };
+    case "royal-burgundy":
+      return {
+        title: rgb(0.96, 0.94, 0.9),
+        muted: rgb(0.9, 0.86, 0.82),
+        accentFromPrimary: true,
+      };
+    case "modern-minimal":
+      return {
+        title: rgb(0.1, 0.12, 0.16),
+        muted: rgb(0.38, 0.42, 0.5),
+        accentFromPrimary: false,
+      };
+    default:
+      return {
+        title: rgb(0.12, 0.18, 0.28),
+        muted: rgb(0.36, 0.42, 0.5),
+        accentFromPrimary: false,
+      };
   }
 };
 
@@ -257,21 +330,22 @@ export async function downloadBatchCertificatePdf({
   const bodyFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const serifFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBoldItalic);
 
-  const primaryColor = hexToRgb(certificate.primaryColor, "#4f46e5");
-  const secondaryColor = hexToRgb(certificate.secondaryColor, "#0ea5e9");
   const template = getCertificateTemplate(certificate.templateId);
+  const primaryColor = hexToRgb(
+    certificate.primaryColor,
+    template.defaultPrimaryColor
+  );
+  const secondaryColor = hexToRgb(
+    certificate.secondaryColor,
+    template.defaultSecondaryColor
+  );
   const logo = await loadLogoImage(pdfDoc, certificate.logoUrl);
-
-  // Use crisp white and subtle grey for text since all new templates are dark mode
-  const titleColor = rgb(1, 1, 1);
-  const mutedColor = rgb(0.8, 0.85, 0.9);
-  
-  // Custom accent color for the main names depending on the template
-  let accentColor = rgb(1, 1, 1);
-  if (template.id === "classic-border") accentColor = rgb(0.9, 0.7, 0.2); // Gold
-  if (template.id === "modern-ribbon") accentColor = rgb(0.2, 0.8, 0.9); // Cyan
-  if (template.id === "seal-elegant") accentColor = rgb(1, 0.5, 0.5); // Rose
-  if (template.id === "minimal-grid") accentColor = rgb(0.4, 0.9, 0.6); // Emerald
+  const textColors = getTemplateTextColors(template.id);
+  const titleColor = textColors.title;
+  const mutedColor = textColors.muted;
+  const accentColor = textColors.accentFromPrimary
+    ? primaryColor
+    : secondaryColor;
 
   applyTemplateChrome({
     page,
@@ -279,6 +353,9 @@ export async function downloadBatchCertificatePdf({
     primary: primaryColor,
     secondary: secondaryColor,
   });
+
+  const heading =
+    certificate.heading?.trim() || DEFAULT_CERTIFICATE_HEADING;
 
   if (logo) {
     page.drawImage(logo.image, {
@@ -291,7 +368,10 @@ export async function downloadBatchCertificatePdf({
 
   drawCenteredText({
     page,
-    text: certificate.organizationName || certificate.issuerName || "TeslaAcademy",
+    text:
+      certificate.organizationName ||
+      certificate.issuerName ||
+      "TeslaAcademy",
     y: logo ? height * 0.8 : height * 0.84,
     size: 14,
     font: displayFont,
@@ -300,7 +380,7 @@ export async function downloadBatchCertificatePdf({
 
   drawCenteredText({
     page,
-    text: "Certificate of Completion",
+    text: heading,
     y: height * 0.76,
     size: 29,
     font: displayFont,
@@ -336,7 +416,9 @@ export async function downloadBatchCertificatePdf({
 
   drawCenteredText({
     page,
-    text: certificate.certificateTitle || `${certificate.batchName} Certificate`,
+    text:
+      certificate.certificateTitle ||
+      `${certificate.batchName} Certificate`,
     y: height * 0.43,
     size: 22,
     font: displayFont,
@@ -370,24 +452,31 @@ export async function downloadBatchCertificatePdf({
     end: { x: 265, y: 118 },
     color: accentColor,
     thickness: 1.5,
-    opacity: 0.6
+    opacity: 0.6,
   });
   page.drawLine({
     start: { x: width - 265, y: 118 },
     end: { x: width - 70, y: 118 },
     color: accentColor,
     thickness: 1.5,
-    opacity: 0.6
+    opacity: 0.6,
   });
 
-  page.drawText(certificate.issuerName || certificate.organizationName || "TeslaAcademy", {
+  const issuerLabel =
+    certificate.issuerName ||
+    certificate.organizationName ||
+    "TeslaAcademy";
+  const signerLabel = certificate.signerName || "Academic Team";
+  const signerRole = certificate.signerTitle || "Course Creator";
+
+  page.drawText(issuerLabel, {
     x: 70,
     y: 96,
     size: 12,
     font: displayFont,
     color: titleColor,
   });
-  page.drawText("Platform", {
+  page.drawText("Issuer", {
     x: 70,
     y: 80,
     size: 10,
@@ -395,14 +484,14 @@ export async function downloadBatchCertificatePdf({
     color: mutedColor,
   });
 
-  page.drawText(certificate.signerName || "Academic Team", {
+  page.drawText(signerLabel, {
     x: width - 265,
     y: 96,
     size: 12,
     font: displayFont,
     color: titleColor,
   });
-  page.drawText("Course Creator", {
+  page.drawText(signerRole, {
     x: width - 265,
     y: 80,
     size: 10,
