@@ -1,20 +1,17 @@
 import asyncio
 import os
 import re
-import subprocess
 import tempfile
 import uuid
 from typing import Any
+
 import httpx
 from pypdf import PdfReader
 from youtube_transcript_api import YouTubeTranscriptApi
 
-from app.config import settings
 from app.db.pool import db_conn
 from app.services.embeddings import upsert_content_embeddings
-
-GROQ_TRANSCRIPTION_URL = "https://api.groq.com/openai/v1/audio/transcriptions"
-GROQ_WHISPER_MODEL = "whisper-large-v3-turbo"
+from app.services.transcription import _transcribe_media_path_sync
 
 
 def _extract_youtube_id(url: str) -> str | None:
@@ -65,69 +62,27 @@ async def _extract_pdf_text(pdf_url: str) -> str:
     return await asyncio.to_thread(_parse)
 
 
-def _transcribe_audio_file(audio_path: str, api_key: str) -> str:
-    with open(audio_path, "rb") as audio_file:
-        files = {"file": ("audio.mp3", audio_file, "audio/mpeg")}
-        data = {"model": GROQ_WHISPER_MODEL}
-        response = httpx.post(
-            GROQ_TRANSCRIPTION_URL,
-            headers={"Authorization": f"Bearer {api_key}"},
-            files=files,
-            data=data,
-            timeout=300.0,
-        )
-    if not response.is_success:
-        raise RuntimeError(f"Groq API error {response.status_code}: {response.text[:400]}")
-    payload = response.json()
-    return str(payload.get("text", "")).strip()
-
-
 async def _extract_hosted_video_transcript(video_url: str) -> str:
-    api_key = settings.groq_api_key.strip()
-    if not api_key:
-        return ""
-
     temp_id = uuid.uuid4().hex
     video_path = os.path.join(tempfile.gettempdir(), f"queztlearn-video-{temp_id}.tmp")
-    audio_path = os.path.join(tempfile.gettempdir(), f"queztlearn-audio-{temp_id}.mp3")
 
     try:
         async with httpx.AsyncClient(timeout=300.0, follow_redirects=True) as client:
             response = await client.get(video_url)
             if not response.is_success:
                 return ""
-            with open(video_path, "wb") as f:
-                f.write(response.content)
+            with open(video_path, "wb") as handle:
+                handle.write(response.content)
 
-        proc = subprocess.run(
-            [
-                "ffmpeg",
-                "-y",
-                "-i",
-                video_path,
-                "-vn",
-                "-ac",
-                "1",
-                "-b:a",
-                "64k",
-                audio_path,
-            ],
-            capture_output=True,
-            check=False,
-        )
-        if proc.returncode != 0:
-            return ""
-
-        return await asyncio.to_thread(_transcribe_audio_file, audio_path, api_key)
+        return await asyncio.to_thread(_transcribe_media_path_sync, video_path)
     except Exception:
         return ""
     finally:
-        for path in (video_path, audio_path):
-            try:
-                if os.path.exists(path):
-                    os.unlink(path)
-            except OSError:
-                pass
+        try:
+            if os.path.exists(video_path):
+                os.unlink(video_path)
+        except OSError:
+            pass
 
 
 async def extract_content_text(content: dict[str, Any]) -> str:

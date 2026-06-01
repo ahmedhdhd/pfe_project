@@ -1,16 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
-import { promises as fsPromises } from 'fs';
-import os from 'os';
 import jwt from 'jsonwebtoken';
-import path from 'path';
 import prisma from '../utils/prisma';
 import { logger } from '../utils/logger';
 import { sendLiveSessionCreatedEmail } from '../utils/email';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../middleware/auth';
 import { normalizeOptionalString, ensureBatchReadAccess } from './misc.helpers';
-import { transcribeLocalMediaFileWithGroq } from '../utils/text-extraction';
 import { aiService, AiServiceError } from '../utils/ai-service-client';
 
 const normalizeScheduleTags = (tags: unknown): string[] => {
@@ -475,11 +471,6 @@ export const uploadScheduleTranscriptChunk = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const tempChunkPath = path.join(
-    os.tmpdir(),
-    `schedule-transcript-chunk-${req.params.id}-${randomUUID()}.webm`
-  );
-
   try {
     const schedule = await prisma.schedule.findUnique({ where: { id: req.params.id } });
     if (!schedule || schedule.organizationId !== req.user!.organizationId) {
@@ -498,8 +489,21 @@ export const uploadScheduleTranscriptChunk = async (
       return;
     }
 
-    await fsPromises.writeFile(tempChunkPath, file.buffer);
-    const transcriptChunk = (await transcribeLocalMediaFileWithGroq(tempChunkPath)).trim();
+    let transcriptChunk = '';
+    try {
+      const result = await aiService.transcribeLocalMedia(
+        file.buffer,
+        file.originalname || 'chunk.webm'
+      );
+      transcriptChunk = result.text?.trim() || '';
+    } catch (error: any) {
+      if (error instanceof AiServiceError) {
+        sendError(res, error.message.slice(0, 800), error.statusCode);
+        return;
+      }
+      throw error;
+    }
+
     if (!transcriptChunk) {
       sendSuccess(res, { appended: false, chars: 0 });
       return;
@@ -522,12 +526,6 @@ export const uploadScheduleTranscriptChunk = async (
     });
   } catch (e) {
     next(e);
-  } finally {
-    try {
-      await fsPromises.unlink(tempChunkPath);
-    } catch {
-      // ignore temp cleanup errors
-    }
   }
 };
 

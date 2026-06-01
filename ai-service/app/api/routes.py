@@ -1,7 +1,7 @@
 import asyncio
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from app.config import settings
 from app.deps import verify_internal_token
@@ -20,6 +20,7 @@ from app.services.embeddings import (
     search_similar_chunks,
 )
 from app.services.ingestion import index_content
+from app.services.transcription import transcribe_media_bytes
 from app.services.openrouter import chat_completion, chat_json
 from app.services.org_keys import get_org_openrouter_key
 from app.services.playground import generate_playground_html
@@ -122,6 +123,21 @@ async def content_index(body: ContentIndexRequest) -> dict[str, bool]:
 async def content_delete_embeddings(content_id: str) -> dict[str, bool]:
     await delete_content_embeddings(content_id)
     return {"deleted": True}
+
+
+@router.post("/transcription/local-media")
+async def transcription_local_media(
+    file: UploadFile = File(...),
+) -> dict[str, str]:
+    data = await file.read()
+    if not data:
+        return {"text": ""}
+    filename = file.filename or "chunk.webm"
+    try:
+        text = await transcribe_media_bytes(data, filename)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=str(exc)[:800]) from exc
+    return {"text": text}
 
 
 @router.post("/assignments/feedback")

@@ -4,7 +4,7 @@ import prisma from '../utils/prisma';
 import { logger } from '../utils/logger';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../middleware/auth';
-import { SystemPromptContext } from '../utils/ai-prompts';
+import { SystemPromptContext } from '../types/ai-context';
 import { sanitizeChatHistory } from '../utils/ai-chat-history';
 import { aiService, AiServiceError } from '../utils/ai-service-client';
 import { ensureBatchReadAccess } from './misc.helpers';

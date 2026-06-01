@@ -68,6 +68,57 @@ async function aiServiceRequest<T>(
   return payload as T;
 }
 
+async function aiServiceMultipartRequest<T>(
+  path: string,
+  formData: FormData
+): Promise<T> {
+  if (!AI_SERVICE_INTERNAL_TOKEN) {
+    throw new AiServiceError(
+      'AI_SERVICE_INTERNAL_TOKEN is not configured on the backend',
+      503
+    );
+  }
+
+  const url = `${AI_SERVICE_URL}/internal/v1${path}`;
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'X-Internal-Token': AI_SERVICE_INTERNAL_TOKEN,
+      },
+      body: formData,
+    });
+  } catch (error: any) {
+    logger.error(`AI service unreachable at ${url}: ${error?.message || String(error)}`);
+    throw new AiServiceError(
+      `AI service is unavailable. Start ai-service on ${AI_SERVICE_URL}.`,
+      503
+    );
+  }
+
+  const raw = await response.text();
+  let payload: any = {};
+  if (raw) {
+    try {
+      payload = JSON.parse(raw);
+    } catch {
+      payload = { detail: raw };
+    }
+  }
+
+  if (!response.ok) {
+    const detail =
+      typeof payload?.detail === 'string'
+        ? payload.detail
+        : payload?.message || response.statusText;
+    throw new AiServiceError(detail || 'AI service request failed', response.status);
+  }
+
+  return payload as T;
+}
+
 export const aiService = {
   health: () => aiServiceRequest<{ status: string }>('/health'),
 
@@ -139,4 +190,15 @@ export const aiService = {
         topicId: string;
       }>;
     }>('/admin/embedding-health'),
+
+  transcribeLocalMedia: (fileBuffer: Buffer, filename: string) => {
+    const form = new FormData();
+    const bytes = new Uint8Array(fileBuffer);
+    form.append(
+      'file',
+      new Blob([bytes], { type: 'application/octet-stream' }),
+      filename || 'chunk.webm'
+    );
+    return aiServiceMultipartRequest<{ text: string }>('/transcription/local-media', form);
+  },
 };

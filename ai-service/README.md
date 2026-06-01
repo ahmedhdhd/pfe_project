@@ -22,7 +22,13 @@ AI_SERVICE_URL=http://localhost:8000
 AI_SERVICE_INTERNAL_TOKEN=<same secret as ai-service>
 ```
 
-Requires `ffmpeg` on PATH for hosted video transcription.
+Express has **no** OpenRouter/Groq/ffmpeg dependencies — all AI runs here.
+
+Requires `ffmpeg` on PATH for video transcription (content indexing + live session chunks).
+
+## Endpoints (internal)
+
+- `POST /internal/v1/transcription/local-media` — multipart audio chunk (live sessions)
 
 ## Docker
 
