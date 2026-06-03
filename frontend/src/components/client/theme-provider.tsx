@@ -16,8 +16,12 @@ export function ClientThemeProvider({ children }: ClientThemeProviderProps) {
   const config = useOrganizationConfigStore((state) => state.config);
 
   // Apply theme colors to CSS variables
+  // Skip if customCSS is present - it already defines all variables in oklch
   useEffect(() => {
     if (!colors.primary || !colors.secondary) return;
+    // When AI-generated customCSS is active, it owns the CSS variables.
+    // Overriding --primary here would fight the AI theme.
+    if (config?.customCSS) return;
 
     try {
       const primaryOKLCH = hexToOKLCHString(colors.primary);
@@ -25,25 +29,21 @@ export function ClientThemeProvider({ children }: ClientThemeProviderProps) {
 
       const root = document.documentElement;
 
-      // Primary color (buttons, links, etc.)
       root.style.setProperty("--primary", primaryOKLCH);
-      root.style.setProperty("--primary-foreground", "oklch(0.98 0.02 260)");
-
-      // Secondary/Accent color
+      root.style.setProperty("--primary-foreground", "oklch(0.985 0 0)");
       root.style.setProperty("--secondary", secondaryOKLCH);
-      root.style.setProperty("--secondary-foreground", "oklch(0.98 0.02 260)");
+      root.style.setProperty("--secondary-foreground", "oklch(0.985 0 0)");
       root.style.setProperty("--accent", secondaryOKLCH);
-      root.style.setProperty("--accent-foreground", "oklch(0.98 0.02 260)");
+      root.style.setProperty("--accent-foreground", "oklch(0.985 0 0)");
 
-      // Font family
       if (colors.fontFamily) {
-        root.style.setProperty("--font-family", colors.fontFamily);
+        root.style.setProperty("--font-sans", colors.fontFamily);
         document.body.style.fontFamily = colors.fontFamily;
       }
     } catch (error) {
       console.error("Failed to apply theme colors:", error);
     }
-  }, [colors.primary, colors.secondary, colors.fontFamily]);
+  }, [colors.primary, colors.secondary, colors.fontFamily, config?.customCSS]);
 
   // Apply custom CSS if provided
   useEffect(() => {

@@ -114,6 +114,29 @@ const isScheduleTerminated = (schedule: { status: 'SCHEDULED' | 'LIVE' | 'COMPLE
   return schedule.status === 'COMPLETED' || schedule.status === 'CANCELLED';
 };
 
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+
+const TRANSCRIPT_WAIT_MAX_MS = 60_000;
+const TRANSCRIPT_WAIT_INTERVAL_MS = 3_000;
+
+const NO_TRANSCRIPT_MESSAGE =
+  'No transcript draft found. As host, join the live room (allow microphone access), speak during the session, then disconnect to upload transcript chunks. Ensure ai-service is running with GROQ_API_KEY set and ffmpeg on PATH.';
+
+/** Poll DB until host transcript chunks are persisted (avoids racing summary on session end). */
+const waitForTranscriptDraft = async (scheduleId: string): Promise<string> => {
+  const deadline = Date.now() + TRANSCRIPT_WAIT_MAX_MS;
+  while (Date.now() < deadline) {
+    const row = await prisma.schedule.findUnique({
+      where: { id: scheduleId },
+      select: { transcriptDraft: true },
+    });
+    const text = row?.transcriptDraft?.trim() || '';
+    if (text) return text;
+    await sleep(TRANSCRIPT_WAIT_INTERVAL_MS);
+  }
+  return '';
+};
+
 const generateAiSummaryFromTranscript = async (
   organizationId: string,
   title: string,
@@ -151,11 +174,13 @@ const generateScheduleSummaryForCompletedSession = async (scheduleId: string): P
   });
 
   try {
-    const transcript = schedule.transcriptDraft?.trim() || '';
+    let transcript = schedule.transcriptDraft?.trim() || '';
     if (!transcript) {
-      throw new Error(
-        'No transcript draft found. Join and end the live session as host so MediaRecorder transcript chunks can be uploaded before summary generation runs.'
-      );
+      logger.info(`Waiting for transcript chunks for schedule ${scheduleId} before summary generation`);
+      transcript = await waitForTranscriptDraft(scheduleId);
+    }
+    if (!transcript) {
+      throw new Error(NO_TRANSCRIPT_MESSAGE);
     }
     const aiSummary = await generateAiSummaryFromTranscript(schedule.organizationId, schedule.title, transcript);
     await prisma.schedule.update({
@@ -505,16 +530,31 @@ export const uploadScheduleTranscriptChunk = async (
     }
 
     if (!transcriptChunk) {
-      sendSuccess(res, { appended: false, chars: 0 });
+      logger.warn(
+        `Transcript chunk for schedule ${schedule.id} produced no text (${file.buffer.length} bytes). Check GROQ_API_KEY, ffmpeg, and that the host microphone captured audio.`
+      );
+      sendSuccess(res, {
+        appended: false,
+        chars: 0,
+        message:
+          'Chunk received but transcription returned no text. Ensure ai-service has GROQ_API_KEY, ffmpeg is installed, and the recording contains audible speech.',
+      });
       return;
     }
+
+    const replaceDraft =
+      req.query.replace === 'true' ||
+      req.query.replace === '1' ||
+      req.body?.replace === true;
 
     const updated = await prisma.schedule.update({
       where: { id: schedule.id },
       data: {
-        transcriptDraft: schedule.transcriptDraft?.trim()
-          ? `${schedule.transcriptDraft.trim()}\n\n${transcriptChunk}`
-          : transcriptChunk,
+        transcriptDraft: replaceDraft
+          ? transcriptChunk
+          : schedule.transcriptDraft?.trim()
+            ? `${schedule.transcriptDraft.trim()}\n\n${transcriptChunk}`
+            : transcriptChunk,
       },
       select: { transcriptDraft: true },
     });

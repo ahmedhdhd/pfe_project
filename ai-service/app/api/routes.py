@@ -1,7 +1,10 @@
 import asyncio
+import logging
 from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+
+log = logging.getLogger(__name__)
 
 from app.config import settings
 from app.deps import verify_internal_token
@@ -12,6 +15,7 @@ from app.schemas import (
     ContentIndexRequest,
     PlaygroundGenerateRequest,
     ScheduleSummarizeRequest,
+    ThemeGenerateRequest,
     TestOpenRouterRequest,
 )
 from app.services.embeddings import (
@@ -25,6 +29,7 @@ from app.services.openrouter import chat_completion, chat_json
 from app.services.org_keys import get_org_openrouter_key
 from app.services.playground import generate_playground_html
 from app.services.prompts import build_system_prompt_with_rag
+from app.services.theme_engine import generate_theme_bundle
 from app.db.pool import db_conn
 
 router = APIRouter(prefix="/internal/v1", dependencies=[Depends(verify_internal_token)])
@@ -111,6 +116,31 @@ async def playground_generate(body: PlaygroundGenerateRequest) -> dict[str, str]
     return {"html": html}
 
 
+@router.post("/theme/generate")
+async def theme_generate(body: ThemeGenerateRequest) -> dict[str, Any]:
+    try:
+        api_key = get_org_openrouter_key(body.organization_id)
+    except Exception as exc:
+        log.exception("theme generate: database lookup failed")
+        raise HTTPException(
+            status_code=503,
+            detail="Database connection failed while loading organization AI settings. Retry in a moment.",
+        ) from exc
+    if not api_key:
+        raise HTTPException(status_code=400, detail="OpenRouter API key is not configured")
+    try:
+        return await generate_theme_bundle(
+            api_key=api_key,
+            organization_name=(body.organization_name or "").strip() or "QuetzLearn LMS",
+            description=body.description,
+            current_custom_css=body.current_custom_css,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)[:800]) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=str(exc)[:800]) from exc
+
+
 @router.post("/content/index")
 async def content_index(body: ContentIndexRequest) -> dict[str, bool]:
     asyncio.create_task(
@@ -136,6 +166,12 @@ async def transcription_local_media(
     try:
         text = await transcribe_media_bytes(data, filename)
     except Exception as exc:
+        log.warning(
+            "transcription/local-media failed (%s bytes, %s): %s",
+            len(data),
+            filename,
+            exc,
+        )
         raise HTTPException(status_code=502, detail=str(exc)[:800]) from exc
     return {"text": text}
 
@@ -159,7 +195,14 @@ async def assignment_feedback(body: AssignmentFeedbackRequest) -> dict[str, Any]
 
 @router.post("/assignments/generate-questions")
 async def assignment_generate(body: AssignmentGenerateRequest) -> dict[str, Any]:
-    api_key = get_org_openrouter_key(body.organization_id)
+    try:
+        api_key = get_org_openrouter_key(body.organization_id)
+    except Exception as exc:
+        log.exception("assignment generate-questions: database lookup failed")
+        raise HTTPException(
+            status_code=503,
+            detail="Database connection failed while loading organization AI settings. Retry in a moment.",
+        ) from exc
     if not api_key:
         raise HTTPException(status_code=400, detail="OpenRouter API key is not configured")
     try:

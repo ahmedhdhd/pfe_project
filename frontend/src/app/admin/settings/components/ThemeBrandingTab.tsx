@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,12 +10,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, Palette, Type, X } from "lucide-react";
+import { Loader2, Palette, Sparkles, Type, X } from "lucide-react";
 import { CreateOrganizationConfigData } from "@/lib/types/api";
 import { FileUpload } from "@/components/common/file-upload";
 import { THEME_OPTIONS } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -45,6 +46,8 @@ interface ThemeBrandingTabProps {
     size: number;
     mimeType: string;
   }) => void;
+  isGeneratingAiTheme: boolean;
+  onGenerateAiTheme: (description: string) => Promise<void>;
 }
 
 const FONT_OPTIONS = [
@@ -87,9 +90,69 @@ export function ThemeBrandingTab({
   isUploadingFavicon,
   onLogoUpload,
   onFaviconUpload,
+  isGeneratingAiTheme,
+  onGenerateAiTheme,
 }: ThemeBrandingTabProps) {
+  const [aiDescription, setAiDescription] = useState("");
+
   return (
     <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5" />
+            <CardTitle>AI Theme Engine</CardTitle>
+          </div>
+          <CardDescription>
+            Describe your LMS and let AI generate brand colors, typography, and
+            custom CSS for your organization site.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="ai-theme-description">Describe your LMS</Label>
+            <Textarea
+              id="ai-theme-description"
+              value={aiDescription}
+              onChange={(event) => setAiDescription(event.target.value)}
+              rows={5}
+              placeholder="Example: A modern medical exam prep LMS for Arabic and French students. Clean white surfaces, confident blue accents, soft gradients, premium dashboard feeling, high readability, and polished CTA buttons."
+            />
+            <p className="text-sm text-muted-foreground">
+              The generated result will fill your theme colors and the custom
+              CSS already used on your org LMS website.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              type="button"
+              onClick={() => onGenerateAiTheme(aiDescription)}
+              disabled={isGeneratingAiTheme || !aiDescription.trim()}
+            >
+              {isGeneratingAiTheme ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Generating Theme...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  Generate AI Theme
+                </>
+              )}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setAiDescription("")}
+              disabled={isGeneratingAiTheme || !aiDescription}
+            >
+              Clear Prompt
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>

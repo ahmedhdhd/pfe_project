@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import prisma from '../utils/prisma';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../middleware/auth';
+import { aiService, AiServiceError } from '../utils/ai-service-client';
 
 const SUPPORTED_CURRENCIES = new Set(['TND', 'USD', 'EUR']);
 
@@ -123,6 +124,41 @@ export const createOrUpdateConfig = async (req: AuthRequest, res: Response, next
     });
     sendSuccess(res, formatConfig(config));
   } catch (e) { next(e); }
+};
+
+export const generateThemeWithAi = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const organizationId = req.user!.organizationId;
+    const { description, currentCustomCss } = req.body as {
+      description?: string;
+      currentCustomCss?: string;
+    };
+
+    if (!description?.trim()) {
+      sendError(res, 'description is required', 400);
+      return;
+    }
+
+    const organization = await prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { name: true },
+    });
+
+    const generated = await aiService.generateTheme({
+      organizationId,
+      organizationName: organization?.name || 'QuetzLearn LMS',
+      description: description.trim(),
+      currentCustomCss: currentCustomCss?.trim() || '',
+    });
+
+    sendSuccess(res, generated);
+  } catch (e) {
+    if (e instanceof AiServiceError) {
+      sendError(res, e.message.slice(0, 800), e.statusCode);
+      return;
+    }
+    next(e);
+  }
 };
 
 export const clearCache = async (_req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {

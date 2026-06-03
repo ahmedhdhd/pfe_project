@@ -9,6 +9,7 @@ r.post('/', c.createOrganization);
 r.get('/config', authenticate, requireAdmin, c.getAdminConfig);
 r.post('/config', authenticate, requireAdmin, c.createOrUpdateConfig);
 r.put('/config', authenticate, requireAdmin, c.createOrUpdateConfig);
+r.post('/config/theme/generate', authenticate, requireAdmin, c.generateThemeWithAi);
 // GET /api/organization-config/:slug  (public)
 r.get('/:slug', c.getPublicConfig);
 export default r;

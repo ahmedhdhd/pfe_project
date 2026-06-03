@@ -41,6 +41,15 @@ class PlaygroundGenerateResponse(BaseModel):
     html: str
 
 
+class ThemeGenerateRequest(BaseModel):
+    organization_id: str = Field(validation_alias="organizationId")
+    description: str
+    organization_name: str | None = Field(default=None, validation_alias="organizationName")
+    current_custom_css: str | None = Field(default=None, validation_alias="currentCustomCss")
+
+    model_config = {"populate_by_name": True}
+
+
 class ContentIndexRequest(BaseModel):
     content_id: str = Field(validation_alias="contentId")
     batch_id: str = Field(validation_alias="batchId")

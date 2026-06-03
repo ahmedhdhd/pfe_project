@@ -386,14 +386,20 @@ export const useUploadScheduleTranscriptChunk = () => {
     mutationFn: async ({
       id,
       file,
+      replace = false,
     }: {
       id: string;
       file: Blob;
+      replace?: boolean;
     }) => {
       const formData = new FormData();
       formData.append("file", file, `schedule-${id}-${Date.now()}.webm`);
 
-      const response = await apiClient.post(`/admin/schedules/${id}/transcript-chunk`, formData, {
+      const path = replace
+        ? `/admin/schedules/${id}/transcript-chunk?replace=true`
+        : `/admin/schedules/${id}/transcript-chunk`;
+
+      const response = await apiClient.post(path, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

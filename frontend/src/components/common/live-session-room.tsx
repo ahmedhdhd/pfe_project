@@ -124,6 +124,8 @@ export function LiveSessionRoom({
   const [roomShouldConnect, setRoomShouldConnect] = useState(true);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const recorderMimeTypeRef = useRef("audio/webm");
   const pendingTranscriptUploadsRef = useRef<Array<Promise<unknown>>>([]);
   const lastTranscriptUploadRef = useRef<Promise<unknown>>(Promise.resolve());
 
@@ -193,16 +195,31 @@ export function LiveSessionRoom({
     }
   };
 
-  const queueTranscriptUpload = (blob: Blob) => {
+  const buildRecordingBlob = () => {
+    if (recordedChunksRef.current.length === 0) {
+      return null;
+    }
+    return new Blob(recordedChunksRef.current, {
+      type: recorderMimeTypeRef.current,
+    });
+  };
+
+  const queueTranscriptUpload = (blob: Blob, options?: { replace?: boolean }) => {
     if (!session?.canPublish || blob.size === 0) {
       return Promise.resolve();
     }
 
-    const uploadPromise = lastTranscriptUploadRef.current.finally(() =>
-      transcriptChunkMutation.mutateAsync({ id: scheduleId, file: blob })
-    ).catch(() => {
-      // Avoid disrupting the live session if one chunk upload fails.
-    });
+    const uploadPromise = lastTranscriptUploadRef.current
+      .finally(() =>
+        transcriptChunkMutation.mutateAsync({
+          id: scheduleId,
+          file: blob,
+          replace: options?.replace ?? false,
+        })
+      )
+      .catch((error: unknown) => {
+        console.warn("[live-session] Transcript chunk upload failed:", error);
+      });
 
     lastTranscriptUploadRef.current = uploadPromise;
 
@@ -217,6 +234,7 @@ export function LiveSessionRoom({
 
   const cleanupTranscriptCapture = () => {
     mediaRecorderRef.current = null;
+    recordedChunksRef.current = [];
     if (mediaStreamRef.current) {
       mediaStreamRef.current.getTracks().forEach((track) => track.stop());
       mediaStreamRef.current = null;
@@ -242,15 +260,22 @@ export function LiveSessionRoom({
       const recorder = new MediaRecorder(stream);
       mediaStreamRef.current = stream;
       mediaRecorderRef.current = recorder;
+      recordedChunksRef.current = [];
+      recorderMimeTypeRef.current = recorder.mimeType || "audio/webm";
 
       recorder.ondataavailable = (event) => {
-        void queueTranscriptUpload(event.data);
-      };
-      recorder.onstop = () => {
-        cleanupTranscriptCapture();
+        if (event.data.size === 0) {
+          return;
+        }
+        recordedChunksRef.current.push(event.data);
+        const recording = buildRecordingBlob();
+        if (recording) {
+          // Timeslice blobs are often invalid alone; upload one merged WebM each interval.
+          void queueTranscriptUpload(recording, { replace: true });
+        }
       };
 
-      recorder.start(120000);
+      recorder.start(30_000);
     } catch {
       cleanupTranscriptCapture();
     }
@@ -274,7 +299,13 @@ export function LiveSessionRoom({
       recorder.addEventListener(
         "stop",
         () => {
-          Promise.all([...pendingTranscriptUploadsRef.current]).finally(() => resolve());
+          // Some browsers enqueue the final dataavailable upload after the stop event.
+          window.setTimeout(() => {
+            Promise.all([...pendingTranscriptUploadsRef.current]).finally(() => {
+              cleanupTranscriptCapture();
+              resolve();
+            });
+          }, 500);
         },
         { once: true }
       );
@@ -422,7 +453,7 @@ export function LiveSessionRoom({
                 </>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Summary is not available yet. Join and end the session as host so transcript chunks can upload, then ensure GROQ_API_KEY and OpenRouter are configured on the server.
+                  Summary is not available yet. Join and end the session as host (allow microphone access) so transcript chunks can upload. Configure GROQ_API_KEY and ffmpeg in ai-service, and OpenRouter for your organization.
                 </p>
               )}
             </CardContent>

@@ -8,6 +8,7 @@ export {
   useCurrentUser,
   useCreateOrganization as useCreateOrganizationApi,
   useCreateOrganizationConfig,
+  useOrganizationConfigAdmin,
   useRegister as useRegisterApi,
   useVerifyEmail as useVerifyEmailApi,
   useSetPassword as useSetPasswordApi,

@@ -333,6 +333,13 @@ export interface CreateOrganizationConfigResponse {
   message?: string;
 }
 
+export interface GeneratedOrganizationTheme {
+  themeName: string;
+  summary: string;
+  theme: OrganizationConfigTheme;
+  customCss: string;
+}
+
 export interface BatchReviewUser {
   id: string;
   username: string;
