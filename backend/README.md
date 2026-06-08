@@ -87,6 +87,7 @@ prisma/
 | `SMTP_HOST/PORT/USER/PASS/FROM` | Email config |
 | `FLOUCI_PUBLIC_KEY` | Flouci public key |
 | `FLOUCI_PRIVATE_KEY` | Flouci private key |
+| `KONNECT_API_BASE` | Konnect API base URL (default: `https://api.sandbox.konnect.network/api/v2`) |
 
 ---
 
