@@ -74,7 +74,11 @@ async def _extract_hosted_video_transcript(video_url: str) -> str:
             with open(video_path, "wb") as handle:
                 handle.write(response.content)
 
-        return await asyncio.to_thread(_transcribe_media_path_sync, video_path)
+        return await asyncio.to_thread(
+            _transcribe_media_path_sync,
+            video_path,
+            os.path.basename(video_path) or "video.mp4",
+        )
     except Exception:
         return ""
     finally:

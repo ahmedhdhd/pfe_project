@@ -144,6 +144,23 @@ export const aiService = {
     language?: string | null;
   }) => aiServiceRequest<{ html: string }>('/playground/generate', { body }),
 
+  generateTheme: (body: {
+    organizationId: string;
+    organizationName?: string;
+    description: string;
+    currentCustomCss?: string;
+  }) =>
+    aiServiceRequest<{
+      themeName: string;
+      summary: string;
+      theme: {
+        primaryColor: string;
+        secondaryColor: string;
+        fontFamily: string;
+      };
+      customCss: string;
+    }>('/theme/generate', { body }),
+
   indexContent: (body: {
     contentId: string;
     batchId: string;

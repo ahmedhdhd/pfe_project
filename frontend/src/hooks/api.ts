@@ -229,6 +229,16 @@ export const useUpdateOrganizationConfig = () => {
   });
 };
 
+export const useGenerateOrganizationTheme = () => {
+  return useMutation({
+    mutationFn: (data: { description: string; currentCustomCss?: string }) =>
+      api.generateOrganizationTheme(data).then((res) => res.data),
+    onError: (error) => {
+      console.error("Failed to generate organization theme:", error);
+    },
+  });
+};
+
 // Auth Registration Hooks
 export const useRegister = () => {
   return useMutation({

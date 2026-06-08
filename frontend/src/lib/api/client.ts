@@ -13,6 +13,7 @@ import {
   OrganizationConfigResponse,
   CreateOrganizationConfigData,
   CreateOrganizationConfigResponse,
+  GeneratedOrganizationTheme,
   Order,
   OrderHistoryResponse,
   RecentlyWatchedResponse,
@@ -488,6 +489,16 @@ export const api = {
 
   getOrganizationConfigAdmin: () =>
     apiClient.get<OrganizationConfigResponse>("/admin/organization-config/config"),
+
+  generateOrganizationTheme: (data: {
+    description: string;
+    currentCustomCss?: string;
+  }) =>
+    apiClient.post<ApiResponse<GeneratedOrganizationTheme>>(
+      "/admin/organization-config/config/theme/generate",
+      data,
+      { timeout: 180000 }
+    ),
 
   // Profile endpoints (Client/Student)
   getProfile: () => apiClient.get<ApiResponse<User>>("/api/profile"),

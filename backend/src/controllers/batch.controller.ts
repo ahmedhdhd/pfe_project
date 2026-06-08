@@ -771,21 +771,24 @@ export const updateBatchCertificateConfig = async (
       return;
     }
 
-    const updatedBatch = await prisma.batch.update({
-      where: { id: req.params.id },
-      data: {
-        certificateEnabled: enabled,
-        certificateTemplateId,
-        certificateTitle,
-        certificateHeading,
-        certificateIssuerName,
-        certificateSignerName,
-        certificateSignerTitle,
-        certificateLinkedInOrgId,
-        certificatePrimaryColor,
-        certificateSecondaryColor,
-      },
-    });
+    const [updatedBatch] = await prisma.$queryRaw<CertificateContextBatch[]>(
+      Prisma.sql`
+        UPDATE "batches"
+        SET
+          "certificateEnabled" = ${enabled},
+          "certificateTemplateId" = ${certificateTemplateId},
+          "certificateTitle" = ${certificateTitle},
+          "certificateHeading" = ${certificateHeading},
+          "certificateIssuerName" = ${certificateIssuerName},
+          "certificateSignerName" = ${certificateSignerName},
+          "certificateSignerTitle" = ${certificateSignerTitle},
+          "certificateLinkedInOrgId" = ${certificateLinkedInOrgId},
+          "certificatePrimaryColor" = ${certificatePrimaryColor},
+          "certificateSecondaryColor" = ${certificateSecondaryColor}
+        WHERE "id" = ${req.params.id}
+        RETURNING *
+      `
+    );
 
     sendSuccess(
       res,

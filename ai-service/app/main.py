@@ -3,11 +3,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api.routes import router
-from app.db.pool import close_pool
+from app.db.pool import close_pool, open_pool
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    open_pool()
     yield
     close_pool()
 

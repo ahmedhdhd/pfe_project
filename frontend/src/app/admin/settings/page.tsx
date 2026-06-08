@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/common/page-header";
 import { useCurrentUser } from "@/hooks";
 import {
   useOrganizationConfigAdmin,
+  useGenerateOrganizationTheme,
   useUpdateOrganizationConfig,
 } from "@/hooks/api";
 import { CreateOrganizationConfigData } from "@/lib/types/api";
@@ -23,6 +24,7 @@ import {
   Settings2,
   Bot,
 } from "lucide-react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,11 +49,37 @@ const normalizeCurrency = (currency?: string) => {
     : "TND";
 };
 
+const extractMutationErrorMessage = (error: unknown) => {
+  if (!error || typeof error !== "object") {
+    return "Unable to generate an AI theme right now.";
+  }
+
+  const apiError = error as {
+    response?: {
+      data?: {
+        message?: string;
+        error?: string;
+        detail?: string;
+      };
+    };
+    message?: string;
+  };
+
+  return (
+    apiError.response?.data?.message ||
+    apiError.response?.data?.error ||
+    apiError.response?.data?.detail ||
+    apiError.message ||
+    "Unable to generate an AI theme right now."
+  );
+};
+
 export default function AdminSettingsPage() {
   const { data: currentUser } = useCurrentUser();
   const { data: configData, isLoading: configLoading } =
     useOrganizationConfigAdmin();
   const updateMutation = useUpdateOrganizationConfig();
+  const generateThemeMutation = useGenerateOrganizationTheme();
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isUploadingFavicon, setIsUploadingFavicon] = useState(false);
   const [bannerUrls, setBannerUrls] = useState<string[]>([]);
@@ -138,15 +166,15 @@ export default function AdminSettingsPage() {
         motto: config.motto,
         razorpayKeyId: config.razorpayKeyId,
         razorpayKeySecret: config.razorpayKeySecret,
-        konnectApiKey: (config as any).konnectApiKey,
-        konnectWalletId: (config as any).konnectWalletId,
-        paymentGateway: (config as any).paymentGateway || "konnect",
-        paymeeApiToken: (config as any).paymeeApiToken || "",
-        paymeeVendor: (config as any).paymeeVendor || "",
-        openRouterApiKey: (config as any).openRouterApiKey || "",
-        paymentMode: (config as any).paymentMode || 'per_course',
-        subscriptionPrice: (config as any).subscriptionPrice || 0,
-        subscriptionType: (config as any).subscriptionType || 'onetime',
+        konnectApiKey: config.konnectApiKey,
+        konnectWalletId: config.konnectWalletId,
+        paymentGateway: config.paymentGateway || "konnect",
+        paymeeApiToken: config.paymeeApiToken || "",
+        paymeeVendor: config.paymeeVendor || "",
+        openRouterApiKey: config.openRouterApiKey || "",
+        paymentMode: config.paymentMode || 'per_course',
+        subscriptionPrice: config.subscriptionPrice || 0,
+        subscriptionType: config.subscriptionType || 'onetime',
         metaTitle: config.metaTitle,
         metaDescription: config.metaDescription,
         featuresEnabled: config.featuresEnabled,
@@ -267,6 +295,49 @@ export default function AdminSettingsPage() {
     setFaqs((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleGenerateAiTheme = async (description: string) => {
+    try {
+      const result = await generateThemeMutation.mutateAsync({
+        description,
+        currentCustomCss: formData.customCSS || "",
+      });
+
+      if (!result.success || !result.data) {
+        toast.error(result.message || "Unable to generate an AI theme right now.");
+        return;
+      }
+
+      const generated = result.data;
+      setFormData((prev) => ({
+        ...prev,
+        theme: {
+          ...prev.theme,
+          primaryColor:
+            generated.theme.primaryColor ||
+            prev.theme?.primaryColor ||
+            "#6366f1",
+          secondaryColor:
+            generated.theme.secondaryColor ||
+            prev.theme?.secondaryColor ||
+            "#ec4899",
+          fontFamily:
+            generated.theme.fontFamily ||
+            prev.theme?.fontFamily ||
+            "var(--font-geist-sans), sans-serif",
+        },
+        customCSS: generated.customCss || prev.customCSS,
+      }));
+
+      toast.success(generated.themeName || "AI theme generated", {
+        description: generated.summary || "The generated theme has been applied to the form.",
+      });
+    } catch (error: unknown) {
+      toast.error("Theme generation failed", {
+        description: extractMutationErrorMessage(error),
+      });
+    }
+  };
+
   const handleSocialLinkChange = (platform: string, value: string) => {
     setFormData((prev) => {
       const nextLinks = { ...(prev.socialLinks || {}) };
@@ -377,6 +448,8 @@ export default function AdminSettingsPage() {
               isUploadingFavicon={isUploadingFavicon}
               onLogoUpload={handleLogoUpload}
               onFaviconUpload={handleFaviconUpload}
+              isGeneratingAiTheme={generateThemeMutation.isPending}
+              onGenerateAiTheme={handleGenerateAiTheme}
             />
           </TabsContent>
 

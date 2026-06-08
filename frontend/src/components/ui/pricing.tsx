@@ -176,7 +176,7 @@ export function PricingCard({
         <div className="text-lg font-medium">{plan.name}</div>
         <p className="text-muted-foreground text-sm font-normal">{plan.info}</p>
         <h3 className="mt-2 flex items-end gap-1">
-          <span className="text-3xl font-bold">${plan.price[frequency]}</span>
+          <span className="text-3xl font-bold">DTN {plan.price[frequency]}</span>
           <span className="text-muted-foreground">
             {plan.name !== "Free"
               ? "/" + (frequency === "monthly" ? "month" : "year")

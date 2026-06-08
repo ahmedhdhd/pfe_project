@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-// Switch to https://api.konnect.network/api/v2 for production
-const KONNECT_API_BASE = 'https://api.preprod.konnect.network/api/v2';
+const DEFAULT_KONNECT_API_BASE = 'https://api.sandbox.konnect.network/api/v2';
+const KONNECT_API_BASE = (
+  process.env.KONNECT_API_BASE || DEFAULT_KONNECT_API_BASE
+).replace(/\/+$/, '');
 
 export interface KonnectInitRequest {
   receiverWalletId: string;
