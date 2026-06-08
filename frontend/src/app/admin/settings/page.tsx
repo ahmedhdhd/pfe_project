@@ -125,8 +125,6 @@ export default function AdminSettingsPage() {
     metaTitle: "",
     metaDescription: "",
     paymentGateway: "konnect",
-    paymeeApiToken: "",
-    paymeeVendor: "",
     openRouterApiKey: "",
   });
 
@@ -169,8 +167,6 @@ export default function AdminSettingsPage() {
         konnectApiKey: config.konnectApiKey,
         konnectWalletId: config.konnectWalletId,
         paymentGateway: config.paymentGateway || "konnect",
-        paymeeApiToken: config.paymeeApiToken || "",
-        paymeeVendor: config.paymeeVendor || "",
         openRouterApiKey: config.openRouterApiKey || "",
         paymentMode: config.paymentMode || 'per_course',
         subscriptionPrice: config.subscriptionPrice || 0,

@@ -79,11 +79,6 @@ const PAYMENT_GATEWAYS = [
     label: "Konnect",
     description: "Direct Konnect hosted checkout integration.",
   },
-  {
-    id: "paymee" as const,
-    label: "Paymee",
-    description: "Paymee hosted checkout integration for Tunisian payments.",
-  },
 ];
 
 export function PaymentSettingsTab({
@@ -330,7 +325,7 @@ export function PaymentSettingsTab({
               <Label className="text-sm font-medium">
                 Gateway <span className="text-destructive">*</span>
               </Label>
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2">
                 {PAYMENT_GATEWAYS.map((gateway) => {
                   const selected = currentGateway === gateway.id;
                   return (
@@ -372,7 +367,7 @@ export function PaymentSettingsTab({
               </div>
             </div>
 
-            {currentGateway === "flouci" ? (
+            {currentGateway === "flouci" && (
             <div className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="flouciPublicKey" className="text-sm font-medium">
@@ -457,7 +452,8 @@ export function PaymentSettingsTab({
                 </p>
               </div>
             </div>
-            ) : currentGateway === "konnect" ? (
+            )}
+            {currentGateway === "konnect" && (
             <div className="space-y-5">
               {/* Konnect API Key */}
               <div className="space-y-2">
@@ -567,45 +563,6 @@ export function PaymentSettingsTab({
                 </p>
               </div>
             </div>
-            ) : (
-              <div className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="paymeeApiToken" className="text-sm font-medium">
-                    Paymee API Token <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="paymeeApiToken"
-                    type={showApiKey ? "text" : "password"}
-                    value={formData.paymeeApiToken || ""}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        paymeeApiToken: e.target.value,
-                      }))
-                    }
-                    placeholder="Paymee token..."
-                    className="font-mono text-sm rounded-xl"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="paymeeVendor" className="text-sm font-medium">
-                    Paymee Vendor / Store Key
-                  </Label>
-                  <Input
-                    id="paymeeVendor"
-                    value={formData.paymeeVendor || ""}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        paymeeVendor: e.target.value,
-                      }))
-                    }
-                    placeholder="Optional vendor code"
-                    className="font-mono text-sm rounded-xl"
-                  />
-                </div>
-              </div>
             )}
 
             {/* How it works */}

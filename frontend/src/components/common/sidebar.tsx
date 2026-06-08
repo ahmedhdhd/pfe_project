@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
+  Layout,
   BookOpen,
   Users,
   BarChart3,
@@ -39,6 +40,7 @@ import {
 
 const iconMap = {
   LayoutDashboard,
+  Layout,
   BookOpen,
   Users,
   BarChart3,
@@ -162,6 +164,9 @@ function SidebarContent({ className }: { className?: string }) {
     }
     if (href === "/admin/clients") {
       return normalizedPath === "/admin/clients";
+    }
+    if (href === "/admin/settings/page-editor") {
+      return normalizedPath.startsWith("/admin/settings/page-editor");
     }
     if (href === "/admin/settings") {
       return normalizedPath === "/admin/settings";

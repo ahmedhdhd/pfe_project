@@ -53,8 +53,6 @@ export const getPublicConfig = async (req: Request, res: Response, next: NextFun
         konnectApiKey: null,
         konnectWalletId: null,
         paymentGateway: "konnect",
-        paymeeApiToken: null,
-        paymeeVendor: null,
         paymentMode: "per_course",
         subscriptionType: "FREE",
         subscriptionPrice: 0,

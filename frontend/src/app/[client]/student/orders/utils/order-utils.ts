@@ -76,8 +76,6 @@ export const formatPaymentProvider = (value?: string | null) => {
       return "Mandat minute poste";
     case "KONNECT":
       return "Konnect";
-    case "PAYMEE":
-      return "Paymee";
     case "FLOUCI":
       return "Flouci";
     default:

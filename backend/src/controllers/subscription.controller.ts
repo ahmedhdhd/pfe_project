@@ -10,7 +10,6 @@ import {
   verifyFlouciPayment,
 } from '../utils/flouci';
 import { createKonnectPayment, verifyKonnectPayment } from '../utils/konnect';
-import { createPaymeePayment, verifyPaymeePayment } from '../utils/paymee';
 
 const PAYMENT_CURRENCY = 'TND';
 const toMillimes = (amount: number) => Math.round(amount * 1000);
@@ -53,7 +52,7 @@ export const getSubscriptionStatus = async (req: AuthRequest, res: Response, nex
         userId,
         organizationId: orgId,
         entityType: 'BATCH',
-        paymentProvider: { in: ['KONNECT', 'PAYMEE'] },
+        paymentProvider: { in: ['KONNECT', 'FLOUCI'] },
         paymentStatus: 'SUCCESS',
         receiptId: { startsWith: 'sub_' },
       },
@@ -102,10 +101,6 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
       sendError(res, 'Konnect payment is not configured', 400);
       return;
     }
-    if (gateway === 'paymee' && !config.paymeeApiToken) {
-      sendError(res, 'Paymee payment is not configured', 400);
-      return;
-    }
 
     const subscriptionPrice = config.subscriptionPrice || 0;
     if (subscriptionPrice <= 0) {
@@ -120,7 +115,7 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
       where: {
         userId,
         organizationId: orgId,
-        paymentProvider: { in: ['KONNECT', 'PAYMEE', 'FLOUCI'] },
+        paymentProvider: { in: ['KONNECT', 'FLOUCI'] },
         paymentStatus: 'SUCCESS',
         receiptId: { startsWith: 'sub_' },
       },
@@ -141,7 +136,7 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
         entityId: orgId,
         amount: subscriptionPrice,
         currency: PAYMENT_CURRENCY,
-        paymentProvider: gateway === 'flouci' ? 'FLOUCI' : gateway === 'paymee' ? 'PAYMEE' : 'KONNECT',
+        paymentProvider: gateway === 'flouci' ? 'FLOUCI' : 'KONNECT',
         receiptId: `sub_${uuidv4()}`,
         paymentStatus: 'PENDING',
       },
@@ -187,30 +182,6 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
           amount: amountMillimes,
           gateway: 'flouci',
         });
-      } else if (gateway === 'paymee') {
-        const payment = await createPaymeePayment({
-          apiToken: config.paymeeApiToken,
-          vendor: config.paymeeVendor,
-          amount: subscriptionPrice,
-          note: `Subscription payment - ${order.id}`,
-          firstName: userObj?.username || 'Learner',
-          lastName: userObj?.username || 'Learner',
-          email: userObj?.email || 'student@example.com',
-          phone: '00000000',
-          orderId: order.id,
-          returnUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=subscription`,
-          cancelUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=subscription`,
-        });
-
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { providerOrderId: payment.token },
-        });
-
-        sendSuccess(res, {
-          payUrl: payment.payUrl,
-          paymentRef: payment.token,
-        });
       } else {
         const payment = await createKonnectPayment(config.konnectApiKey, {
           receiverWalletId: config.konnectWalletId,
@@ -242,7 +213,7 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
           failureReason:
             error instanceof Error
               ? error.message
-              : `Failed to initialize ${gateway === 'flouci' ? 'Flouci' : gateway === 'paymee' ? 'Paymee' : 'Konnect'} payment`,
+              : `Failed to initialize ${gateway === 'flouci' ? 'Flouci' : 'Konnect'} payment`,
         },
       });
       throw error;
@@ -283,8 +254,6 @@ export const subscriptionVerify = async (req: AuthRequest, res: Response, next: 
     const gateway =
       order.paymentProvider === 'FLOUCI'
         ? 'flouci'
-        : order.paymentProvider === 'PAYMEE'
-        ? 'paymee'
         : order.paymentProvider === 'KONNECT'
         ? 'konnect'
         : (config?.paymentGateway || 'konnect').toLowerCase();
@@ -305,17 +274,6 @@ export const subscriptionVerify = async (req: AuthRequest, res: Response, next: 
           ? 'pending'
           : 'failed';
       providerPaymentId = payment.orderNumber || order.providerOrderId;
-    } else if (gateway === 'paymee') {
-      if (!config?.paymeeApiToken) {
-        sendError(res, 'Paymee payment is not configured', 400);
-        return;
-      }
-      const paymentDetails = await verifyPaymeePayment({
-        apiToken: config.paymeeApiToken,
-        token: paymentRef,
-      });
-      status = paymentDetails.paid ? 'completed' : paymentDetails.status;
-      providerPaymentId = paymentDetails.transactionId;
     } else {
       if (!config?.konnectApiKey) {
         sendError(res, 'Konnect payment is not configured', 400);
@@ -349,7 +307,7 @@ export const subscriptionVerify = async (req: AuthRequest, res: Response, next: 
     await prisma.order.update({
       where: { id: order.id },
       data: {
-        paymentProvider: gateway === 'flouci' ? 'FLOUCI' : gateway === 'paymee' ? 'PAYMEE' : 'KONNECT',
+        paymentProvider: gateway === 'flouci' ? 'FLOUCI' : 'KONNECT',
         paymentStatus: 'SUCCESS',
         providerPaymentId,
         failureReason: null,

@@ -237,9 +237,7 @@ export interface OrganizationConfig {
   razorpayKeySecret?: string;
   konnectApiKey?: string;
   konnectWalletId?: string;
-  paymentGateway?: 'konnect' | 'paymee' | 'flouci';
-  paymeeApiToken?: string;
-  paymeeVendor?: string;
+  paymentGateway?: 'konnect' | 'flouci';
   openRouterApiKey?: string;
   paymentMode?: 'free' | 'per_course' | 'subscription';
   subscriptionPrice?: number;
@@ -292,9 +290,7 @@ export interface CreateOrganizationConfigData {
   razorpayKeySecret?: string;
   konnectApiKey?: string;
   konnectWalletId?: string;
-  paymentGateway?: 'konnect' | 'paymee' | 'flouci';
-  paymeeApiToken?: string;
-  paymeeVendor?: string;
+  paymentGateway?: 'konnect' | 'flouci';
   openRouterApiKey?: string;
   paymentMode?: 'free' | 'per_course' | 'subscription';
   subscriptionPrice?: number;

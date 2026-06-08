@@ -15,28 +15,25 @@ export function ClientThemeProvider({ children }: ClientThemeProviderProps) {
   const colors = useOrgColors();
   const config = useOrganizationConfigStore((state) => state.config);
 
-  // Apply theme colors to CSS variables
-  // Skip if customCSS is present - it already defines all variables in oklch
+  // Apply theme colors to CSS variables.
+  // SKIP if customCSS is present — customCSS already defines all variables
+  // in oklch format. Overriding with setProperty() would fight the AI theme
+  // because inline styles have higher specificity than <style> tags.
   useEffect(() => {
     if (!colors.primary || !colors.secondary) return;
-    // When AI-generated customCSS is active, it owns the CSS variables.
-    // Overriding --primary here would fight the AI theme.
-    if (config?.customCSS) return;
-
+    if (config?.customCSS) return; // AI theme owns the variables — do not override
     try {
       const primaryOKLCH = hexToOKLCHString(colors.primary);
       const secondaryOKLCH = hexToOKLCHString(colors.secondary);
-
       const root = document.documentElement;
-
       root.style.setProperty("--primary", primaryOKLCH);
       root.style.setProperty("--primary-foreground", "oklch(0.985 0 0)");
       root.style.setProperty("--secondary", secondaryOKLCH);
       root.style.setProperty("--secondary-foreground", "oklch(0.985 0 0)");
       root.style.setProperty("--accent", secondaryOKLCH);
       root.style.setProperty("--accent-foreground", "oklch(0.985 0 0)");
-
       if (colors.fontFamily) {
+        // Tailwind v4 token is --font-sans, NOT --font-family
         root.style.setProperty("--font-sans", colors.fontFamily);
         document.body.style.fontFamily = colors.fontFamily;
       }
@@ -45,26 +42,51 @@ export function ClientThemeProvider({ children }: ClientThemeProviderProps) {
     }
   }, [colors.primary, colors.secondary, colors.fontFamily, config?.customCSS]);
 
-  // Apply custom CSS if provided
+  // Inject AI-generated customCSS.
+  // Uses !important on the style element's position to ensure it loads
+  // AFTER globals.css so its :root variables win the cascade.
   useEffect(() => {
-    if (config?.customCSS) {
-      const styleId = "custom-org-css";
-      let styleElement = document.getElementById(styleId) as HTMLStyleElement;
-
-      if (!styleElement) {
-        styleElement = document.createElement("style");
-        styleElement.id = styleId;
-        document.head.appendChild(styleElement);
-      }
-
-      styleElement.textContent = config.customCSS;
+    const styleId = "custom-org-css";
+    if (!config?.customCSS) {
+      // Remove the style tag if customCSS was cleared
+      document.getElementById(styleId)?.remove();
+      // Also clear any inline style overrides from previous non-AI theme
+      const root = document.documentElement;
+      root.style.removeProperty("--primary");
+      root.style.removeProperty("--primary-foreground");
+      root.style.removeProperty("--secondary");
+      root.style.removeProperty("--secondary-foreground");
+      root.style.removeProperty("--accent");
+      root.style.removeProperty("--accent-foreground");
+      return;
     }
-
+    let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
+    if (!styleEl) {
+      styleEl = document.createElement("style");
+      styleEl.id = styleId;
+      // Append at the END of <head> so it comes after globals.css
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = config.customCSS;
+    // Force-clear any inline style.setProperty overrides so the <style> tag wins
+    const root = document.documentElement;
+    root.style.removeProperty("--primary");
+    root.style.removeProperty("--primary-foreground");
+    root.style.removeProperty("--secondary");
+    root.style.removeProperty("--secondary-foreground");
+    root.style.removeProperty("--accent");
+    root.style.removeProperty("--accent-foreground");
+    root.style.removeProperty("--background");
+    root.style.removeProperty("--foreground");
+    root.style.removeProperty("--card");
+    root.style.removeProperty("--card-foreground");
+    root.style.removeProperty("--border");
+    root.style.removeProperty("--input");
+    root.style.removeProperty("--ring");
+    root.style.removeProperty("--sidebar");
+    root.style.removeProperty("--font-sans");
     return () => {
-      const styleElement = document.getElementById("custom-org-css");
-      if (styleElement) {
-        styleElement.remove();
-      }
+      document.getElementById(styleId)?.remove();
     };
   }, [config?.customCSS]);
 

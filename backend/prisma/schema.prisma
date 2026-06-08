@@ -57,8 +57,6 @@ model OrganizationConfig {
   konnectApiKey     String?
   konnectWalletId   String?
   paymentGateway    String?  @default("konnect")
-  paymeeApiToken    String?
-  paymeeVendor      String?
   paymentMode       String?  @default("per_course")
   subscriptionPrice Float?   @default(0)
   subscriptionType  String?  @default("onetime")

@@ -68,6 +68,12 @@ export const ADMIN_NAVIGATION_ITEMS: NavigationItem[] = [
     icon: "Settings",
     roles: ["admin"],
   },
+  {
+    title: "Page Editor",
+    href: "/admin/settings/page-editor",
+    icon: "Layout",
+    roles: ["admin"],
+  },
 ];
 
 // Teacher navigation items (main domain)

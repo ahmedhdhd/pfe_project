@@ -112,13 +112,19 @@ export function ClientHeroSection({ homepage }: ClientHeroSectionProps) {
                 </span>
               </motion.div>
 
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight relative">
+              <h1
+                className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight relative"
+                data-preview="hero-title"
+              >
                 <span className="bg-clip-text text-transparent bg-linear-to-b from-foreground to-foreground/70">
                   {homepage.title}
                 </span>
               </h1>
 
-              <div className="text-xl md:text-2xl text-muted-foreground font-light h-12 flex items-center justify-center">
+              <div
+                className="text-xl md:text-2xl text-muted-foreground font-light h-12 flex items-center justify-center"
+                data-preview="hero-subtitle"
+              >
                 <TypewriterText text={homepage.tagline} />
               </div>
 
@@ -138,7 +144,7 @@ export function ClientHeroSection({ homepage }: ClientHeroSectionProps) {
                   asChild
                 >
                   <Link href={homepage.ctaUrl}>
-                    {homepage.ctaText}
+                    <span data-preview="cta-text">{homepage.ctaText}</span>
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>

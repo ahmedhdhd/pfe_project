@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { ClientConfigWrapper } from "@/components/client/config-wrapper";
+import { PreviewListener } from "@/components/client/preview-listener";
 import type { OrganizationConfigResponse } from "@/lib/types/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -124,5 +125,10 @@ export async function generateMetadata({
 }
 
 export default function ClientLayout({ children }: ClientLayoutProps) {
-  return <ClientConfigWrapper>{children}</ClientConfigWrapper>;
+  return (
+    <ClientConfigWrapper>
+      <PreviewListener />
+      {children}
+    </ClientConfigWrapper>
+  );
 }

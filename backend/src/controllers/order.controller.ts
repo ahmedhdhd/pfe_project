@@ -10,7 +10,6 @@ import {
   resolveFlouciCredentials,
 } from '../utils/flouci';
 import { createKonnectPayment } from '../utils/konnect';
-import { createPaymeePayment } from '../utils/paymee';
 
 const PAYMENT_CURRENCY_FALLBACK = 'TND';
 const MANUAL_PAYMENT_PROVIDERS = ['BANK_TRANSFER', 'MANDAT_MINUTE_POSTE'] as const;
@@ -317,8 +316,6 @@ export const createCourseOrderCheckout = async (
         currency: true,
         konnectApiKey: true,
         konnectWalletId: true,
-        paymeeApiToken: true,
-        paymeeVendor: true,
         razorpayKeyId: true,
         razorpayKeySecret: true,
         logoUrl: true,
@@ -445,16 +442,11 @@ export const createCourseOrderCheckout = async (
       sendError(res, 'Konnect payment is not configured for this organization', 400);
       return;
     }
-    if (gateway === 'paymee' && !config?.paymeeApiToken) {
-      sendError(res, 'Paymee payment is not configured for this organization', 400);
-      return;
-    }
 
     const order = await prisma.order.create({
       data: {
         ...baseOrderData,
-        paymentProvider:
-          gateway === 'flouci' ? 'FLOUCI' : gateway === 'paymee' ? 'PAYMEE' : 'KONNECT',
+        paymentProvider: gateway === 'flouci' ? 'FLOUCI' : 'KONNECT',
         paymentStatus: 'PENDING',
         manualReviewStatus: ManualOrderStatus.NOT_REQUIRED,
       },
@@ -495,36 +487,6 @@ export const createCourseOrderCheckout = async (
           paymentLink: payment.link,
           paymentId: payment.paymentId,
           paymentRef: payment.paymentId,
-          purchasedBatchIds: items.map((item) => item.batchId),
-        });
-        return;
-      }
-
-      if (gateway === 'paymee') {
-        const payment = await createPaymeePayment({
-          apiToken: config!.paymeeApiToken!,
-          vendor: config?.paymeeVendor,
-          amount,
-          note: `Course order - ${order.id}`,
-          firstName,
-          lastName,
-          email,
-          phone,
-          orderId: order.id,
-          returnUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=batch&entityId=${entityId}`,
-          cancelUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=batch&entityId=${entityId}`,
-        });
-
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { providerOrderId: payment.token },
-        });
-
-        sendSuccess(res, {
-          orderId: order.id,
-          payUrl: payment.payUrl,
-          paymentLink: payment.payUrl,
-          paymentRef: payment.token,
           purchasedBatchIds: items.map((item) => item.batchId),
         });
         return;
