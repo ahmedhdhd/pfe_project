@@ -391,6 +391,26 @@ export const useStudentResetPassword = () => {
   });
 };
 
+export const useAdminForgotPassword = () => {
+  return useMutation({
+    mutationFn: (data: { email: string; organizationId?: string }) =>
+      api.adminForgotPassword(data).then((res) => res.data),
+    onError: (error) => {
+      console.error("Admin forgot password failed:", error);
+    },
+  });
+};
+
+export const useAdminResetPassword = () => {
+  return useMutation({
+    mutationFn: (data: { token: string; password: string }) =>
+      api.adminResetPassword(data).then((res) => res.data),
+    onError: (error) => {
+      console.error("Admin reset password failed:", error);
+    },
+  });
+};
+
 // OTP Authentication Hooks
 export const useGetOtp = () => {
   return useMutation({

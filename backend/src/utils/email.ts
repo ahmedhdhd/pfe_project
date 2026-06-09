@@ -558,6 +558,34 @@ export const sendStudentPasswordResetEmail = async (
   logger.info(`Student password reset email sent to ${to} for org ${slug}`);
 };
 
+export const sendAdminPasswordResetEmail = async (
+  to: string,
+  token: string,
+  frontendUrl: string,
+  slug: string,
+  organizationId?: string
+) => {
+  const brand = await getEmailBranding(organizationId);
+  const link = `${frontendUrl}/admin/reset-password?token=${token}&slug=${slug}`;
+
+  await sendActionEmail({
+    organizationId,
+    to,
+    subject: `Reset your password - ${brand.organizationName}`,
+    preheader: 'Reset your admin or teacher account password.',
+    eyebrow: 'Password reset',
+    title: 'Reset your password',
+    intro:
+      'We received a request to reset your password. Use the link below to choose a new one.',
+    actionLabel: 'Reset Password',
+    actionUrl: link,
+    bodyLead: 'This reset link will expire in 1 hour.',
+    note: 'If you did not request a password reset, you can ignore this email.',
+  });
+
+  logger.info(`Admin password reset email sent to ${to} for org ${slug}`);
+};
+
 export const sendAnnouncementEmail = async ({
   organizationId,
   recipients,

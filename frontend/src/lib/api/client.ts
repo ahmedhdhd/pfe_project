@@ -356,6 +356,18 @@ export const api = {
   login: (data: { email: string; password: string }) =>
     apiClient.post<ApiResponse<LoginResponse>>("/admin/auth/login", data),
 
+  adminForgotPassword: (data: { email: string; organizationId?: string }) =>
+    apiClient.post<ApiResponse<{ message: string }>>(
+      "/admin/auth/forgot-password",
+      data
+    ),
+
+  adminResetPassword: (data: { token: string; password: string }) =>
+    apiClient.post<ApiResponse<{ message: string }>>(
+      "/admin/auth/reset-password",
+      data
+    ),
+
   resendVerification: (data: { email: string }) =>
     apiClient.post<ApiResponse<{ message: string }>>(
       "/admin/auth/resend-verification",

@@ -7,6 +7,8 @@ r.post('/register', c.register);
 r.post('/verify-email', c.verifyEmail);
 r.post('/set-password', c.setPassword);
 r.post('/login', c.login);
+r.post('/forgot-password', c.forgotAdminPassword);
+r.post('/reset-password', c.resetAdminPassword);
 r.post('/resend-verification', c.resendVerification);
 r.post('/refresh', c.refreshAdminToken);
 r.post('/invite-user', authenticate, requireAdmin, c.inviteUser);

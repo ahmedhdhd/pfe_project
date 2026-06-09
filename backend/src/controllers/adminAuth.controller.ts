@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import prisma from '../utils/prisma';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt';
-import { sendVerificationEmail, sendInviteEmail } from '../utils/email';
+import { sendVerificationEmail, sendInviteEmail, sendAdminPasswordResetEmail } from '../utils/email';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../middleware/auth';
 
@@ -103,5 +103,75 @@ export const inviteUser = async (req: AuthRequest, res: Response, next: NextFunc
       organizationId
     );
     sendSuccess(res, { id: user.id, email, username, role: 'TEACHER', organizationId, message: 'Invite sent' }, undefined, 201);
+  } catch (e) { next(e); }
+};
+
+export const forgotAdminPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { email, organizationId } = req.body;
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email,
+        ...(organizationId ? { organizationId } : {}),
+        role: { in: ['ADMIN', 'TEACHER'] },
+      },
+    });
+
+    if (!user) {
+      sendSuccess(res, { message: 'If the email exists, a reset link was sent' });
+      return;
+    }
+
+    const token = uuidv4();
+    await prisma.emailToken.create({
+      data: {
+        userId: user.id,
+        token,
+        type: 'RESET_PASSWORD',
+        expiresAt: new Date(Date.now() + 3600000),
+      },
+    });
+
+    const organization = await prisma.organization.findUnique({
+      where: { id: user.organizationId },
+    });
+    const slug = organization?.slug || '';
+
+    await sendAdminPasswordResetEmail(
+      email,
+      token,
+      FRONTEND,
+      slug,
+      user.organizationId
+    );
+
+    sendSuccess(res, { message: 'If the email exists, a reset link was sent' });
+  } catch (e) { next(e); }
+};
+
+export const resetAdminPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { token, password } = req.body;
+
+    const et = await prisma.emailToken.findUnique({ where: { token } });
+    if (!et || et.usedAt || et.expiresAt < new Date() || et.type !== 'RESET_PASSWORD') {
+      sendError(res, 'Invalid or expired token', 400);
+      return;
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    await prisma.user.update({
+      where: { id: et.userId },
+      data: { passwordHash },
+    });
+
+    await prisma.emailToken.update({
+      where: { id: et.id },
+      data: { usedAt: new Date() },
+    });
+
+    sendSuccess(res, { message: 'Password reset successfully' });
   } catch (e) { next(e); }
 };

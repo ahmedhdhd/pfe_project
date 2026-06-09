@@ -41,6 +41,7 @@ import studentNoteRoutes from './routes/student.note.routes';
 import studentQuestionRoutes from './routes/student.question.routes';
 import studentAnnouncementRoutes from './routes/student.announcement.routes';
 import adminQuestionRoutes from './routes/admin.question.routes';
+import platformRoutes from './routes/platform.routes';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -105,6 +106,9 @@ app.use('/admin/upload',            adminUploadRoutes);
 app.use('/admin/orders',            adminOrderRoutes);
 app.use('/admin/cache',             adminBatchRoutes); // clearCache lives on batch router
 app.use('/admin/questions',         adminQuestionRoutes);
+
+// ─── Platform (Super Admin) routes ───────────────────────
+app.use('/platform',                authLimiter, platformRoutes);
 
 // ─── Student / client routes ─────────────────────────────
 app.use('/api/auth',                authLimiter, studentAuthRoutes);

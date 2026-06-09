@@ -23,6 +23,7 @@ model Organization {
   slug      String   @unique
   subdomain String   @unique
   domain    String?  @unique
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -103,6 +104,7 @@ model OrganizationConfig {
   supportEmail     String?
   featuresEnabled  Json? @default("{}")    // Record<string, boolean>
   maintenanceMode  Boolean @default(false)
+  plan             String? @default("free") // "free" | "basic" | "pro" | "enterprise"
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1143,4 +1145,21 @@ model BatchQuestionResponse {
 
   @@index([questionId])
   @@map("batch_question_responses")
+}
+
+// ============================================================
+// PLATFORM — REPORTS
+// ============================================================
+
+model Report {
+  id             String    @id @default(cuid())
+  organizationId String
+  batchId        String?
+  contentId      String?
+  reason         String
+  status         String    @default("PENDING")
+  createdAt      DateTime  @default(now())
+  resolvedAt     DateTime?
+
+  @@map("reports")
 }
