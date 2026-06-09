@@ -58,10 +58,48 @@ export default function PageEditorPage() {
     });
   }, [config]);
 
-  const iframeUrl =
-    previewTarget === "homepage"
-      ? `${window.location.origin.replace("admin.", "")}/`
-      : `${window.location.origin.replace("admin.", "")}/student/my-learning`;
+  const iframeUrl = (() => {
+    if (typeof window === "undefined") {
+      return "";
+    }
+
+    const slug = config?.slug?.trim();
+    const { protocol, port, hostname } = window.location;
+    const portSuffix = port ? `:${port}` : "";
+
+    const previewHost = (() => {
+      if (!slug) {
+        return hostname;
+      }
+
+      if (hostname === "localhost" || hostname === "127.0.0.1") {
+        return `${slug}.localhost`;
+      }
+
+      if (hostname.endsWith(".localhost")) {
+        return `${slug}.localhost`;
+      }
+
+      if (
+        hostname === "teslaacademy.com" ||
+        hostname === "www.teslaacademy.com" ||
+        hostname.endsWith(".teslaacademy.com")
+      ) {
+        return `${slug}.teslaacademy.com`;
+      }
+
+      if (hostname.endsWith(".teslaacademy.in")) {
+        return `${slug}.teslaacademy.in`;
+      }
+
+      return hostname;
+    })();
+
+    const baseUrl = `${protocol}//${previewHost}${portSuffix}`;
+    return previewTarget === "homepage"
+      ? `${baseUrl}/`
+      : `${baseUrl}/student/my-learning`;
+  })();
 
   const sendPreviewPatch = useCallback(
     (patch: Partial<EditableFields>) => {
@@ -335,3 +373,4 @@ export default function PageEditorPage() {
     </div>
   );
 }
+

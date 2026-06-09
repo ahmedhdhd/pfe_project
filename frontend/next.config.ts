@@ -29,22 +29,57 @@ const nextConfig: NextConfig = {
   },
   // Configure to handle subdomains
   async headers() {
+    const sharedSecurityHeaders = [
+      {
+        key: "X-Content-Type-Options",
+        value: "nosniff",
+      },
+      {
+        key: "Referrer-Policy",
+        value: "strict-origin-when-cross-origin",
+      },
+    ];
+
     return [
       {
-        source: "/:path*",
+        source: "/admin/:path*",
         headers: [
           {
             key: "X-Frame-Options",
             value: "DENY",
           },
+          ...sharedSecurityHeaders,
+        ],
+      },
+      {
+        source: "/teacher/:path*",
+        headers: [
           {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
+            key: "X-Frame-Options",
+            value: "DENY",
           },
+          ...sharedSecurityHeaders,
+        ],
+      },
+      {
+        source: "/login",
+        headers: [
           {
-            key: "Referrer-Policy",
-            value: "strict-origin-when-cross-origin",
+            key: "X-Frame-Options",
+            value: "DENY",
           },
+          ...sharedSecurityHeaders,
+        ],
+      },
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value:
+              "frame-ancestors 'self' http://localhost:3000 http://*.localhost:3000 https://teslaacademy.com https://www.teslaacademy.com https://*.teslaacademy.com https://*.teslaacademy.in",
+          },
+          ...sharedSecurityHeaders,
         ],
       },
     ];
@@ -77,3 +112,4 @@ const nextConfig: NextConfig = {
 };
 
 export default withBundleAnalyzer(nextConfig);
+
