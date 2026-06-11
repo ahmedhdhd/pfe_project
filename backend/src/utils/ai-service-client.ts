@@ -159,6 +159,7 @@ export const aiService = {
         fontFamily: string;
       };
       customCss: string;
+      approvedCustomCss: string;
     }>('/theme/generate', { body }),
 
   indexContent: (body: {

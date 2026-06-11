@@ -5,7 +5,8 @@ dotenv.config();
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.DIRECT_URL, // Must use the direct URL for DDL statements
+      // Prefer a non-pooled connection for DDL, but fall back to the primary database URL.
+      url: process.env.DIRECT_URL || process.env.DATABASE_URL,
     },
   },
 });

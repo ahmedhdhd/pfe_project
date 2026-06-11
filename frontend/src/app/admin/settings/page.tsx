@@ -321,7 +321,11 @@ export default function AdminSettingsPage() {
             prev.theme?.fontFamily ||
             "var(--font-geist-sans), sans-serif",
         },
-        customCSS: generated.customCss || prev.customCSS,
+        // Persist only the policy-approved CSS returned by the AI service.
+        customCSS:
+          generated.approvedCustomCss ||
+          generated.customCss ||
+          prev.customCSS,
       }));
 
       toast.success(generated.themeName || "AI theme generated", {

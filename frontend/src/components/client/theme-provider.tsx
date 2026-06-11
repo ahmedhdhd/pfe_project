@@ -14,6 +14,7 @@ interface ClientThemeProviderProps {
 export function ClientThemeProvider({ children }: ClientThemeProviderProps) {
   const colors = useOrgColors();
   const config = useOrganizationConfigStore((state) => state.config);
+  const approvedCustomCss = config?.customCSS?.trim() || "";
 
   // Apply theme colors to CSS variables.
   // SKIP if customCSS is present — customCSS already defines all variables
@@ -21,6 +22,7 @@ export function ClientThemeProvider({ children }: ClientThemeProviderProps) {
   // because inline styles have higher specificity than <style> tags.
   useEffect(() => {
     if (!colors.primary || !colors.secondary) return;
+    if (approvedCustomCss) return;
     if (config?.customCSS) return; // AI theme owns the variables — do not override
     try {
       const primaryOKLCH = hexToOKLCHString(colors.primary);
@@ -40,14 +42,14 @@ export function ClientThemeProvider({ children }: ClientThemeProviderProps) {
     } catch (error) {
       console.error("Failed to apply theme colors:", error);
     }
-  }, [colors.primary, colors.secondary, colors.fontFamily, config?.customCSS]);
+  }, [colors.primary, colors.secondary, colors.fontFamily, approvedCustomCss]);
 
-  // Inject AI-generated customCSS.
-  // Uses !important on the style element's position to ensure it loads
-  // AFTER globals.css so its :root variables win the cascade.
+  // Inject only policy-approved theme CSS.
+  // The backend strips non-theme selectors and clamps sensitive variables
+  // before this string is ever persisted in organization config.
   useEffect(() => {
     const styleId = "custom-org-css";
-    if (!config?.customCSS) {
+    if (!approvedCustomCss) {
       // Remove the style tag if customCSS was cleared
       document.getElementById(styleId)?.remove();
       // Also clear any inline style overrides from previous non-AI theme
@@ -67,7 +69,7 @@ export function ClientThemeProvider({ children }: ClientThemeProviderProps) {
       // Append at the END of <head> so it comes after globals.css
       document.head.appendChild(styleEl);
     }
-    styleEl.textContent = config.customCSS;
+    styleEl.textContent = approvedCustomCss;
     // Force-clear any inline style.setProperty overrides so the <style> tag wins
     const root = document.documentElement;
     root.style.removeProperty("--primary");
@@ -88,7 +90,7 @@ export function ClientThemeProvider({ children }: ClientThemeProviderProps) {
     return () => {
       document.getElementById(styleId)?.remove();
     };
-  }, [config?.customCSS]);
+  }, [approvedCustomCss]);
 
   // Apply custom JavaScript if provided (with caution)
   useEffect(() => {

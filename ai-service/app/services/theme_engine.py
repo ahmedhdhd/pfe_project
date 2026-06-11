@@ -8,6 +8,11 @@ from app.services.openrouter import chat_json
 HEX_COLOR_RE = re.compile(r"^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$")
 ROOT_BLOCK_RE = re.compile(r":root\s*\{[^}]*\}", re.I | re.S)
 DARK_BLOCK_RE = re.compile(r"\.dark\s*\{[^}]*\}", re.I | re.S)
+OKLCH_COLOR_RE = re.compile(
+    r"^oklch\(\s*(?:0(?:\.\d+)?|1(?:\.0+)?)\s+(?:0(?:\.\d+)?|0?\.\d+|0\.4(?:0+)?)\s+(?:\d+(?:\.\d+)?)\s*\)$",
+    re.I,
+)
+CSS_NUMBER_RE = re.compile(r"^(-?\d+(?:\.\d+)?)([a-z%]*)$", re.I)
 FORBIDDEN_CSS_PATTERNS = [
     re.compile(r"@import", re.I),
     re.compile(r"@apply", re.I),
@@ -100,6 +105,81 @@ REQUIRED_THEME_VARS = (
     "--spacing",
 )
 
+COLOR_THEME_VARS = {
+    token
+    for token in REQUIRED_THEME_VARS
+    if token
+    not in {
+        "--font-sans",
+        "--font-serif",
+        "--font-mono",
+        "--radius",
+        "--shadow-x",
+        "--shadow-y",
+        "--shadow-blur",
+        "--shadow-spread",
+        "--shadow-opacity",
+        "--shadow-color",
+        "--shadow-2xs",
+        "--shadow-xs",
+        "--shadow-sm",
+        "--shadow",
+        "--shadow-md",
+        "--shadow-lg",
+        "--shadow-xl",
+        "--shadow-2xl",
+        "--tracking-normal",
+        "--spacing",
+    }
+}
+FREE_FONT_VARS = {"--font-sans"}
+CONSTRAINED_VARS = {
+    "--radius",
+    "--spacing",
+    "--font-size-base",
+    "--tracking-normal",
+}
+LOCKED_THEME_VARS = {
+    "--font-serif",
+    "--font-mono",
+    "--shadow-x",
+    "--shadow-y",
+    "--shadow-blur",
+    "--shadow-spread",
+    "--shadow-opacity",
+    "--shadow-color",
+    "--shadow-2xs",
+    "--shadow-xs",
+    "--shadow-sm",
+    "--shadow",
+    "--shadow-md",
+    "--shadow-lg",
+    "--shadow-xl",
+    "--shadow-2xl",
+}
+KNOWN_OPTIONAL_VARS = {"--font-size-base"}
+LINE_HEIGHT_VAR_RE = re.compile(r"^--(?:.*-)?line-height(?:-.*)?$", re.I)
+LOCKED_VAR_PATTERNS = [
+    re.compile(r"--.*button.*height", re.I),
+    re.compile(r"--.*input.*height", re.I),
+    re.compile(r"--.*sidebar.*width", re.I),
+    re.compile(r"--.*header.*height", re.I),
+    re.compile(r"--.*container.*width", re.I),
+    re.compile(r"--.*(?:^|-)width(?:-|$)", re.I),
+    re.compile(r"--.*(?:^|-)height(?:-|$)", re.I),
+    re.compile(r"--.*scale(?:-|$)", re.I),
+    re.compile(r"--.*padding(?:-|$)", re.I),
+    re.compile(r"--.*margin(?:-|$)", re.I),
+    re.compile(r"--.*gap(?:-|$)", re.I),
+]
+SAFE_CONSTRAINED_RANGES = {
+    "--radius": (0.375, 1.0, "rem"),
+    "--spacing": (0.125, 0.5, "rem"),
+    "--font-size-base": (0.875, 1.125, "rem"),
+    "--tracking-normal": (-0.02, 0.02, "em"),
+}
+SAFE_LINE_HEIGHT_RANGE = (1.1, 1.8)
+
 
 def _normalize_hex(value: Any, fallback: str) -> str:
     candidate = str(value or "").strip()
@@ -120,6 +200,76 @@ def _normalize_font_family(value: Any) -> str:
 
 def _normalize_hue(value: float) -> float:
     return value % 360.0
+
+
+def _is_valid_color_value(value: str) -> bool:
+    candidate = value.strip()
+    return bool(HEX_COLOR_RE.fullmatch(candidate) or OKLCH_COLOR_RE.fullmatch(candidate))
+
+
+def _is_locked_variable(token: str) -> bool:
+    if token in LOCKED_THEME_VARS:
+        return True
+    return any(pattern.fullmatch(token) for pattern in LOCKED_VAR_PATTERNS)
+
+
+def _parse_numeric_css_value(value: str) -> tuple[float, str] | None:
+    match = CSS_NUMBER_RE.fullmatch(value.strip())
+    if not match:
+        return None
+    return float(match.group(1)), match.group(2).lower()
+
+
+def _coerce_to_rem(value: float, unit: str) -> float | None:
+    if unit in {"", "rem"}:
+        return value
+    if unit == "px":
+        return value / 16.0
+    return None
+
+
+def _format_css_number(value: float) -> str:
+    formatted = f"{value:.3f}".rstrip("0").rstrip(".")
+    return formatted or "0"
+
+
+def _clamp_constrained_value(token: str, candidate_value: str, fallback_value: str) -> str:
+    parsed = _parse_numeric_css_value(candidate_value)
+    fallback_parsed = _parse_numeric_css_value(fallback_value)
+
+    if LINE_HEIGHT_VAR_RE.fullmatch(token):
+        if not parsed:
+            return fallback_value
+        value, unit = parsed
+        clamped = min(max(value, SAFE_LINE_HEIGHT_RANGE[0]), SAFE_LINE_HEIGHT_RANGE[1])
+        return f"{_format_css_number(clamped)}{unit}"
+
+    bounds = SAFE_CONSTRAINED_RANGES.get(token)
+    if not bounds or not parsed:
+        return fallback_value
+
+    min_value, max_value, expected_unit = bounds
+    value, unit = parsed
+
+    if expected_unit == "rem":
+        rem_value = _coerce_to_rem(value, unit)
+        if rem_value is None:
+            return fallback_value
+        clamped = min(max(rem_value, min_value), max_value)
+        return f"{_format_css_number(clamped)}rem"
+
+    if unit and unit != expected_unit:
+        return fallback_value
+
+    clamped = min(max(value, min_value), max_value)
+    if expected_unit:
+        return f"{_format_css_number(clamped)}{expected_unit}"
+
+    if fallback_parsed:
+        _fallback_value, fallback_unit = fallback_parsed
+        if fallback_unit:
+            return f"{_format_css_number(clamped)}{fallback_unit}"
+    return _format_css_number(clamped)
 
 
 def _format_oklch(lightness: float, chroma: float, hue: float) -> str:
@@ -321,30 +471,6 @@ def _build_variable_scaffold(
 
 
 DECLARATION_RE = re.compile(r"(--[\w-]+)\s*:\s*([^;]+);")
-STABLE_THEME_VARS = {
-    "--font-sans",
-    "--font-serif",
-    "--font-mono",
-    "--radius",
-    "--shadow-x",
-    "--shadow-y",
-    "--shadow-blur",
-    "--shadow-spread",
-    "--shadow-opacity",
-    "--shadow-color",
-    "--shadow-2xs",
-    "--shadow-xs",
-    "--shadow-sm",
-    "--shadow",
-    "--shadow-md",
-    "--shadow-lg",
-    "--shadow-xl",
-    "--shadow-2xl",
-    "--tracking-normal",
-    "--spacing",
-}
-
-
 def _extract_declarations(block: str) -> dict[str, str]:
     return {
         key.strip(): value.strip()
@@ -358,31 +484,87 @@ def _serialize_block(selector: str, declarations: dict[str, str]) -> str:
         value = declarations.get(token)
         if value:
             lines.append(f"  {token}: {value};")
+    for token in sorted(KNOWN_OPTIONAL_VARS):
+        value = declarations.get(token)
+        if value:
+            lines.append(f"  {token}: {value};")
+    extra_line_height_tokens = sorted(
+        token
+        for token in declarations
+        if token not in REQUIRED_THEME_VARS
+        and token not in KNOWN_OPTIONAL_VARS
+        and LINE_HEIGHT_VAR_RE.fullmatch(token)
+    )
+    for token in extra_line_height_tokens:
+        lines.append(f"  {token}: {declarations[token]};")
     lines.append("}")
     return "\n".join(lines)
 
 
-def _merge_with_scaffold(candidate_block: str, scaffold_block: str) -> str:
+def _is_known_variable(token: str) -> bool:
+    return (
+        token in REQUIRED_THEME_VARS
+        or token in KNOWN_OPTIONAL_VARS
+        or LINE_HEIGHT_VAR_RE.fullmatch(token) is not None
+    )
+
+
+def _approve_variable_value(token: str, candidate_value: str, fallback_value: str) -> str | None:
+    # Policy layer:
+    # - free variables may vary if the value is valid
+    # - constrained variables are clamped into a safe design range
+    # - locked variables always fall back to the scaffold/default value
+    if _is_locked_variable(token):
+        return fallback_value or None
+
+    if token in COLOR_THEME_VARS:
+        return candidate_value if _is_valid_color_value(candidate_value) else fallback_value
+
+    if token in FREE_FONT_VARS:
+        normalized = _normalize_font_family(candidate_value)
+        return normalized if normalized in ALLOWED_FONTS.values() else fallback_value
+
+    if token in CONSTRAINED_VARS or LINE_HEIGHT_VAR_RE.fullmatch(token):
+        fallback_seed = fallback_value or candidate_value
+        return _clamp_constrained_value(token, candidate_value, fallback_seed)
+
+    if token in LOCKED_THEME_VARS:
+        return fallback_value or None
+
+    if token in REQUIRED_THEME_VARS:
+        return candidate_value or fallback_value or None
+
+    return None
+
+
+def _apply_variable_policy(candidate_block: str, scaffold_block: str) -> str:
     candidate_vars = _extract_declarations(candidate_block)
     scaffold_vars = _extract_declarations(scaffold_block)
     merged: dict[str, str] = {}
 
     for token in REQUIRED_THEME_VARS:
-        scaffold_value = scaffold_vars.get(token)
-        candidate_value = candidate_vars.get(token)
+        scaffold_value = scaffold_vars.get(token, "")
+        candidate_value = candidate_vars.get(token, scaffold_value)
+        approved_value = _approve_variable_value(token, candidate_value, scaffold_value)
+        if approved_value:
+            merged[token] = approved_value
 
-        if token in STABLE_THEME_VARS:
-            if scaffold_value:
-                merged[token] = scaffold_value
+    for token, candidate_value in candidate_vars.items():
+        if token in merged or not _is_known_variable(token):
             continue
-
-        if candidate_value:
-            merged[token] = candidate_value
-        elif scaffold_value:
-            merged[token] = scaffold_value
+        approved_value = _approve_variable_value(token, candidate_value, scaffold_vars.get(token, ""))
+        if approved_value:
+            merged[token] = approved_value
 
     selector = ".dark" if candidate_block.strip().startswith(".dark") else ":root"
     return _serialize_block(selector, merged)
+
+
+def _strip_allowed_blocks(candidate: str) -> str:
+    stripped = ROOT_BLOCK_RE.sub("", candidate)
+    stripped = DARK_BLOCK_RE.sub("", stripped)
+    stripped = re.sub(r"/\*.*?\*/", "", stripped, flags=re.S)
+    return stripped.strip()
 
 
 def _sanitize_css(
@@ -408,14 +590,17 @@ def _sanitize_css(
     if not scaffold_root_match or not scaffold_dark_match:
         raise ValueError("Theme scaffold is invalid")
 
+    if candidate and _strip_allowed_blocks(candidate):
+        raise ValueError("Generated CSS must contain only :root and .dark variable blocks")
+
     candidate_root_match = ROOT_BLOCK_RE.search(candidate)
     candidate_dark_match = DARK_BLOCK_RE.search(candidate)
 
-    root_block = _merge_with_scaffold(
+    root_block = _apply_variable_policy(
         candidate_root_match.group(0) if candidate_root_match else scaffold_root_match.group(0),
         scaffold_root_match.group(0),
     )
-    dark_block = _merge_with_scaffold(
+    dark_block = _apply_variable_policy(
         candidate_dark_match.group(0) if candidate_dark_match else scaffold_dark_match.group(0),
         scaffold_dark_match.group(0),
     )
@@ -519,7 +704,10 @@ CRITICAL RULES FOR customCss:
             "secondaryColor": secondary,
             "fontFamily": font_family,
         },
+        # Keep the legacy customCss field for compatibility, but only expose
+        # the policy-approved CSS to downstream consumers.
         "customCss": custom_css,
+        "approvedCustomCss": custom_css,
     }
 
 

@@ -334,6 +334,7 @@ export interface GeneratedOrganizationTheme {
   summary: string;
   theme: OrganizationConfigTheme;
   customCss: string;
+  approvedCustomCss: string;
 }
 
 export interface BatchReviewUser {
