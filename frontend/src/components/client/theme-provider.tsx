@@ -11,10 +11,15 @@ interface ClientThemeProviderProps {
   children: React.ReactNode;
 }
 
+/** Strip @import rules — they resolve as page URLs in injected <style> tags. */
+function sanitizeInjectedCss(css: string): string {
+  return css.replace(/@import[^;]+;?/gi, "").trim();
+}
+
 export function ClientThemeProvider({ children }: ClientThemeProviderProps) {
   const colors = useOrgColors();
   const config = useOrganizationConfigStore((state) => state.config);
-  const approvedCustomCss = config?.customCSS?.trim() || "";
+  const approvedCustomCss = sanitizeInjectedCss(config?.customCSS?.trim() || "");
 
   // Apply theme colors to CSS variables.
   // SKIP if customCSS is present — customCSS already defines all variables

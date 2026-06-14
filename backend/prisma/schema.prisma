@@ -8,8 +8,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ============================================================
@@ -75,6 +76,13 @@ model OrganizationConfig {
 
   // Theme (stored as JSON)
   themeJson  Json?    // { primaryColor, secondaryColor, fontFamily }
+  themeColor String?  // Primary brand hex (mirrors themeJson.primaryColor)
+  uiConfigJson Json?  // Structured UI config: tokens, variants, layout, homepage sections
+
+  // Onboarding / platform metadata
+  language     String?
+  audienceType String?
+  platformType String?
 
   // Landing page content
   heroTitle    String?
@@ -133,6 +141,7 @@ model User {
   passwordHash   String?
   role           UserRole
   isVerified     Boolean  @default(false)
+  hasCompletedOnboarding Boolean @default(false)
   profileImg     String?
   gender         String?  // "Male" | "Female" | "Other"
 

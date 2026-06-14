@@ -1,0 +1,156 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches: [main, skipaionboarding]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP || 'queztlearn-rg' }}
+  AZURE_WEBAPP_BACKEND: ${{ vars.AZURE_WEBAPP_BACKEND || 'queztlearn-api' }}
+  AZURE_WEBAPP_FRONTEND: ${{ vars.AZURE_WEBAPP_FRONTEND || 'queztlearn-web' }}
+  ACR_NAME: ${{ vars.ACR_NAME || 'queztlearnacr' }}
+  CONTAINER_APP_NAME: ${{ vars.CONTAINER_APP_NAME || 'queztlearn-ai' }}
+  CONTAINERAPPS_ENV: ${{ vars.CONTAINERAPPS_ENV || 'queztlearn-env' }}
+
+jobs:
+  migrate-database:
+    name: Prisma migrate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Run migrations
+        working-directory: backend
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+  deploy-ai-service:
+    name: Deploy AI service
+    runs-on: ubuntu-latest
+    needs: migrate-database
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push AI image
+        run: |
+          az acr build \
+            --registry "${{ env.ACR_NAME }}" \
+            --image "quezlearn-ai:${{ github.sha }}" \
+            --image "quezlearn-ai:latest" \
+            ./ai-service
+
+      - name: Update Container App
+        run: |
+          ACR_LOGIN_SERVER=$(az acr show --name "${{ env.ACR_NAME }}" --query loginServer -o tsv)
+          az containerapp update \
+            --name "${{ env.CONTAINER_APP_NAME }}" \
+            --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
+            --image "${ACR_LOGIN_SERVER}/quezlearn-ai:${{ github.sha }}"
+
+  deploy-backend:
+    name: Deploy backend API
+    runs-on: ubuntu-latest
+    needs: migrate-database
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Build backend
+        working-directory: backend
+        run: |
+          npm ci
+          npx prisma generate
+          npm run build
+
+      - name: Prepare deployment package
+        working-directory: backend
+        run: |
+          mkdir -p deploy
+          cp -r dist deploy/dist
+          cp -r node_modules deploy/node_modules
+          cp -r prisma deploy/prisma
+          cp package.json package-lock.json deploy/
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_BACKEND }}
+          package: backend/deploy
+
+  deploy-frontend:
+    name: Deploy frontend
+    runs-on: ubuntu-latest
+    needs: deploy-backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_URL: https://${{ env.AZURE_WEBAPP_BACKEND }}.azurewebsites.net
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare deployment package
+        working-directory: frontend
+        run: |
+          mkdir -p deploy
+          cp -r .next/standalone/. deploy/
+          mkdir -p deploy/.next
+          cp -r .next/static deploy/.next/static
+          cp -r public deploy/public
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_FRONTEND }}
+          package: frontend/deploy

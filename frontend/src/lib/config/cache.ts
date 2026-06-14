@@ -150,17 +150,25 @@ async function fetchAndCacheConfig(
       throw error;
     }
 
-    const config = await response.json();
+    const payload = await response.json();
 
-    // Validate config structure
-    if (!config || typeof config !== "object") {
+    if (!payload || typeof payload !== "object") {
       throw new Error("Invalid config response: expected an object");
     }
 
-    // Cache it
-    setCachedConfig(subdomain, config);
+    const config =
+      payload.success === true && payload.data
+        ? payload.data
+        : payload;
 
-    return config;
+    if (!config || typeof config !== "object") {
+      throw new Error("Invalid config response: missing organization config");
+    }
+
+    // Cache it
+    setCachedConfig(subdomain, config as OrganizationConfig);
+
+    return config as OrganizationConfig;
   } catch (error) {
     // Re-throw with more context if it's not already our error
     if (error instanceof Error) {

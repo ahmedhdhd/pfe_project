@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
+/** Paths that must not be rewritten to tenant routes (assets, Next internals, etc.) */
+function shouldBypassTenantRewrite(pathname: string): boolean {
+  return (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname === "/favicon.ico" ||
+    pathname === "/tailwindcss" ||
+    /\.[a-zA-Z0-9]+$/.test(pathname)
+  );
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostHeader = request.headers.get("host") || "";
@@ -33,6 +44,10 @@ export function middleware(request: NextRequest) {
       hostname.endsWith(".teslaacademy.in")) &&
     subdomain
   ) {
+    if (shouldBypassTenantRewrite(pathname)) {
+      return NextResponse.next();
+    }
+
     const url = new URL(request.url);
 
     // Add subdomain to search params for client identification
@@ -63,6 +78,10 @@ export function middleware(request: NextRequest) {
 
   // Handle localhost subdomain like mit.localhost
   if (hostname.endsWith(".localhost")) {
+    if (shouldBypassTenantRewrite(pathname)) {
+      return NextResponse.next();
+    }
+
     const url = new URL(request.url);
     const tenant = hostname.replace(".localhost", "");
 

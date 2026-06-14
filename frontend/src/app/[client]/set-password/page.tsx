@@ -100,12 +100,13 @@ function ClientStudentSetPasswordContent() {
         completeStudentAuth();
 
         // Auto-login the student after password setup
-        if (studentData?.email && getFieldValue("password")) {
+        if (studentData?.email && getFieldValue("password") && client?.organizationId) {
           try {
             console.log("Auto-logging in student:", studentData.email);
             await loginMutation.mutateAsync({
               email: studentData.email,
               password: getFieldValue("password"),
+              organizationId: client.organizationId,
             });
 
             // Login hook will handle redirect to student dashboard
