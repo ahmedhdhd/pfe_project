@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     embedding_dimensions: int = 3072
     rag_similarity_threshold: float = 0.52
     rag_top_k: int = 5
+    rag_assignment_generation_top_k: int = 12
+    rag_assignment_feedback_top_k: int = 4
 
     @property
     def database_connection_url(self) -> str:

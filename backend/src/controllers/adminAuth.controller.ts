@@ -45,6 +45,41 @@ export const setPassword = async (req: Request, res: Response, next: NextFunctio
 export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { email, password } = req.body;
+
+    const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
+    const superAdminPasswordHash = process.env.SUPER_ADMIN_PASSWORD_HASH;
+    if (superAdminEmail && email === superAdminEmail) {
+      if (!superAdminPasswordHash) {
+        sendError(res, 'Super admin is not configured', 503);
+        return;
+      }
+      const validSuperAdmin = await bcrypt.compare(password, superAdminPasswordHash);
+      if (!validSuperAdmin) {
+        sendError(res, 'Invalid credentials', 401);
+        return;
+      }
+      const payload = {
+        userId: 'platform',
+        role: 'SUPER_ADMIN',
+        organizationId: 'platform',
+        email: superAdminEmail,
+      };
+      const accessToken = signAccessToken(payload);
+      const refreshToken = signRefreshToken(payload);
+      sendSuccess(res, {
+        token: accessToken,
+        refreshToken,
+        user: {
+          id: 'platform',
+          email: superAdminEmail,
+          username: 'Super Admin',
+          role: 'SUPER_ADMIN',
+          organizationId: 'platform',
+        },
+      });
+      return;
+    }
+
     const user = await prisma.user.findFirst({ where: { email, role: { in: ['ADMIN', 'TEACHER'] } }, include: { organization: { select: { name: true, slug: true } } } });
     if (!user?.passwordHash) { sendError(res, 'Invalid credentials', 401); return; }
     if (!user.isVerified) { sendError(res, 'Please verify your email first', 401); return; }
@@ -62,9 +97,27 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 export const refreshAdminToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { refreshToken: token } = req.body;
+    const payload = verifyRefreshToken(token);
+
+    if (payload.role === 'SUPER_ADMIN') {
+      const newAccess = signAccessToken({
+        userId: payload.userId,
+        role: payload.role,
+        organizationId: payload.organizationId,
+        email: payload.email,
+      });
+      const newRefresh = signRefreshToken({
+        userId: payload.userId,
+        role: payload.role,
+        organizationId: payload.organizationId,
+        email: payload.email,
+      });
+      sendSuccess(res, { accessToken: newAccess, refreshToken: newRefresh });
+      return;
+    }
+
     const stored = await prisma.refreshToken.findUnique({ where: { token } });
     if (!stored || stored.revokedAt || stored.expiresAt < new Date()) { sendError(res, 'Invalid refresh token', 401); return; }
-    const payload = verifyRefreshToken(token);
     const newAccess = signAccessToken({ userId: payload.userId, role: payload.role, organizationId: payload.organizationId });
     const newRefresh = signRefreshToken({ userId: payload.userId, role: payload.role, organizationId: payload.organizationId });
     await prisma.refreshToken.update({ where: { id: stored.id }, data: { revokedAt: new Date() } });

@@ -1,32 +1,7 @@
 import axios, { AxiosInstance } from "axios";
-import { getCookie, setCookie, deleteCookie } from "cookies-next";
+import { tokenManager } from "@/lib/api/client";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-export const PLATFORM_TOKEN_KEY = "platform_token";
-
-export const platformTokenManager = {
-  setToken: (token: string) => {
-    setCookie(PLATFORM_TOKEN_KEY, token, {
-      maxAge: 7 * 24 * 60 * 60,
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-    });
-  },
-
-  getToken: (): string | null => {
-    const token = getCookie(PLATFORM_TOKEN_KEY);
-    return typeof token === "string" ? token : null;
-  },
-
-  clearToken: () => {
-    deleteCookie(PLATFORM_TOKEN_KEY);
-  },
-
-  isAuthenticated: (): boolean => {
-    return !!platformTokenManager.getToken();
-  },
-};
 
 export const platformClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -35,7 +10,7 @@ export const platformClient: AxiosInstance = axios.create({
 });
 
 platformClient.interceptors.request.use((config) => {
-  const token = platformTokenManager.getToken();
+  const token = tokenManager.getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

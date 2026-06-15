@@ -38,7 +38,7 @@ export interface User {
   organizationSlug?: string;
   email: string;
   username: string;
-  role: "ADMIN" | "TEACHER" | "STUDENT";
+  role: "ADMIN" | "TEACHER" | "STUDENT" | "SUPER_ADMIN";
   isVerified: boolean;
   createdAt: string;
   profileImg?: string;

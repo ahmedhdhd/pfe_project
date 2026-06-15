@@ -167,22 +167,27 @@ const generateAssignmentAiFeedbackPayload = async ({
   scorePercent: number | null;
 }) => {
   const fallback = buildRuleBasedAssignmentFeedback({ assignment, answers, scorePercent });
-  const prompt = `You are an educational tutor. Analyze this assignment submission for "${assignment.title}".
-Return JSON only with keys: overallFeedback, weakConcepts, strengths, recommendations, questionFeedback.
-Each questionFeedback item must include: questionId, isCorrect, feedback, whyCorrectAnswer, studyHint.
-Be concise, supportive, and explain what the student got wrong and why. If a question needs manual grading, say what to improve without inventing a score.
-Use the provided correctAnswer and isCorrect fields — do not invent scores or answers.
-
-Assignment attempt:
-${JSON.stringify({
-  title: assignment.title,
-  description: stripHtml(assignment.description),
-  scorePercent,
-  questions: buildAssignmentAttemptContext({ assignment, answers }),
-}).slice(0, 18000)}`;
+  const questionContext = buildAssignmentAttemptContext({ assignment, answers });
 
   try {
-    const parsed = await aiService.assignmentFeedback({ organizationId, prompt });
+    const parsed = await aiService.assignmentFeedback({
+      organizationId,
+      batchId: assignment.batchId,
+      topicId: assignment.topicId || undefined,
+      assignmentTitle: assignment.title,
+      assignmentDescription: stripHtml(assignment.description),
+      courseName: assignment.batch?.name || '',
+      topicName: assignment.topic?.name || '',
+      scorePercent,
+      questions: questionContext,
+    });
+
+    if (parsed.ragStatus === 'no_chunks') {
+      logger.warn(
+        `Assignment AI feedback used with no RAG chunks for assignment ${assignment.id}`
+      );
+    }
+
     return {
       overallFeedback:
         typeof parsed.overallFeedback === 'string'
@@ -192,10 +197,14 @@ ${JSON.stringify({
       strengths: normalizeJsonArray(parsed.strengths),
       recommendations: normalizeJsonArray(parsed.recommendations),
       questionFeedback: normalizeJsonArray(parsed.questionFeedback),
+      suggestedScorePercent:
+        typeof parsed.suggestedScorePercent === 'number'
+          ? Math.min(100, Math.max(0, parsed.suggestedScorePercent))
+          : null,
     };
   } catch (error: any) {
     logger.warn(`Assignment AI feedback fallback used: ${error?.message || String(error)}`);
-    return fallback;
+    return { ...fallback, suggestedScorePercent: null };
   }
 };
 
@@ -205,6 +214,7 @@ const upsertAssignmentAiFeedback = async (submissionId: string) => {
     include: {
       assignment: {
         include: {
+          batch: { select: { name: true } },
           topic: { select: { name: true } },
           questions: { orderBy: { order: 'asc' } },
         },
@@ -227,6 +237,12 @@ const upsertAssignmentAiFeedback = async (submissionId: string) => {
     scorePercent,
   });
 
+  const resolvedScorePercent =
+    scorePercent ??
+    (typeof payload.suggestedScorePercent === 'number'
+      ? payload.suggestedScorePercent
+      : null);
+
   const feedbackRecord = await (prisma as any).assignmentAiFeedback.upsert({
     where: { submissionId: submission.id },
     create: {
@@ -234,7 +250,7 @@ const upsertAssignmentAiFeedback = async (submissionId: string) => {
       assignmentId: submission.assignmentId,
       studentId: submission.studentId,
       batchId: submission.assignment.batchId,
-      scorePercent,
+      scorePercent: resolvedScorePercent,
       feedbackText: payload.overallFeedback,
       weakConceptsJson: payload.weakConcepts,
       strengthsJson: payload.strengths,
@@ -243,7 +259,7 @@ const upsertAssignmentAiFeedback = async (submissionId: string) => {
       generatedAt: new Date(),
     },
     update: {
-      scorePercent,
+      scorePercent: resolvedScorePercent,
       feedbackText: payload.overallFeedback,
       weakConceptsJson: payload.weakConcepts,
       strengthsJson: payload.strengths,
@@ -587,53 +603,51 @@ export const generateAssignmentWithAi = async (
 
     const count = Math.min(Math.max(Number(req.body?.count) || 5, 1), 12);
     const level = normalizeQuestionLevel(req.body?.level);
-    const levelInstruction =
-      level === 'EASY'
-        ? 'Easy: test recall and basic understanding with direct wording and low cognitive load.'
-        : level === 'HARD'
-        ? 'Hard: require analysis, application, edge cases, or multi-step reasoning. Avoid trick questions, but make distractors plausible.'
-        : 'Medium: mix understanding and application. Questions should be clear but require more than memorization.';
-    const generationPrompt = `Generate ${count} ${level.toLowerCase()} assignment questions for this LMS assignment.
-Return JSON only:
-{
-  "questions": [
-    {
-      "type": "QUIZ" | "TRUE_FALSE" | "SHORT_ANSWER",
-      "title": "short title",
-      "prompt": "student-facing question, can include simple HTML",
-      "points": 1,
-      "options": [{"id":"a","text":"Option A"}],
-      "correctAnswer": {"optionId":"a"} OR {"value":true} OR {"text":"expected answer"}
-    }
-  ]
-}
-Use only supported types: QUIZ, TRUE_FALSE, SHORT_ANSWER. For QUIZ, include 4 options with ids a,b,c,d and one correct optionId. For TRUE_FALSE, include correctAnswer.value. For SHORT_ANSWER, include correctAnswer.text.
-Difficulty requirement: ${levelInstruction}
+    const contentIds = normalizeJsonArray(req.body?.contentIds)
+      .map((item) => String(item || '').trim())
+      .filter(Boolean);
 
-Assignment:
-${JSON.stringify({
-  title: assignment.title,
-  description: stripHtml(assignment.description),
-  course: assignment.batch?.name,
-  topic: assignment.topic?.name,
-  level,
-  teacherPrompt: promptText,
-}).slice(0, 8000)}`;
-
-    let parsed: Record<string, unknown>;
+    let parsed: {
+      questions?: unknown[];
+      ragChunksUsed?: number;
+      ragStatus?: string;
+    };
     try {
       parsed = await aiService.assignmentGenerateQuestions({
         organizationId: req.user!.organizationId,
-        generationPrompt,
+        batchId: assignment.batchId,
+        topicId: assignment.topicId || undefined,
+        contentIds: contentIds.length > 0 ? contentIds : undefined,
+        assignmentTitle: assignment.title,
+        assignmentDescription: stripHtml(assignment.description),
+        courseName: assignment.batch?.name || '',
+        topicName: assignment.topic?.name || '',
+        teacherPrompt: promptText,
+        count,
+        level,
       });
     } catch (error: any) {
       const message =
         error instanceof AiServiceError
           ? error.message
           : String(error?.message || error);
-      sendError(res, `Assignment generation failed: ${message.slice(0, 300)}`, 502);
+      const statusCode = error instanceof AiServiceError && error.statusCode === 422 ? 422 : 502;
+      sendError(res, message.slice(0, 400), statusCode);
       return;
     }
+
+    if (parsed.ragStatus === 'no_chunks' || !normalizeJsonArray(parsed.questions).length) {
+      sendError(
+        res,
+        'No indexed course content was found for this assignment. Ensure lessons are indexed in the RAG pipeline for the selected course or topic, then try again.',
+        422
+      );
+      return;
+    }
+
+    logger.info(
+      `Assignment AI generation used ${parsed.ragChunksUsed ?? 0} RAG chunks for assignment ${assignment.id}`
+    );
 
     const questions = normalizeJsonArray(parsed.questions)
       .map((question: any) => {
@@ -695,7 +709,11 @@ ${JSON.stringify({
       )
     );
 
-    sendSuccess(res, { questions: created }, undefined, 201);
+    sendSuccess(res, {
+      questions: created,
+      ragChunksUsed: parsed.ragChunksUsed ?? 0,
+      ragStatus: parsed.ragStatus || 'ok',
+    }, undefined, 201);
   } catch (e) {
     next(e);
   }
@@ -984,6 +1002,82 @@ export const submitAssignment = async (
     const assignment = await ensureStudentAssignmentAccess(req, res, req.params.id);
     if (!assignment) return;
 
+    const existing = await (prisma as any).assignmentSubmission.findUnique({
+      where: {
+        assignmentId_studentId: {
+          assignmentId: assignment.id,
+          studentId: req.user!.userId,
+        },
+      },
+    });
+
+    if (existing?.submittedAt) {
+      sendError(res, 'Assignment already submitted', 400);
+      return;
+    }
+
+    const answers = normalizeJsonObject(req.body?.answers);
+    const { _meta: _, ...submissionAnswers } = answers;
+    const maxScore = assignment.questions.reduce(
+      (total: number, question: any) => total + Number(question.points || 0),
+      0
+    );
+
+    const submission = await (prisma as any).assignmentSubmission.upsert({
+      where: {
+        assignmentId_studentId: {
+          assignmentId: assignment.id,
+          studentId: req.user!.userId,
+        },
+      },
+      create: {
+        assignmentId: assignment.id,
+        studentId: req.user!.userId,
+        answersJson: submissionAnswers,
+        maxScore,
+        status: 'SUBMITTED',
+        submittedAt: new Date(),
+      },
+      update: {
+        answersJson: submissionAnswers,
+        maxScore,
+        status: 'SUBMITTED',
+        submittedAt: new Date(),
+      },
+      include: { aiFeedback: true },
+    });
+
+    const aiFeedback = await upsertAssignmentAiFeedback(submission.id);
+
+    sendSuccess(res, { ...submission, aiFeedback });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const saveAssignmentDraft = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const assignment = await ensureStudentAssignmentAccess(req, res, req.params.id);
+    if (!assignment) return;
+
+    const existing = await (prisma as any).assignmentSubmission.findUnique({
+      where: {
+        assignmentId_studentId: {
+          assignmentId: assignment.id,
+          studentId: req.user!.userId,
+        },
+      },
+    });
+
+    if (existing?.submittedAt) {
+      sendError(res, 'Assignment already submitted', 400);
+      return;
+    }
+
     const answers = normalizeJsonObject(req.body?.answers);
     const maxScore = assignment.questions.reduce(
       (total: number, question: any) => total + Number(question.points || 0),
@@ -1002,21 +1096,16 @@ export const submitAssignment = async (
         studentId: req.user!.userId,
         answersJson: answers,
         maxScore,
-        status: 'SUBMITTED',
-        submittedAt: new Date(),
+        status: 'DRAFT',
       },
       update: {
         answersJson: answers,
         maxScore,
-        status: 'SUBMITTED',
-        submittedAt: new Date(),
+        status: 'DRAFT',
       },
-      include: { aiFeedback: true },
     });
 
-    const aiFeedback = await upsertAssignmentAiFeedback(submission.id);
-
-    sendSuccess(res, { ...submission, aiFeedback });
+    sendSuccess(res, submission);
   } catch (e) {
     next(e);
   }

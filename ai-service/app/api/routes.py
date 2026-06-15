@@ -28,6 +28,10 @@ from app.services.transcription import transcribe_media_bytes
 from app.services.openrouter import chat_completion, chat_json
 from app.services.org_keys import get_org_openrouter_key
 from app.services.playground import generate_playground_html
+from app.services.assignment_ai import (
+    evaluate_assignment_submission_with_rag,
+    generate_assignment_questions_with_rag,
+)
 from app.services.prompts import build_system_prompt_with_rag
 from app.services.theme_engine import generate_theme_bundle
 from app.db.pool import db_conn
@@ -182,12 +186,17 @@ async def assignment_feedback(body: AssignmentFeedbackRequest) -> dict[str, Any]
     if not api_key:
         raise HTTPException(status_code=400, detail="OpenRouter API key is not configured")
     try:
-        return await chat_json(
+        return await evaluate_assignment_submission_with_rag(
             api_key=api_key,
             model=settings.openrouter_model,
-            prompt=body.prompt,
-            temperature=0.2,
-            max_tokens=settings.openrouter_assignment_feedback_max_tokens,
+            batch_id=body.batch_id,
+            topic_id=body.topic_id,
+            assignment_title=body.assignment_title,
+            assignment_description=body.assignment_description,
+            course_name=body.course_name,
+            topic_name=body.topic_name,
+            score_percent=body.score_percent,
+            questions=body.questions,
         )
     except Exception as exc:
         raise HTTPException(status_code=502, detail=str(exc)[:800]) from exc
@@ -206,13 +215,32 @@ async def assignment_generate(body: AssignmentGenerateRequest) -> dict[str, Any]
     if not api_key:
         raise HTTPException(status_code=400, detail="OpenRouter API key is not configured")
     try:
-        return await chat_json(
+        result = await generate_assignment_questions_with_rag(
             api_key=api_key,
             model=settings.openrouter_model,
-            prompt=body.generation_prompt,
-            temperature=0.35,
-            max_tokens=settings.openrouter_assignment_generation_max_tokens,
+            batch_id=body.batch_id,
+            topic_id=body.topic_id,
+            content_ids=body.content_ids or None,
+            assignment_title=body.assignment_title,
+            assignment_description=body.assignment_description,
+            course_name=body.course_name,
+            topic_name=body.topic_name,
+            teacher_prompt=body.teacher_prompt,
+            count=body.count,
+            level=body.level,
         )
+        if result.get("ragStatus") == "no_chunks":
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    "No indexed course content was found for this assignment scope. "
+                    "Ensure lessons are indexed in the RAG pipeline (extracted text + embeddings) "
+                    "for the selected course or topic, then try again."
+                ),
+            )
+        return result
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=502, detail=str(exc)[:800]) from exc
 

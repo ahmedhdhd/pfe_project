@@ -95,8 +95,15 @@ export const useLogin = () => {
         // Update user cache
         queryClient.setQueryData(queryKeys.user, data.data.user);
 
-        // Redirect to dashboard
-        router.push("/admin/dashboard");
+        // Redirect based on user role
+        const userRole = data.data.user.role?.toUpperCase();
+        if (userRole === 'SUPER_ADMIN') {
+          router.push('/platform/dashboard');
+        } else if (userRole === 'TEACHER') {
+          router.push('/teacher/dashboard');
+        } else {
+          router.push('/admin/dashboard');
+        }
       }
     },
     onError: (error) => {
@@ -2018,7 +2025,14 @@ export const useGenerateAssignmentWithAi = () => {
       level?: AssignmentQuestionLevel;
     }) =>
       apiClient
-        .post<{ success: boolean; data: { questions: AssignmentQuestion[] } }>(
+        .post<{
+          success: boolean;
+          data: {
+            questions: AssignmentQuestion[];
+            ragChunksUsed?: number;
+            ragStatus?: string;
+          };
+        }>(
           `/admin/assignments/${assignmentId}/generate`,
           { prompt, count, level }
         )
@@ -2225,6 +2239,36 @@ export const useSubmitAssignment = () => {
       queryClient.invalidateQueries({
         queryKey: ["student", "assignment", variables.id],
       });
+    },
+  });
+};
+
+export const useSaveAssignmentDraft = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, answers }: { id: string; answers: Record<string, unknown> }) =>
+      apiClient
+        .post<{ success: boolean; data: AssignmentSubmission }>(
+          `/api/assignments/${id}/save`,
+          { answers }
+        )
+        .then((res) => res.data),
+    onSuccess: (response, variables) => {
+      queryClient.setQueryData(
+        ["student", "assignment", variables.id],
+        (current: { success: boolean; data: Assignment & { mySubmission?: AssignmentSubmission } } | undefined) => {
+          if (!current?.data) return current;
+
+          return {
+            ...current,
+            data: {
+              ...current.data,
+              mySubmission: response.data,
+            },
+          };
+        }
+      );
     },
   });
 };

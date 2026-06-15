@@ -57,16 +57,26 @@ async def search_similar_chunks(
     query_embedding: list[float],
     batch_id: str,
     top_k: int | None = None,
+    *,
+    topic_id: str | None = None,
+    content_ids: list[str] | None = None,
+    similarity_threshold: float | None = None,
 ) -> list[dict[str, Any]]:
     k = top_k or settings.rag_top_k
     embedding_str = "[" + ",".join(str(v) for v in query_embedding) + "]"
-    threshold = settings.rag_similarity_threshold
+    threshold = (
+        similarity_threshold
+        if similarity_threshold is not None
+        else settings.rag_similarity_threshold
+    )
+    filtered_content_ids = [cid for cid in (content_ids or []) if cid]
 
     def _search() -> list[dict[str, Any]]:
         with db_conn() as conn:
             rows = conn.execute(
                 """
                 SELECT
+                  content_id,
                   chunk_text,
                   source_field,
                   1 - (embedding <=> %s::vector) AS similarity,
@@ -74,10 +84,28 @@ async def search_similar_chunks(
                 FROM content_embeddings
                 WHERE batch_id = %s
                   AND 1 - (embedding <=> %s::vector) > %s
+                  AND (%s::text IS NULL OR metadata->>'topicId' = %s)
+                  AND (
+                    %s::text[] IS NULL
+                    OR cardinality(%s::text[]) = 0
+                    OR content_id = ANY(%s::text[])
+                  )
                 ORDER BY embedding <=> %s::vector
                 LIMIT %s
                 """,
-                (embedding_str, batch_id, embedding_str, threshold, embedding_str, k),
+                (
+                    embedding_str,
+                    batch_id,
+                    embedding_str,
+                    threshold,
+                    topic_id,
+                    topic_id,
+                    filtered_content_ids or None,
+                    filtered_content_ids or None,
+                    filtered_content_ids or None,
+                    embedding_str,
+                    k,
+                ),
             ).fetchall()
         results = []
         for row in rows:
@@ -86,6 +114,7 @@ async def search_similar_chunks(
                 metadata = json.loads(metadata)
             results.append(
                 {
+                    "content_id": row.get("content_id"),
                     "chunk_text": row["chunk_text"],
                     "source_field": row["source_field"],
                     "similarity": float(row["similarity"]),

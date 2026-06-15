@@ -2,10 +2,8 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import {
-  platformApi,
-  platformTokenManager,
-} from "@/lib/api/platform";
+import { platformApi } from "@/lib/api/platform";
+import { tokenManager } from "@/lib/api/client";
 
 export const platformQueryKeys = {
   stats: ["platform", "stats"] as const,
@@ -14,32 +12,14 @@ export const platformQueryKeys = {
   reports: (status?: string) => ["platform", "reports", status] as const,
 };
 
-export const usePlatformLogin = () => {
-  const router = useRouter();
-
-  return useMutation({
-    mutationFn: async (data: { email: string; password: string }) => {
-      const response = await platformApi.login(data);
-      if (!response.data.success) {
-        throw new Error("Login failed");
-      }
-      return response.data.data;
-    },
-    onSuccess: (data) => {
-      platformTokenManager.setToken(data.token);
-      router.push("/platform/dashboard");
-    },
-  });
-};
-
 export const usePlatformLogout = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
   return () => {
-    platformTokenManager.clearToken();
+    tokenManager.clearAuthData();
     queryClient.clear();
-    router.push("/platform/login");
+    router.push("/login");
   };
 };
 

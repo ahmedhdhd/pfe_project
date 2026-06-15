@@ -70,15 +70,18 @@ export default function LoginPage() {
             // Redirect based on user role
             const userRole = (
               userData as { role?: string }
-            ).role?.toLowerCase();
+            ).role?.toUpperCase();
             switch (userRole) {
-              case "admin":
+              case "SUPER_ADMIN":
+                router.push("/platform/dashboard");
+                return;
+              case "ADMIN":
                 router.push("/admin/dashboard");
                 return;
-              case "teacher":
+              case "TEACHER":
                 router.push("/teacher/dashboard");
                 return;
-              case "student":
+              case "STUDENT":
                 // Redirect students to My Learning page
                 router.push("/student/my-learning");
                 return;

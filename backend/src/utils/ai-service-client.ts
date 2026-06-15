@@ -173,13 +173,36 @@ export const aiService = {
       method: 'DELETE',
     }),
 
-  assignmentFeedback: (body: { organizationId: string; prompt: string }) =>
-    aiServiceRequest<Record<string, unknown>>('/assignments/feedback', { body }),
+  assignmentFeedback: (body: {
+    organizationId: string;
+    batchId: string;
+    topicId?: string;
+    assignmentTitle: string;
+    assignmentDescription?: string;
+    courseName?: string;
+    topicName?: string;
+    scorePercent?: number | null;
+    questions: Array<Record<string, unknown>>;
+  }) => aiServiceRequest<Record<string, unknown>>('/assignments/feedback', { body }),
 
   assignmentGenerateQuestions: (body: {
     organizationId: string;
-    generationPrompt: string;
-  }) => aiServiceRequest<Record<string, unknown>>('/assignments/generate-questions', { body }),
+    batchId: string;
+    topicId?: string;
+    contentIds?: string[];
+    assignmentTitle: string;
+    assignmentDescription?: string;
+    courseName?: string;
+    topicName?: string;
+    teacherPrompt: string;
+    count?: number;
+    level?: string;
+  }) =>
+    aiServiceRequest<{
+      questions: unknown[];
+      ragChunksUsed?: number;
+      ragStatus?: string;
+    }>('/assignments/generate-questions', { body }),
 
   summarizeSchedule: (body: {
     organizationId: string;

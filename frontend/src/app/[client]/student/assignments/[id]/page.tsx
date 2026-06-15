@@ -1,18 +1,31 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import DOMPurify from "dompurify";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle2, FileUp, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  FileUp,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { FileUpload } from "@/components/common/file-upload";
-import { useGetStudentAssignment, useSubmitAssignment } from "@/hooks";
+import {
+  useGetStudentAssignment,
+  useSaveAssignmentDraft,
+  useSubmitAssignment,
+} from "@/hooks";
 import type { AssignmentQuestion } from "@/hooks/api";
 
 function getOptions(question: AssignmentQuestion) {
@@ -47,6 +60,108 @@ const asStringArray = (value?: unknown[]) =>
         .filter(Boolean)
     : [];
 
+const isAnswerFilled = (value: unknown) =>
+  value !== undefined && value !== "" && value !== null;
+
+function QuestionInput({
+  question,
+  value,
+  onChange,
+  disabled,
+}: {
+  question: AssignmentQuestion;
+  value: unknown;
+  onChange: (value: unknown) => void;
+  disabled: boolean;
+}) {
+  if (question.type === "QUIZ") {
+    return (
+      <RadioGroup
+        value={String(value || "")}
+        onValueChange={onChange}
+        disabled={disabled}
+      >
+        {getOptions(question).map((option) => (
+          <div key={option.id} className="flex items-start gap-3 rounded-xl border p-3">
+            <RadioGroupItem value={option.id} id={`${question.id}-${option.id}`} className="mt-1" />
+            <Label htmlFor={`${question.id}-${option.id}`} className="flex-1 cursor-pointer">
+              <div
+                className="prose prose-sm max-w-none dark:prose-invert [&_ol]:ml-6 [&_ol]:list-decimal [&_ul]:ml-6 [&_ul]:list-disc"
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(option.text || ""),
+                }}
+              />
+            </Label>
+          </div>
+        ))}
+      </RadioGroup>
+    );
+  }
+
+  if (question.type === "TRUE_FALSE") {
+    return (
+      <RadioGroup
+        value={String(value ?? "")}
+        onValueChange={(next) => onChange(next === "true")}
+        disabled={disabled}
+      >
+        {getOptions(question).map((option) => (
+          <div key={option.id} className="flex items-start gap-3 rounded-xl border p-3">
+            <RadioGroupItem
+              value={option.id}
+              id={`${question.id}-${option.id}`}
+              className="mt-1"
+            />
+            <Label htmlFor={`${question.id}-${option.id}`} className="flex-1 cursor-pointer">
+              <div
+                className="prose prose-sm max-w-none dark:prose-invert [&_ol]:ml-6 [&_ol]:list-decimal [&_ul]:ml-6 [&_ul]:list-disc"
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(option.text || ""),
+                }}
+              />
+            </Label>
+          </div>
+        ))}
+      </RadioGroup>
+    );
+  }
+
+  if (question.type === "SHORT_ANSWER") {
+    return (
+      <Textarea
+        value={String(value || "")}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
+        rows={5}
+        placeholder="Write your answer..."
+      />
+    );
+  }
+
+  if (question.type === "FILE_SUBMISSION") {
+    return (
+      <div className="space-y-3">
+        <FileUpload
+          maxSize={50}
+          onUploadComplete={(file) => onChange(file.url)}
+        />
+        {value ? (
+          <div className="flex items-center gap-2 rounded-xl border bg-muted/30 p-3 text-sm">
+            <FileUp className="h-4 w-4 text-primary" />
+            File uploaded
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Upload your file before submitting.
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return null;
+}
+
 export default function StudentAssignmentPage() {
   const params = useParams();
   const router = useRouter();
@@ -54,9 +169,17 @@ export default function StudentAssignmentPage() {
   const { data: assignmentResponse, isLoading } =
     useGetStudentAssignment(assignmentId);
   const submitAssignment = useSubmitAssignment();
+  const saveDraft = useSaveAssignmentDraft();
   const assignment = assignmentResponse?.data;
 
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
+  const answersRef = useRef<Record<string, unknown>>({});
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [hasHydrated, setHasHydrated] = useState(false);
+
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
 
   const isSubmitted = Boolean(assignment?.mySubmission?.submittedAt);
   const isResultPublished = assignment?.mySubmission?.status === "RETURNED";
@@ -66,27 +189,99 @@ export default function StudentAssignmentPage() {
     [assignment?.questions]
   );
 
+  const questionCount = questions.length;
+  const currentQuestion = questions[currentQuestionIndex];
+  const isFirstQuestion = currentQuestionIndex === 0;
+  const isLastQuestion = currentQuestionIndex === questionCount - 1;
+
+  const answeredCount = useMemo(
+    () => questions.filter((q) => isAnswerFilled(answers[q.id])).length,
+    [answers, questions]
+  );
+
+  const progressPercent =
+    questionCount > 0 ? Math.round((answeredCount / questionCount) * 100) : 0;
+
   useEffect(() => {
-    if (
-      assignment?.mySubmission?.answersJson &&
-      Object.keys(answers).length === 0
-    ) {
-      setAnswers(assignment.mySubmission.answersJson);
+    if (!assignment?.mySubmission?.answersJson) return;
+
+    const saved = assignment.mySubmission.answersJson as Record<string, unknown>;
+    const { _meta: _, ...savedAnswers } = saved;
+
+    if (isSubmitted) {
+      setAnswers(savedAnswers);
+      return;
     }
-  }, [answers, assignment?.mySubmission?.answersJson]);
+
+    if (hasHydrated) return;
+
+    setAnswers(savedAnswers);
+    const meta = saved._meta as { currentQuestionIndex?: number } | undefined;
+    if (typeof meta?.currentQuestionIndex === "number") {
+      const clamped = Math.min(
+        Math.max(0, meta.currentQuestionIndex),
+        Math.max(0, questions.length - 1)
+      );
+      setCurrentQuestionIndex(clamped);
+    }
+    setHasHydrated(true);
+  }, [
+    assignment?.mySubmission?.answersJson,
+    hasHydrated,
+    isSubmitted,
+    questions.length,
+  ]);
 
   const updateAnswer = (questionId: string, value: unknown) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
+  const buildSavePayload = useCallback((nextIndex: number) => {
+    return {
+      ...answersRef.current,
+      _meta: { currentQuestionIndex: nextIndex },
+    };
+  }, []);
+
+  const saveProgress = async (nextIndex: number) => {
+    if (!assignment || isSubmitted) return false;
+
+    try {
+      await saveDraft.mutateAsync({
+        id: assignment.id,
+        answers: buildSavePayload(nextIndex),
+      });
+      return true;
+    } catch {
+      toast.error("Unable to save your progress.");
+      return false;
+    }
+  };
+
+  const handlePrevious = async () => {
+    if (isFirstQuestion) return;
+    const nextIndex = currentQuestionIndex - 1;
+    const saved = await saveProgress(nextIndex);
+    if (saved) {
+      setCurrentQuestionIndex(nextIndex);
+    }
+  };
+
+  const handleNext = async () => {
+    if (isLastQuestion) return;
+    const nextIndex = currentQuestionIndex + 1;
+    const saved = await saveProgress(nextIndex);
+    if (saved) {
+      setCurrentQuestionIndex(nextIndex);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!assignment) return;
 
+    const latestAnswers = answersRef.current;
     const unanswered = questions.filter(
-      (question) =>
-        answers[question.id] === undefined ||
-        answers[question.id] === "" ||
-        answers[question.id] === null
+      (question) => !isAnswerFilled(latestAnswers[question.id])
     );
 
     if (unanswered.length > 0) {
@@ -94,8 +289,14 @@ export default function StudentAssignmentPage() {
       return;
     }
 
+    const saved = await saveProgress(currentQuestionIndex);
+    if (!saved) return;
+
     try {
-      await submitAssignment.mutateAsync({ id: assignment.id, answers });
+      await submitAssignment.mutateAsync({
+        id: assignment.id,
+        answers: buildSavePayload(currentQuestionIndex),
+      });
       toast.success("Assignment submitted.");
     } catch {
       toast.error("Unable to submit assignment.");
@@ -276,119 +477,124 @@ export default function StudentAssignmentPage() {
           </Card>
         ) : null}
 
-        {questions.map((question, index) => (
-          <Card key={question.id}>
-            <CardHeader>
-              <div className="flex items-center justify-between gap-4">
-                <CardTitle className="text-lg">Question {index + 1}</CardTitle>
-                <Badge variant="outline">{question.points} pts</Badge>
+        {!isSubmitted && questionCount > 0 && currentQuestion ? (
+          <Card>
+            <CardHeader className="space-y-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <CardTitle className="text-lg">
+                  Question {currentQuestionIndex + 1} of {questionCount}
+                </CardTitle>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="secondary">
+                    {answeredCount}/{questionCount} answered
+                  </Badge>
+                  {saveDraft.isPending ? (
+                    <Badge variant="outline" className="gap-1">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Saving...
+                    </Badge>
+                  ) : null}
+                </div>
               </div>
-              <div
-                className="prose prose-sm max-w-none text-sm leading-6 text-muted-foreground dark:prose-invert [&_ol]:ml-6 [&_ol]:list-decimal [&_ul]:ml-6 [&_ul]:list-disc"
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(question.prompt || ""),
-                }}
-              />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Progress</span>
+                  <span>{progressPercent}% complete</span>
+                </div>
+                <Progress value={progressPercent} />
+              </div>
             </CardHeader>
-            <CardContent>
-              {question.type === "QUIZ" ? (
-                <RadioGroup
-                  value={String(answers[question.id] || "")}
-                  onValueChange={(value) => updateAnswer(question.id, value)}
-                  disabled={isSubmitted}
-                >
-                  {getOptions(question).map((option) => (
-                    <div key={option.id} className="flex items-start gap-3 rounded-xl border p-3">
-                      <RadioGroupItem value={option.id} id={`${question.id}-${option.id}`} className="mt-1" />
-                      <Label htmlFor={`${question.id}-${option.id}`} className="flex-1 cursor-pointer">
-                        <div
-                          className="prose prose-sm max-w-none dark:prose-invert [&_ol]:ml-6 [&_ol]:list-decimal [&_ul]:ml-6 [&_ul]:list-disc"
-                          dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(option.text || ""),
-                          }}
-                        />
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              ) : null}
-
-              {question.type === "TRUE_FALSE" ? (
-                <RadioGroup
-                  value={String(answers[question.id] ?? "")}
-                  onValueChange={(value) => updateAnswer(question.id, value === "true")}
-                  disabled={isSubmitted}
-                >
-                  {getOptions(question).map((option) => (
-                    <div key={option.id} className="flex items-start gap-3 rounded-xl border p-3">
-                      <RadioGroupItem
-                        value={option.id}
-                        id={`${question.id}-${option.id}`}
-                        className="mt-1"
-                      />
-                      <Label htmlFor={`${question.id}-${option.id}`} className="flex-1 cursor-pointer">
-                        <div
-                          className="prose prose-sm max-w-none dark:prose-invert [&_ol]:ml-6 [&_ol]:list-decimal [&_ul]:ml-6 [&_ul]:list-disc"
-                          dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(option.text || ""),
-                          }}
-                        />
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              ) : null}
-
-              {question.type === "SHORT_ANSWER" ? (
-                <Textarea
-                  value={String(answers[question.id] || "")}
-                  onChange={(e) => updateAnswer(question.id, e.target.value)}
-                  disabled={isSubmitted}
-                  rows={5}
-                  placeholder="Write your answer..."
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between gap-4">
+                <div
+                  className="prose prose-sm max-w-none flex-1 text-sm leading-6 text-muted-foreground dark:prose-invert [&_ol]:ml-6 [&_ol]:list-decimal [&_ul]:ml-6 [&_ul]:list-disc"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(currentQuestion.prompt || ""),
+                  }}
                 />
-              ) : null}
+                <Badge variant="outline">{currentQuestion.points} pts</Badge>
+              </div>
 
-              {question.type === "FILE_SUBMISSION" ? (
-                <div className="space-y-3">
-                  <FileUpload
-                    maxSize={50}
-                    onUploadComplete={(file) => updateAnswer(question.id, file.url)}
-                  />
-                  {answers[question.id] ? (
-                    <div className="flex items-center gap-2 rounded-xl border bg-muted/30 p-3 text-sm">
-                      <FileUp className="h-4 w-4 text-primary" />
-                      File uploaded
-                    </div>
+              <div className="rounded-xl border bg-muted/10 p-4">
+                <QuestionInput
+                  question={currentQuestion}
+                  value={answers[currentQuestion.id]}
+                  onChange={(value) => updateAnswer(currentQuestion.id, value)}
+                  disabled={false}
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handlePrevious}
+                  disabled={isFirstQuestion || saveDraft.isPending}
+                >
+                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  Previous
+                </Button>
+
+                <div className="flex gap-3">
+                  {!isLastQuestion ? (
+                    <Button
+                      type="button"
+                      onClick={handleNext}
+                      disabled={saveDraft.isPending}
+                    >
+                      Next
+                      <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Upload your file before submitting.
-                    </p>
+                    <Button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={submitAssignment.isPending || saveDraft.isPending}
+                    >
+                      {submitAssignment.isPending ? "Submitting..." : "Submit Assignment"}
+                    </Button>
                   )}
                 </div>
-              ) : null}
+              </div>
             </CardContent>
           </Card>
-        ))}
+        ) : null}
 
-        <div className="sticky bottom-4 flex justify-end">
-          <Button
-            size="lg"
-            disabled={isSubmitted || submitAssignment.isPending}
-            onClick={handleSubmit}
-          >
-            {isSubmitted ? (
-              <>
-                <CheckCircle2 className="mr-2 h-4 w-4" />
-                Submitted
-              </>
-            ) : submitAssignment.isPending ? (
-              "Submitting..."
-            ) : (
-              "Submit Assignment"
-            )}
-          </Button>
-        </div>
+        {isSubmitted
+          ? questions.map((question, index) => (
+              <Card key={question.id}>
+                <CardHeader>
+                  <div className="flex items-center justify-between gap-4">
+                    <CardTitle className="text-lg">Question {index + 1}</CardTitle>
+                    <Badge variant="outline">{question.points} pts</Badge>
+                  </div>
+                  <div
+                    className="prose prose-sm max-w-none text-sm leading-6 text-muted-foreground dark:prose-invert [&_ol]:ml-6 [&_ol]:list-decimal [&_ul]:ml-6 [&_ul]:list-disc"
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(question.prompt || ""),
+                    }}
+                  />
+                </CardHeader>
+                <CardContent>
+                  <QuestionInput
+                    question={question}
+                    value={answers[question.id]}
+                    onChange={() => {}}
+                    disabled
+                  />
+                </CardContent>
+              </Card>
+            ))
+          : null}
+
+        {isSubmitted ? (
+          <div className="sticky bottom-4 flex justify-end">
+            <Button size="lg" disabled>
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              Submitted
+            </Button>
+          </div>
+        ) : null}
       </main>
     </div>
   );

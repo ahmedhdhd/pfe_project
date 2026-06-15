@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Building2, FileWarning, LayoutDashboard, LogOut } from "lucide-react";
-import { platformTokenManager } from "@/lib/api/platform";
-import { usePlatformLogout } from "@/hooks/platform";
+import { tokenManager } from "@/lib/api/client";
+import { useLogout } from "@/hooks/api";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -22,20 +22,19 @@ export default function PlatformLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const logout = usePlatformLogout();
-  const isLoginPage = pathname === "/platform/login";
+  const logout = useLogout();
 
   useEffect(() => {
-    if (isLoginPage) return;
-
-    if (!platformTokenManager.isAuthenticated()) {
-      router.replace("/platform/login");
+    if (!tokenManager.isAuthenticated()) {
+      router.replace("/login");
+      return;
     }
-  }, [isLoginPage, router]);
 
-  if (isLoginPage) {
-    return <>{children}</>;
-  }
+    const user = tokenManager.getUser();
+    if (user?.role !== "SUPER_ADMIN") {
+      router.replace("/login");
+    }
+  }, [router]);
 
   return (
     <div className="min-h-screen flex bg-slate-950 text-slate-100">
@@ -72,7 +71,7 @@ export default function PlatformLayout({
           <Button
             variant="ghost"
             className="w-full justify-start text-slate-400 hover:text-white hover:bg-slate-800"
-            onClick={logout}
+            onClick={() => logout.mutate()}
           >
             <LogOut className="h-4 w-4 mr-2" />
             Logout

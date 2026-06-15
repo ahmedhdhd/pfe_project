@@ -60,14 +60,30 @@ class ContentIndexRequest(BaseModel):
 
 class AssignmentFeedbackRequest(BaseModel):
     organization_id: str = Field(validation_alias="organizationId")
-    prompt: str
+    batch_id: str = Field(validation_alias="batchId")
+    topic_id: str | None = Field(default=None, validation_alias="topicId")
+    assignment_title: str = Field(validation_alias="assignmentTitle")
+    assignment_description: str = Field(default="", validation_alias="assignmentDescription")
+    course_name: str = Field(default="", validation_alias="courseName")
+    topic_name: str = Field(default="", validation_alias="topicName")
+    score_percent: float | None = Field(default=None, validation_alias="scorePercent")
+    questions: list[dict[str, Any]] = Field(default_factory=list)
 
     model_config = {"populate_by_name": True}
 
 
 class AssignmentGenerateRequest(BaseModel):
     organization_id: str = Field(validation_alias="organizationId")
-    generation_prompt: str = Field(validation_alias="generationPrompt")
+    batch_id: str = Field(validation_alias="batchId")
+    topic_id: str | None = Field(default=None, validation_alias="topicId")
+    content_ids: list[str] = Field(default_factory=list, validation_alias="contentIds")
+    assignment_title: str = Field(validation_alias="assignmentTitle")
+    assignment_description: str = Field(default="", validation_alias="assignmentDescription")
+    course_name: str = Field(default="", validation_alias="courseName")
+    topic_name: str = Field(default="", validation_alias="topicName")
+    teacher_prompt: str = Field(validation_alias="teacherPrompt")
+    count: int = Field(default=5, ge=1, le=12)
+    level: str = Field(default="MEDIUM")
 
     model_config = {"populate_by_name": True}
 

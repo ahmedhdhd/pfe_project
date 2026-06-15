@@ -16,6 +16,13 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
   const token = authHeader.split(' ')[1];
   try {
     const payload = verifyAccessToken(token);
+
+    if (payload.role === 'SUPER_ADMIN' && payload.userId === 'platform') {
+      req.user = payload;
+      next();
+      return;
+    }
+
     const currentUser = await prisma.user.findUnique({
       where: { id: payload.userId },
       select: {
