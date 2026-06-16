@@ -1,0 +1,243 @@
+<mxfile host="app.diagrams.net" version="21.0.0">
+  <diagram name="Backend Package Diagram — R1" id="pkg_backend_r1">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="2" value="Diagramme de Paquetages — Backend Express.js (Release 1)" style="text;html=1;fontSize=16;fontStyle=1;align=center;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="100" y="10" width="1200" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ════════════════════════════════════════════════════ -->
+        <!-- OUTER: backend/src -->
+        <!-- ════════════════════════════════════════════════════ -->
+        <mxCell id="3" value="&lt;b&gt;&amp;laquo;package&amp;raquo;&lt;/b&gt;&lt;br/&gt;backend / src" style="swimlane;startSize=40;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=13;fontStyle=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="60" width="1300" height="790" as="geometry"/>
+        </mxCell>
+
+        <!-- ── routes ── -->
+        <mxCell id="10" value="&lt;b&gt;&amp;laquo;package&amp;raquo;&lt;/b&gt;&lt;br/&gt;routes" style="swimlane;startSize=35;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;rounded=1;" vertex="1" parent="3">
+          <mxGeometry x="20" y="60" width="250" height="670" as="geometry"/>
+        </mxCell>
+        <mxCell id="11" value="admin.auth.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="45" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="12" value="student.auth.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="70" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="13" value="admin.batch.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="95" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="14" value="admin.category.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="120" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="15" value="admin.content.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="145" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="16" value="admin.chapter.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="170" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="17" value="admin.subject.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="195" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="18" value="admin.topic.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="220" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="19" value="admin.teacher.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="245" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="19b" value="admin.upload.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="270" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="19c" value="organization.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="295" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="19d" value="platform.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="320" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="19e" value="student.batch.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="345" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="19f" value="student.content.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="370" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="19g" value="ai.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="395" width="230" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="19h" value="subscription.routes.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="10">
+          <mxGeometry x="5" y="420" width="230" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- ── controllers ── -->
+        <mxCell id="20" value="&lt;b&gt;&amp;laquo;package&amp;raquo;&lt;/b&gt;&lt;br/&gt;controllers" style="swimlane;startSize=35;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;rounded=1;" vertex="1" parent="3">
+          <mxGeometry x="290" y="60" width="240" height="670" as="geometry"/>
+        </mxCell>
+        <mxCell id="21" value="adminAuth.controller.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="20">
+          <mxGeometry x="5" y="45" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="22" value="studentAuth.controller.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="20">
+          <mxGeometry x="5" y="70" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="23" value="batch.controller.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="20">
+          <mxGeometry x="5" y="95" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="24" value="content.controller.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="20">
+          <mxGeometry x="5" y="120" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="25" value="category.controller.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="20">
+          <mxGeometry x="5" y="145" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="26" value="chapter.controller.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="20">
+          <mxGeometry x="5" y="170" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="27" value="subject.controller.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="20">
+          <mxGeometry x="5" y="195" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="28" value="topic.controller.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="20">
+          <mxGeometry x="5" y="220" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="29" value="teacher.controller.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="20">
+          <mxGeometry x="5" y="245" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="29b" value="organization.controller.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="20">
+          <mxGeometry x="5" y="270" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="29c" value="platform.controller.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="20">
+          <mxGeometry x="5" y="295" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="29d" value="upload.controller.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="20">
+          <mxGeometry x="5" y="320" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="29e" value="profile.controller.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="20">
+          <mxGeometry x="5" y="345" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="29f" value="order.controller.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="20">
+          <mxGeometry x="5" y="370" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="29g" value="ai.controller.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="20">
+          <mxGeometry x="5" y="395" width="220" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- ── middleware ── -->
+        <mxCell id="30" value="&lt;b&gt;&amp;laquo;package&amp;raquo;&lt;/b&gt;&lt;br/&gt;middleware" style="swimlane;startSize=35;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=1;rounded=1;" vertex="1" parent="3">
+          <mxGeometry x="550" y="60" width="220" height="260" as="geometry"/>
+        </mxCell>
+        <mxCell id="31" value="auth.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="30">
+          <mxGeometry x="5" y="45" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="32" value="superAdmin.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="30">
+          <mxGeometry x="5" y="70" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="33" value="validate.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="30">
+          <mxGeometry x="5" y="95" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="34" value="errorHandler.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="30">
+          <mxGeometry x="5" y="120" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="35" value="notFound.ts" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="30">
+          <mxGeometry x="5" y="145" width="200" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- ── utils ── -->
+        <mxCell id="40" value="&lt;b&gt;&amp;laquo;package&amp;raquo;&lt;/b&gt;&lt;br/&gt;utils" style="swimlane;startSize=35;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;rounded=1;" vertex="1" parent="3">
+          <mxGeometry x="790" y="60" width="220" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="41" value="prisma.ts  (PrismaClient)" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="40">
+          <mxGeometry x="5" y="45" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="42" value="jwt.ts  (sign / verify tokens)" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="40">
+          <mxGeometry x="5" y="70" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="43" value="email.ts  (sendEmail helpers)" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="40">
+          <mxGeometry x="5" y="95" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="44" value="s3.ts  (Supabase Storage)" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="40">
+          <mxGeometry x="5" y="120" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="45" value="response.ts  (sendSuccess/Error)" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="40">
+          <mxGeometry x="5" y="145" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="46" value="logger.ts  (structured logger)" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="40">
+          <mxGeometry x="5" y="170" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="47" value="embeddings.ts  (AI vector store)" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="40">
+          <mxGeometry x="5" y="195" width="200" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- ── prisma ── -->
+        <mxCell id="50" value="&lt;b&gt;&amp;laquo;package&amp;raquo;&lt;/b&gt;&lt;br/&gt;prisma" style="swimlane;startSize=35;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;rounded=1;" vertex="1" parent="3">
+          <mxGeometry x="1030" y="60" width="220" height="180" as="geometry"/>
+        </mxCell>
+        <mxCell id="51" value="schema.prisma  (data models)" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="50">
+          <mxGeometry x="5" y="45" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="52" value="migrations/  (DB history)" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="50">
+          <mxGeometry x="5" y="70" width="200" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- ── types ── -->
+        <mxCell id="55" value="&lt;b&gt;&amp;laquo;package&amp;raquo;&lt;/b&gt;&lt;br/&gt;types" style="swimlane;startSize=35;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;rounded=1;" vertex="1" parent="3">
+          <mxGeometry x="1030" y="260" width="220" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="56" value="AuthRequest (interface)" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="55">
+          <mxGeometry x="5" y="45" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="57" value="JwtPayload (interface)" style="text;html=1;fontSize=10;align=left;spacingLeft=5;" vertex="1" parent="55">
+          <mxGeometry x="5" y="70" width="200" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- ── index.ts entry point ── -->
+        <mxCell id="60" value="&lt;b&gt;index.ts&lt;/b&gt;&lt;br/&gt;(Express App Entry Point)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="3">
+          <mxGeometry x="550" y="370" width="700" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- ── External dependencies note ── -->
+        <mxCell id="65" value="&lt;b&gt;&amp;laquo;external&amp;raquo;&lt;/b&gt;&lt;br/&gt;Express.js · Prisma ORM · bcryptjs · jsonwebtoken · nodemailer · multer · @supabase/supabase-js" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#555555;fontSize=10;dashed=1;" vertex="1" parent="3">
+          <mxGeometry x="550" y="460" width="700" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══════════════════════════════ -->
+        <!-- DEPENDENCY ARROWS (between packages) -->
+        <!-- ═══════════════════════════════ -->
+
+        <!-- routes → controllers -->
+        <mxCell id="200" value="&lt;&lt;use&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=open;endFill=0;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="10" target="20" parent="3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- routes → middleware -->
+        <mxCell id="201" value="&lt;&lt;use&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=open;endFill=0;html=1;fontSize=10;" edge="1" source="10" target="30" parent="3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- controllers → utils -->
+        <mxCell id="202" value="&lt;&lt;use&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=open;endFill=0;html=1;fontSize=10;" edge="1" source="20" target="40" parent="3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- middleware → utils -->
+        <mxCell id="203" value="&lt;&lt;use&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=open;endFill=0;html=1;fontSize=10;" edge="1" source="30" target="40" parent="3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- utils → prisma -->
+        <mxCell id="204" value="&lt;&lt;use&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=open;endFill=0;html=1;fontSize=10;" edge="1" source="40" target="50" parent="3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- index.ts → routes -->
+        <mxCell id="205" value="registers" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=open;endFill=0;html=1;fontSize=10;" edge="1" source="60" target="10" parent="3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- index.ts → middleware -->
+        <mxCell id="206" value="applies" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=open;endFill=0;html=1;fontSize=10;" edge="1" source="60" target="30" parent="3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

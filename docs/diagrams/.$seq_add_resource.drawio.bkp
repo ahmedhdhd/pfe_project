@@ -1,0 +1,262 @@
+<mxfile host="app.diagrams.net" version="21.0.0">
+  <diagram name="Add Learning Resource Sequence" id="seq_add_resource">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1600" pageHeight="1500" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- TITLE -->
+        <mxCell id="title" value="Diagramme de Séquence — Ajout d'une Ressource Pédagogique (US-013)" style="text;html=1;fontSize=16;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="50" y="10" width="1500" height="35" as="geometry"/>
+        </mxCell>
+
+        <!-- ══════════════════════════════════════════════════════ -->
+        <!-- LIFELINE HEADERS -->
+        <!-- ══════════════════════════════════════════════════════ -->
+
+        <mxCell id="h1" value=":Instructeur&lt;br/&gt;(Navigateur)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="10" y="60" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="75" y="110" as="sourcePoint"/><mxPoint x="75" y="1460" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h2" value=":Frontend&lt;br/&gt;(Next.js)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="190" y="60" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="255" y="110" as="sourcePoint"/><mxPoint x="255" y="1460" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h3" value=":Backend API&lt;br/&gt;(Express.js)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="390" y="60" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l3" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="460" y="110" as="sourcePoint"/><mxPoint x="460" y="1460" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h4" value=":Auth&lt;br/&gt;Middleware" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="60" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l4" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="665" y="110" as="sourcePoint"/><mxPoint x="665" y="1460" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h5" value=":Base de Données&lt;br/&gt;(PostgreSQL)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="810" y="60" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l5" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="880" y="110" as="sourcePoint"/><mxPoint x="880" y="1460" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h6" value=":Supabase&lt;br/&gt;Storage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="60" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l6" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1095" y="110" as="sourcePoint"/><mxPoint x="1095" y="1460" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h7" value=":AI Embedding&lt;br/&gt;Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="60" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l7" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1320" y="110" as="sourcePoint"/><mxPoint x="1320" y="1460" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- ══════════════════════════════════════════════════════ -->
+        <!-- PHASE 1: Upload File to Supabase -->
+        <!-- ══════════════════════════════════════════════════════ -->
+        <mxCell id="phase1" value="Phase 1 — Téléversement du fichier (Vidéo / PDF) vers Supabase Storage" style="text;html=1;fontSize=11;fontStyle=3;fillColor=#f5f5f5;strokeColor=#666666;align=left;" vertex="1" parent="1">
+          <mxGeometry x="10" y="128" width="1400" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- 1. Instructor selects resource type + file -->
+        <mxCell id="m1" value="1: Sélectionner le type de ressource (Vidéo/PDF/Texte/URL) + choisir un fichier" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="75" y="165" as="sourcePoint"/><mxPoint x="255" y="165" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 2. Frontend → Backend: POST /admin/upload/initiate { fileName, folder } -->
+        <mxCell id="m2" value="2: POST /admin/upload/initiate  { fileName: 'video.mp4', folder: 'uploads' }" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="255" y="200" as="sourcePoint"/><mxPoint x="460" y="200" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 3. Auth Middleware validates JWT -->
+        <mxCell id="m3" value="3: authenticate() → verifyAccessToken(Bearer JWT)" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="460" y="235" as="sourcePoint"/><mxPoint x="665" y="235" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 4. Middleware → DB: findUnique User -->
+        <mxCell id="m4" value="4: findUnique User (userId depuis JWT payload)" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="665" y="265" as="sourcePoint"/><mxPoint x="880" y="265" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 5. DB → Middleware: User -->
+        <mxCell id="m5" value="5: User { id, role='TEACHER', organizationId }" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="880" y="295" as="sourcePoint"/><mxPoint x="665" y="295" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 6. Middleware → Backend: next() req.user attached -->
+        <mxCell id="m6" value="6: next()  [req.user = { userId, role, organizationId }]" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="665" y="325" as="sourcePoint"/><mxPoint x="460" y="325" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 7. Backend → Supabase: createSignedUploadUrl -->
+        <mxCell id="m7" value="7: createSignedUploadUrl(fileName, folder)  →  génère une URL signée Supabase" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="460" y="360" as="sourcePoint"/><mxPoint x="1095" y="360" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 8. Supabase → Backend: signedUrl + key -->
+        <mxCell id="m8" value="8: { signedUrl: 'https://supabase.io/...', key: 'uploads/uuid-video.mp4' }" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1095" y="390" as="sourcePoint"/><mxPoint x="460" y="390" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 9. Backend → Frontend: { uploadId, key, signedUrl } -->
+        <mxCell id="m9" value="9: 200 OK  { uploadId, key, signedUrl }" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="460" y="420" as="sourcePoint"/><mxPoint x="255" y="420" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 10. Frontend → Supabase: PUT file directly to signed URL -->
+        <mxCell id="m10" value="10: PUT {signedUrl}  [upload du fichier binaire directement vers Supabase Storage]" style="html=1;endArrow=block;endFill=1;fontSize=10;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="255" y="455" as="sourcePoint"/><mxPoint x="1095" y="455" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 11. Supabase → Frontend: upload confirmed -->
+        <mxCell id="m11" value="11: 200 OK  [fichier stocké avec succès]" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1095" y="485" as="sourcePoint"/><mxPoint x="255" y="485" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- ══════════════════════════════════════════════════════ -->
+        <!-- PHASE 2: Create Content record -->
+        <!-- ══════════════════════════════════════════════════════ -->
+        <mxCell id="phase2" value="Phase 2 — Enregistrement de la ressource (création de l'entité Content)" style="text;html=1;fontSize=11;fontStyle=3;fillColor=#f5f5f5;strokeColor=#666666;align=left;" vertex="1" parent="1">
+          <mxGeometry x="10" y="515" width="1400" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- 12. Instructor fills content metadata -->
+        <mxCell id="m12" value="12: Saisir les métadonnées (titre, description) + valider" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="75" y="555" as="sourcePoint"/><mxPoint x="255" y="555" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 13. Frontend → Backend: POST /admin/content -->
+        <mxCell id="m13" value="13: POST /admin/content  { topicId, type:'Lecture', title, videoUrl:key, videoDuration, videoType }" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="255" y="590" as="sourcePoint"/><mxPoint x="460" y="590" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 14. Auth middleware (already authenticated) -->
+        <mxCell id="m14" value="14: authenticate() → token valide, req.user disponible" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="460" y="620" as="sourcePoint"/><mxPoint x="665" y="620" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m14r" value="14b: next()" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="665" y="645" as="sourcePoint"/><mxPoint x="460" y="645" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 15. Backend: normalizeContentPayload + validateContentPayload -->
+        <mxCell id="m15" value="15: normalizeContentPayload(body) + validateContentPayload(payload)  [valider le type, l'URL, le titre...]" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460" y="675" as="sourcePoint"/>
+            <mxPoint x="460" y="675" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="560" y="675"/>
+              <mxPoint x="560" y="695"/>
+              <mxPoint x="460" y="695"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ALT: validation error -->
+        <mxCell id="alt1" value="[alt] Erreur de validation (topicId manquant, videoUrl manquant, etc.)  →  400 Bad Request" style="swimlane;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="110" y="715" width="850" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- 16. Backend → DB: findFirst Content (for order) -->
+        <mxCell id="m16" value="16: findFirst Content (topicId, orderBy: order desc)  [calculer le prochain ordre]" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="460" y="785" as="sourcePoint"/><mxPoint x="880" y="785" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 17. DB → Backend: lastOrder -->
+        <mxCell id="m17" value="17: { order: lastOrder }  (ou null si aucun contenu)" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="880" y="815" as="sourcePoint"/><mxPoint x="460" y="815" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 18. Backend → DB: create Content -->
+        <mxCell id="m18" value="18: create Content { topicId, title, type='Lecture', videoUrl, videoType, videoDuration, order: lastOrder+1 }" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="460" y="850" as="sourcePoint"/><mxPoint x="880" y="850" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 19. DB → Backend: Content record -->
+        <mxCell id="m19" value="19: Content { id, topicId, title, type, videoUrl, order, createdAt }" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="880" y="880" as="sourcePoint"/><mxPoint x="460" y="880" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 20. Backend → DB: findUnique Topic (to get batchId for embeddings) -->
+        <mxCell id="m20" value="20: findUnique Topic (contentId via chain: Topic→Chapter→Subject)  [récupérer batchId]" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="460" y="910" as="sourcePoint"/><mxPoint x="880" y="910" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 21. DB → Backend: batchId -->
+        <mxCell id="m21" value="21: { batchId }" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="880" y="940" as="sourcePoint"/><mxPoint x="460" y="940" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 22. Backend → Frontend: 201 Created -->
+        <mxCell id="m22" value="22: 201 Created  Content { id, topicId, title, type, videoUrl, order }" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="460" y="975" as="sourcePoint"/><mxPoint x="255" y="975" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 23. Frontend → Instructor: content added -->
+        <mxCell id="m23" value="23: Afficher la ressource ajoutée dans l'arbre de contenu du cours" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="255" y="1005" as="sourcePoint"/><mxPoint x="75" y="1005" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- ══════════════════════════════════════════════════════ -->
+        <!-- PHASE 3: Background AI Embedding (async) -->
+        <!-- ══════════════════════════════════════════════════════ -->
+        <mxCell id="phase3" value="Phase 3 — Génération des embeddings IA (traitement asynchrone en arrière-plan)" style="text;html=1;fontSize=11;fontStyle=3;fillColor=#f5f5f5;strokeColor=#666666;align=left;" vertex="1" parent="1">
+          <mxGeometry x="10" y="1035" width="1400" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- NOTE: async -->
+        <mxCell id="asyncNote" value="[async fire-and-forget — ne bloque pas la réponse HTTP]" style="text;html=1;fontSize=10;fontStyle=2;align=center;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="400" y="1035" width="700" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- 24. Backend → AI Service: extractAndEmbed -->
+        <mxCell id="m24" value="24: extractAndEmbed(contentId, batchId, organizationId)  [appel non bloquant .catch(err → logger)]" style="html=1;endArrow=block;endFill=1;fontSize=10;dashed=1;strokeColor=#666666;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="460" y="1080" as="sourcePoint"/><mxPoint x="1320" y="1080" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 25. AI Service → Supabase: fetch file for extraction -->
+        <mxCell id="m25" value="25: Récupérer le fichier (videoUrl / pdfUrl / markdownBody)  +  extraire le texte" style="html=1;endArrow=block;endFill=1;fontSize=10;dashed=1;strokeColor=#666666;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1320" y="1115" as="sourcePoint"/><mxPoint x="1095" y="1115" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 26. AI Service → DB: store embedding vectors -->
+        <mxCell id="m26" value="26: Générer les vecteurs d'embeddings + stocker dans la table vectors (Supabase pgvector)" style="html=1;endArrow=block;endFill=1;fontSize=10;dashed=1;strokeColor=#666666;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1320" y="1150" as="sourcePoint"/><mxPoint x="880" y="1150" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 27. Background complete -->
+        <mxCell id="m27" value="27: Embeddings générés et indexés  [contenu disponible pour la recherche IA du chatbot]" style="html=1;endArrow=none;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1320" y="1190" as="sourcePoint"/>
+            <mxPoint x="1320" y="1190" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="1400" y="1190"/>
+              <mxPoint x="1400" y="1210"/>
+              <mxPoint x="1320" y="1210"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- LEGEND -->
+        <mxCell id="leg" value="Légende des types de ressources (ContentType) :" style="text;html=1;fontSize=11;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="10" y="1270" width="600" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg2" value="• Lecture : vidéo uploadée (mp4) ou YouTube / HLS stream&lt;br/&gt;• PDF : document PDF uploadé sur Supabase Storage&lt;br/&gt;• MARKDOWN : bloc de texte riche (markdownBody)&lt;br/&gt;• URL : lien externe (HTTP/HTTPS validé)&lt;br/&gt;• PLAYGROUND : exercice interactif (playgroundId)" style="text;html=1;fontSize=10;align=left;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="10" y="1290" width="600" height="100" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

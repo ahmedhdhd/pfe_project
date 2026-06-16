@@ -1,0 +1,259 @@
+<mxfile host="app.diagrams.net" version="21.0.0">
+  <diagram name="Registration + Email Verification" id="seq_reg_verify">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1400" pageHeight="1300" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- TITLE -->
+        <mxCell id="title" value="Diagramme de Séquence — Inscription + Vérification E-mail (US-001)" style="text;html=1;fontSize=16;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="50" y="10" width="1300" height="35" as="geometry"/>
+        </mxCell>
+
+        <!-- LIFELINE HEADERS -->
+        <mxCell id="h1" value=":Étudiant&lt;br/&gt;(Navigateur)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="20" y="60" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="85" y="110" as="sourcePoint"/><mxPoint x="85" y="1260" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h2" value=":Frontend&lt;br/&gt;(Next.js)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="210" y="60" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="275" y="110" as="sourcePoint"/><mxPoint x="275" y="1260" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h3" value=":Backend API&lt;br/&gt;(Express.js)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="60" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l3" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="110" as="sourcePoint"/><mxPoint x="500" y="1260" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h4" value=":Base de Données&lt;br/&gt;(PostgreSQL)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="680" y="60" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l4" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="750" y="110" as="sourcePoint"/><mxPoint x="750" y="1260" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h5" value=":Service Email&lt;br/&gt;(Nodemailer)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="930" y="60" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l5" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1000" y="110" as="sourcePoint"/><mxPoint x="1000" y="1260" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h6" value=":Client E-mail&lt;br/&gt;(Étudiant inbox)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="60" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l6" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1220" y="110" as="sourcePoint"/><mxPoint x="1220" y="1260" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- Activation Bars -->
+        <mxCell id="act_fe" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="270" y="165" width="10" height="980" as="geometry" />
+        </mxCell>
+        <mxCell id="act_be" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="495" y="200" width="10" height="910" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="745" y="235" width="10" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db2" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="745" y="400" width="10" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db3" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="745" y="505" width="10" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db4" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="745" y="565" width="10" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db5" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="745" y="895" width="10" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db6" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="745" y="1015" width="10" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="act_email" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="995" y="625" width="10" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- PHASE 1 -->
+        <mxCell id="phase1" value="Phase 1 — Inscription" style="text;html=1;fontSize=11;fontStyle=3;fillColor=#f5f5f5;strokeColor=#666666;align=left;" vertex="1" parent="1">
+          <mxGeometry x="20" y="128" width="1360" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- 1. Student fills registration form -->
+        <mxCell id="m1" value="1: Remplir le formulaire (firstName, lastName, email, password)" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="85" y="165" as="sourcePoint"/><mxPoint x="275" y="165" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 2. Frontend → Backend -->
+        <mxCell id="m2" value="2: Demande de création de compte" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="275" y="200" as="sourcePoint"/><mxPoint x="500" y="200" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 3. Backend → DB: check duplicate -->
+        <mxCell id="m3" value="3: Vérifier que l&#39;e-mail n&#39;est pas déjà utilisé" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="235" as="sourcePoint"/><mxPoint x="750" y="235" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 4. DB → Backend -->
+        <mxCell id="m4" value="4: E-mail disponible" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="750" y="265" as="sourcePoint"/><mxPoint x="500" y="265" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- ALT: email already exists -->
+        <mxCell id="alt1" value="[alt] E-mail déjà enregistré  →  409 Conflict: 'Email already registered'" style="swimlane;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="110" y="285" width="760" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- 5. Backend: hash password (self-loop) -->
+        <mxCell id="m5" value="5: Sécuriser (crypter) le mot de passe" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="500" y="355" as="sourcePoint"/>
+            <mxPoint x="500" y="355" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="590" y="355"/>
+              <mxPoint x="590" y="375"/>
+              <mxPoint x="500" y="375"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6. Backend → DB: create User -->
+        <mxCell id="m6" value="6: Enregistrer le nouvel utilisateur (compte non vérifié)" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="400" as="sourcePoint"/><mxPoint x="750" y="400" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 7. DB → Backend -->
+        <mxCell id="m7" value="7: Compte créé avec succès" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="750" y="430" as="sourcePoint"/><mxPoint x="500" y="430" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 8. Backend: generate verification token (self-loop) -->
+        <mxCell id="m8" value="8: Générer un jeton unique de vérification" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="500" y="460" as="sourcePoint"/>
+            <mxPoint x="500" y="460" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="590" y="460"/>
+              <mxPoint x="590" y="480"/>
+              <mxPoint x="500" y="480"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 9. Backend → DB: create EmailToken -->
+        <mxCell id="m9" value="9: Enregistrer le jeton en base de données" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="505" as="sourcePoint"/><mxPoint x="750" y="505" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 10. DB → Backend -->
+        <mxCell id="m10" value="10: Jeton enregistré (expire dans 24h)" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="750" y="535" as="sourcePoint"/><mxPoint x="500" y="535" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 11. Backend → DB: get organization -->
+        <mxCell id="m11" value="11: Récupérer les informations de l&#39;organisation" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="565" as="sourcePoint"/><mxPoint x="750" y="565" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 12. DB → Backend -->
+        <mxCell id="m12" value="12: Retourne les informations de l&#39;organisation" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="750" y="595" as="sourcePoint"/><mxPoint x="500" y="595" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 13. Backend → Email Service -->
+        <mxCell id="m13" value="13: Demander l&#39;envoi de l&#39;e-mail de vérification" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="625" as="sourcePoint"/><mxPoint x="1000" y="625" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 14. Email Service → Inbox -->
+        <mxCell id="m14" value="14: E-mail livré: 'Vérifiez votre compte' + lien {frontendUrl}/{slug}/verify?token={token}  [expire 24h]" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1000" y="660" as="sourcePoint"/><mxPoint x="1220" y="660" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 15. Backend → Frontend -->
+        <mxCell id="m15" value="15: Réponse : Compte créé, vérification en attente" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="695" as="sourcePoint"/><mxPoint x="275" y="695" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 16. Frontend → Student -->
+        <mxCell id="m16" value="16: Afficher le message « Vérifiez votre boîte mail »" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="275" y="725" as="sourcePoint"/><mxPoint x="85" y="725" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- PHASE 2 -->
+        <mxCell id="phase2" value="Phase 2 — Vérification de l'adresse e-mail" style="text;html=1;fontSize=11;fontStyle=3;fillColor=#f5f5f5;strokeColor=#666666;align=left;" vertex="1" parent="1">
+          <mxGeometry x="20" y="755" width="1360" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- 17. Student clicks link -->
+        <mxCell id="m17" value="17: Cliquer sur le lien de vérification dans l'e-mail" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1220" y="795" as="sourcePoint"/><mxPoint x="85" y="795" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 18. Student → Frontend -->
+        <mxCell id="m18" value="18: Ouvrir la page de vérification (token dans l'URL)" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="85" y="825" as="sourcePoint"/><mxPoint x="275" y="825" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 19. Frontend → Backend -->
+        <mxCell id="m19" value="19: Envoyer le jeton de vérification" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="275" y="860" as="sourcePoint"/><mxPoint x="500" y="860" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 20. Backend → DB -->
+        <mxCell id="m20" value="20: Vérifier la validité du jeton" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="895" as="sourcePoint"/><mxPoint x="750" y="895" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 21. DB → Backend -->
+        <mxCell id="m21" value="21: Retourne les détails du jeton" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="750" y="925" as="sourcePoint"/><mxPoint x="500" y="925" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- ALT: invalid token -->
+        <mxCell id="alt2" value="[alt] Token invalide, expiré ou déjà utilisé  →  400 Error: 'Invalid or expired token'" style="swimlane;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="110" y="945" width="760" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- 22. Backend → DB: mark token used -->
+        <mxCell id="m22" value="22: Marquer le jeton comme utilisé" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="1015" as="sourcePoint"/><mxPoint x="750" y="1015" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 23. Backend → DB: activate user -->
+        <mxCell id="m23" value="23: Activer le compte utilisateur (vérifié)" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="1050" as="sourcePoint"/><mxPoint x="750" y="1050" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 24. DB → Backend -->
+        <mxCell id="m24" value="24: Compte activé avec succès" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="750" y="1080" as="sourcePoint"/><mxPoint x="500" y="1080" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 25. Backend → Frontend -->
+        <mxCell id="m25" value="25: Réponse : E-mail vérifié avec succès" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="500" y="1110" as="sourcePoint"/><mxPoint x="275" y="1110" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 26. Frontend → Student -->
+        <mxCell id="m26" value="26: Afficher « E-mail vérifié ! » + Rediriger vers la page de connexion" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="275" y="1145" as="sourcePoint"/><mxPoint x="85" y="1145" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- NOTE -->
+        <mxCell id="note1" value="Note: Le compte reste en état isVerified=false (accès limité) jusqu'à la confirmation. Le token VERIFY_EMAIL expire après 24h. En cas d'expiration, l'étudiant peut demander un renvoi via POST /api/auth/resend-verification." style="shape=note;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff9c4;strokeColor=#d6b656;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="110" y="1175" width="1000" height="65" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

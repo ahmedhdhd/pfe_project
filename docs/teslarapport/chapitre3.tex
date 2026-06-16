@@ -1,0 +1,921 @@
+ 
+%% ============================================================
+%%  Chapter 4 — Release 1: Foundation and Core Management
+%% ============================================================
+\begingroup
+\renewcommand{\baselinestretch}{0.85}
+\chapter{Release 1: Foundation and Core Management}
+\minitoc
+\endgroup
+\newpage
+
+%% ------------------------------------------------------------
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+%% ------------------------------------------------------------
+
+The development of Tesla Academy was organized into three successive releases, each
+building upon the foundations established by the previous one. This chapter is dedicated
+to the first release, which constitutes the structural backbone of the entire platform.
+Before any advanced functionality can be introduced, the system must provide a reliable
+and secure foundation covering user identity, access control, organizational boundaries,
+and educational content structure.
+
+Release 1 spans two sprints. Sprint 1 addresses the authentication layer, user profile
+management, role-based workspace routing, and organization administration. Sprint 2
+focuses on the course creation workflow, content hierarchy management, and the
+instructor-facing tools required to build and structure educational material.
+
+The chapter is organized as follows: it begins with the sprint backlog, then presents
+the detailed functional and technical specifications of the key user stories, followed by
+the static and dynamic design models, and concludes with the implementation results
+illustrated by interface screenshots.
+
+%% ------------------------------------------------------------
+\section{Sprint Backlog}
+%% ------------------------------------------------------------
+
+Release 1 covers two sprints. Sprint 1 focuses on authentication, user profiles,
+role-based access, and organization management. Sprint 2 focuses on course management,
+course validation, content structure, and learning resource management.
+\begin{table}[H]
+\centering
+\caption{Sprint Backlog — Release 1}
+\label{tab:backlog_r1}
+\footnotesize
+\renewcommand{\arraystretch}{1.3}   % Much more reasonable
+
+\begin{tabularx}{\textwidth}{|p{1.8cm}|p{1.3cm}|p{2.8cm}|X|}
+\hline
+\textbf{Sprint} & \textbf{Code} & \textbf{Feature} & \textbf{User Story} \\
+\hline
+\multirow{8}{*}{Sprint 1}
+  & US-001 & Registration & Create a student account using email and password \\
+  \cline{2-4}
+  & US-002 & Authentication & Log in and log out securely from the platform \\
+  \cline{2-4}
+  & US-003 & Password recovery & Reset the account password by email \\
+  \cline{2-4}
+  & US-004 & User profile & Update personal information and avatar \\
+  \cline{2-4}
+  & US-005 & Role-based redirection & Redirect user to the appropriate workspace according to role \\
+  \cline{2-4}
+  & US-006 & Create organization & Create an organization with its main information and configuration \\
+  \cline{2-4}
+  & US-007 & Organization status & Activate or suspend an organization \\
+  \cline{2-4}
+  & US-008 & Instructor management & Add, update, or suspend instructor accounts \\
+\hline
+\multirow{6}{*}{Sprint 2}
+  & US-009 & Course management & Create and update courses with title, description, level, category, and price \\
+  \cline{2-4}
+  & US-010 & Course validation workflow & Submit courses for review and approve or reject submitted courses \\
+  \cline{2-4}
+  & US-011 & Category management & Create and manage course categories \\
+  \cline{2-4}
+  & US-012 & Course structure management & Organize course content into chapters, topics, and learning units \\
+  \cline{2-4}
+  & US-013 & Resource management & Add educational resources such as videos, PDFs, text content, and external links \\
+  \cline{2-4}
+  & US-014 & Course archiving & Archive a course without permanently deleting it \\
+\hline
+\end{tabularx}
+\end{table}
+%% ------------------------------------------------------------
+\section{Functional and Technical Specifications}
+%% ------------------------------------------------------------
+
+This section provides a detailed breakdown of all user stories implemented in Release 1.
+For each functional area, a specification table describes the user story, the associated
+business rules, the technical implementation details, and the acceptance criteria that
+were used to validate the delivered functionality.
+
+%% ----------------------------
+\subsection{Authentication (US-001 to US-005)}
+%% ----------------------------
+
+Authentication is the entry point of the platform and a critical component for ensuring
+security and access control. The authentication module handles account creation,
+login, logout, and password recovery for all user profiles. Two distinct login endpoints
+are provided to separate the administrative workspace from the student-facing interface,
+while sharing the same underlying security mechanisms.
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-001: Registration}
+\label{tab:us001}
+\renewcommand{\arraystretch}{1}
+\begin{tabularx}{\textwidth}{|p{2.5cm}|X|}
+\hline
+\textbf{User Story} & As a student, I want to create an account using my email and password so that I can access the platform. \\
+\hline
+\textbf{Precondition} & The user does not already have an account with the same email address. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}
+  \item The email address must be unique within the platform;
+  \item The password must respect the minimum security requirements;
+  \item A verification email must be sent after registration;
+  \item The account remains limited until the email is verified.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}
+  \item User data is stored in the \texttt{User} table;
+  \item The password is hashed using bcrypt before being stored;
+  \item A verification token is generated and stored in the \texttt{EmailToken} table;
+  \item The backend sends the verification link by email.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}
+  \item A new user can register with valid information;
+  \item Duplicate emails are rejected with a descriptive error;
+  \item A verification email is sent after successful registration.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-002: Authentication}
+\label{tab:us002}
+\renewcommand{\arraystretch}{1}
+\begin{tabularx}{\textwidth}{|p{2.5cm}|X|}
+\hline
+\textbf{User Story} & As any user, I want to log in and log out securely so that I can access my workspace and end my session safely. \\
+\hline
+\textbf{Precondition} & The user must have a registered and verified account. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}
+  \item Users must provide a valid email and password to log in;
+  \item After successful login, the user must be redirected to the workspace corresponding to their role;
+  \item Failed login attempts must return a generic error message for security;
+  \item The user must be able to log out at any time;
+  \item Logout must invalidate the current session on the client side.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}
+  \item Password verification uses bcrypt hash comparison;
+  \item A JWT access token and a refresh token are generated on successful login;
+  \item The refresh token is stored in the database for rotation and revocation;
+  \item Separate login endpoints exist for admin/instructor (\texttt{/admin/auth/login}) and students (\texttt{/api/auth/login});
+  \item During logout, client-side authentication data is cleared and the user is redirected to the login page.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}
+  \item A valid user can log in and is redirected to the correct role-specific dashboard;
+  \item Invalid credentials produce a clear and secure error message;
+  \item An unverified user receives a prompt to verify their email first;
+  \item A logged-in user can log out successfully;
+  \item After logout, protected pages are no longer accessible without re-authentication.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-003: Password Recovery}
+\label{tab:us003}
+\renewcommand{\arraystretch}{1}
+\begin{tabularx}{\textwidth}{|p{2.5cm}|X|}
+\hline
+\textbf{User Story} & As any user, I want to reset my password by email so that I can regain access to my account. \\
+\hline
+\textbf{Precondition} & The user has a registered account with a verified email address. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}
+  \item A secure time-limited reset token is generated and sent to the user's email;
+  \item The token expires after 24 hours and can only be used once;
+  \item The response message is always generic to prevent email enumeration.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}
+  \item The token is a UUID stored in the \texttt{EmailToken} table with type \texttt{RESET\_PASSWORD};
+  \item Upon token use, \texttt{usedAt} is populated to prevent reuse;
+  \item The new password is hashed with bcrypt (cost factor 12).
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}
+  \item The user receives a reset email containing a valid link;
+  \item A valid token allows the user to set a new password successfully;
+  \item An expired or already-used token returns an appropriate error message.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-004: User Profile}
+\label{tab:us004}
+\renewcommand{\arraystretch}{1}
+\begin{tabularx}{\textwidth}{|p{2.5cm}|X|}
+\hline
+\textbf{User Story} & As any authenticated user, I want to update my personal information and avatar so that my profile reflects accurate and up-to-date information. \\
+\hline
+\textbf{Precondition} & The user is authenticated with a valid session. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}
+  \item Users can update their name, bio, and avatar image;
+  \item Avatar images must be within an acceptable file size limit;
+  \item Users can only update their own profile.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}
+  \item Profile information is stored in the \texttt{User} table;
+  \item Avatar images are uploaded to Supabase Storage and the resulting URL is stored in the database;
+  \item The backend validates ownership before applying any update.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}
+  \item The user can update their name and bio successfully;
+  \item The user can upload a new avatar image;
+  \item The updated profile information is reflected immediately after saving.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-005: Role-Based Redirection}
+\label{tab:us005}
+\renewcommand{\arraystretch}{1}
+\begin{tabularx}{\textwidth}{|p{2.5cm}|X|}
+\hline
+\textbf{User Story} & As the system, I want to redirect users to the correct workspace according to their role so that each user accesses only authorized features. \\
+\hline
+\textbf{Precondition} & The user is authenticated and has a valid role assigned. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}
+  \item Super Administrators are redirected to the platform management workspace;
+  \item Organization Administrators and Instructors are redirected to the organization administration workspace;
+  \item Students are redirected to the student-facing learning workspace;
+  \item Unauthorized role access must be blocked and redirected appropriately.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}
+  \item The user role is extracted from the authenticated user payload after login;
+  \item Frontend middleware and backend authorization checks enforce workspace access;
+  \item Protected routes verify both the user role and the organization context before granting access.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}
+  \item Each user is automatically redirected to the correct dashboard after login;
+  \item A user cannot access a workspace that does not match their role;
+  \item Invalid or expired sessions redirect the user to the login page.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+%% ----------------------------
+\subsection{Organization Management (US-006 to US-008)}
+%% ----------------------------
+Organization management is a core feature of Tesla Academy’s multi-tenant architecture. It allows Super Administrators to create and manage multiple independent organizations on a shared infrastructure. Each organization operates in its own isolated environment, identified by a unique subdomain and slug.
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-006: Create Organization}
+\label{tab:us006}
+\renewcommand{\arraystretch}{1}
+\begin{tabularx}{\textwidth}{|p{2.5cm}|X|}
+\hline
+\textbf{User Story} & As a Super Administrator, I want to create an organization so that it can start using the platform. \\
+\hline
+\textbf{Precondition} & The user is authenticated as Super Administrator. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}
+  \item Each organization must have a unique name, slug, and subdomain;
+  \item Creating an organization automatically provisions a default \texttt{OrganizationConfig};
+  \item The organization is inactive by default until explicitly activated.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}
+  \item The slug and subdomain are derived from the organization name and must pass uniqueness checks;
+  \item A dedicated \texttt{bypassRlsPrisma} client is used to perform cross-tenant creation operations;
+  \item A default \texttt{OrganizationConfig} record is automatically created alongside the organization.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}
+  \item The organization is created and appears in the Super Admin dashboard;
+  \item A default configuration is provisioned automatically;
+  \item Duplicate names or subdomains are rejected with a descriptive error.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-007: Activate or Suspend Organization}
+\label{tab:us007}
+\renewcommand{\arraystretch}{1}
+\begin{tabularx}{\textwidth}{|p{2.5cm}|X|}
+\hline
+\textbf{User Story} & As a Super Administrator, I want to activate or suspend an organization so that I can control its access to the platform. \\
+\hline
+\textbf{Precondition} & The organization already exists and the user is authenticated as Super Administrator. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}
+  \item An inactive organization cannot access its workspace;
+  \item Suspending an organization blocks access for its administrators, instructors, and students;
+  \item Reactivating an organization restores access without deleting its data.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}
+  \item The activation state is managed through the \texttt{isActive} field of the \texttt{Organization} model;
+  \item Backend middleware verifies the organization status before allowing access to tenant-scoped routes;
+  \item Organization data remains stored even when access is suspended.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}
+  \item The Super Administrator can activate or suspend an organization from the dashboard;
+  \item Suspended organizations cannot access their workspaces;
+  \item Reactivated organizations regain access to all their existing data.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-008: Instructor Management}
+\label{tab:us008}
+\renewcommand{\arraystretch}{1}
+\begin{tabularx}{\textwidth}{|p{2.5cm}|X|}
+\hline
+\textbf{User Story} & As an Organization Administrator, I want to manage instructor accounts so that teachers can create and manage courses inside my organization. \\
+\hline
+\textbf{Precondition} & The Organization Administrator is authenticated and belongs to an active organization. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}
+  \item Instructor accounts are created inside the current organization only;
+  \item Each instructor must have a valid and unique email address;
+  \item Instructor access can be activated, suspended, or updated by the Organization Administrator.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}
+  \item Instructors are stored as users with the \texttt{TEACHER} role;
+  \item Instructor-specific information is stored in the \texttt{Teacher} entity;
+  \item Invitation and verification emails are sent during account creation;
+  \item All queries are scoped using \texttt{organizationId} to preserve tenant isolation.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}
+  \item The Organization Administrator can create an instructor account;
+  \item The instructor receives an invitation email with an account verification link;
+  \item The instructor appears in the organization instructor list after creation.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+%% ----------------------------
+\subsection{Course Management (US-009 to US-014)}
+%% ----------------------------
+Course management is the main educational feature of Release 1. It covers the entire course lifecycle, from creation by an instructor to publication and access by students. To improve clarity, related user stories are grouped into functional workflows that reflect how the platform is implemented. The course management module includes four main workflows: course creation and editing, course validation, course structure management, and resource management.
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-009: Course Management}
+\label{tab:us009}
+\renewcommand{\arraystretch}{1}
+\begin{tabularx}{\textwidth}{|p{2.5cm}|X|}
+\hline
+\textbf{User Story} & As an Instructor, I want to create and update courses so that I can prepare and manage educational content before publishing it. \\
+\hline
+\textbf{Precondition} & The instructor is authenticated and belongs to an active organization. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}
+  \item A course is created in \texttt{DRAFT} status by default;
+  \item Only the instructor or an authorized administrator can edit course information;
+  \item A course must contain basic metadata such as title, description, level, and category;
+  \item Draft courses are not visible to students.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}
+  \item Courses are implemented using the \texttt{Batch} model;
+  \item Each \texttt{Batch} is linked to an \texttt{organizationId} to preserve tenant isolation;
+  \item Course metadata is validated before being stored in the database;
+  \item The frontend provides a dedicated course editor for creating and updating course information.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}
+  \item The instructor can create a new course in draft status;
+  \item The instructor can update course metadata at any time;
+  \item Invalid or incomplete information is rejected with clear validation messages;
+  \item The course remains hidden from students until it is published.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-010: Course Validation Workflow}
+\label{tab:us010}
+\renewcommand{\arraystretch}{1}
+\begin{tabularx}{\textwidth}{|p{2.5cm}|X|}
+\hline
+\textbf{User Story} & As an Instructor, I want to submit a course for review; as an Organization Administrator, I want to approve or reject submitted courses so that only validated content becomes available to students. \\
+\hline
+\textbf{Precondition} & The course exists in draft status and contains the required information and learning structure. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}
+  \item An instructor can only submit a course that is currently in \texttt{DRAFT} status;
+  \item A submitted course transitions from \texttt{DRAFT} to \texttt{SUBMITTED};
+  \item The Organization Administrator can approve the course, transitioning it to \texttt{PUBLISHED};
+  \item The Organization Administrator can reject the course, returning it to \texttt{DRAFT} status;
+  \item Only \texttt{PUBLISHED} courses are visible in the student catalog.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}
+  \item Status transitions are managed through the \texttt{status} field of the \texttt{Batch} model;
+  \item The backend validates the current status before allowing any transition;
+  \item The validation action is restricted to users with the Organization Administrator role;
+  \item Course visibility in the student catalog depends strictly on the \texttt{PUBLISHED} status.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}
+  \item The instructor can submit a valid draft course for administrative review;
+  \item The administrator can approve or reject a submitted course from the dashboard;
+  \item Approved courses become immediately visible to enrolled students;
+  \item Rejected courses return to draft status and can be corrected by the instructor.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-011: Category Management}
+\label{tab:us011}
+\renewcommand{\arraystretch}{1}
+\begin{tabularx}{\textwidth}{|p{2.5cm}|X|}
+\hline
+\textbf{User Story} & As an Organization Administrator, I want to create and manage course categories so that courses can be organized and easily browsed by students. \\
+\hline
+\textbf{Precondition} & The Organization Administrator is authenticated and belongs to an active organization. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}
+  \item Categories are scoped to the organization and not shared across tenants;
+  \item Each category must have a unique name within the organization;
+  \item Categories are used to filter and organize courses in the student catalog.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}
+  \item Categories are stored in the \texttt{Category} model, scoped by \texttt{organizationId};
+  \item Category names are validated for uniqueness within the organization context;
+  \item The course creation form references available categories for the current organization.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}
+  \item The Organization Administrator can create a new category;
+  \item Duplicate category names within the same organization are rejected;
+  \item Categories appear as selectable options in the course creation form.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-012: Course Structure Management}
+\label{tab:us012}
+\renewcommand{\arraystretch}{1}
+\begin{tabularx}{\textwidth}{|p{2.5cm}|X|}
+\hline
+\textbf{User Story} & As an Instructor, I want to organize course content into subjects, chapters, topics, and learning resources so that learners can follow a structured and progressive learning path. \\
+\hline
+\textbf{Precondition} & The instructor has already created a course in draft status. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}
+  \item A course must have a structured content hierarchy before submission for publication;
+  \item Subjects group chapters, chapters group topics, and topics contain learning content;
+  \item Instructors can create, update, delete, and reorder elements of the course structure;
+  \item All structural elements must remain linked to the same organization as the course.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}
+  \item The hierarchy is represented by the \texttt{Subject}, \texttt{Chapter}, and \texttt{Topic} models;
+  \item Each entity is linked to its parent entity and scoped by \texttt{organizationId};
+  \item The frontend provides a structured editor for managing the content tree;
+  \item The backend validates ownership and hierarchy consistency before persisting changes.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}
+  \item The instructor can create subjects, chapters, and topics within a course;
+  \item The instructor can update and reorder elements of the course structure;
+  \item The content hierarchy is saved and displayed correctly in the course editor;
+  \item The course structure is preserved between editing sessions.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-013: Resource Management}
+\label{tab:us013}
+\renewcommand{\arraystretch}{1}
+\begin{tabularx}{\textwidth}{|p{2.5cm}|X|}
+\hline
+\textbf{User Story} & As an Instructor, I want to add educational resources such as videos, PDF documents, text content, and external links so that I can provide students with rich and diverse learning materials. \\
+\hline
+\textbf{Precondition} & The instructor is authenticated and has access to the course editor for a course in draft status. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}
+  \item Only authorized instructors can add resources to courses within their organization;
+  \item A resource must be attached to a valid topic within the course structure;
+  \item Uploaded files must remain associated with their corresponding content item;
+  \item File access must be controlled through the backend to prevent unauthorized downloads.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}
+  \item Learning resources are represented by the \texttt{Content} model;
+  \item Content can represent uploaded videos, YouTube videos, PDF documents, rich-text blocks, or external links;
+  \item Uploaded files are stored using Supabase Storage through secure presigned upload URLs;
+  \item File metadata and resource access URLs are stored in the database.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}
+  \item The instructor can add different types of learning resources to any topic;
+  \item Uploaded files are stored successfully and are accessible through their stored URL;
+  \item Resources appear in the correct topic within the course structure;
+  \item Students can access the resources once the course is published.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-014: Course Archiving}
+\label{tab:us014}
+\renewcommand{\arraystretch}{1}
+\begin{tabularx}{\textwidth}{|p{2.5cm}|X|}
+\hline
+\textbf{User Story} & As an Instructor, I want to archive a course without permanently deleting it so that I can remove it from the active catalog while preserving its content. \\
+\hline
+\textbf{Precondition} & The instructor is authenticated and is the owner of the course to be archived. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}
+  \item Archiving a course removes it from the active catalog without deleting its data;
+  \item Archived courses are no longer accessible to new students;
+  \item Students currently enrolled in an archived course retain access to their progress and materials;
+  \item An archived course can be restored if needed.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}
+  \item The archived state is managed through a dedicated status field on the \texttt{Batch} model;
+  \item Catalog queries exclude courses with archived status;
+  \item Existing enrollment records and progress data are preserved upon archiving.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}
+  \item The instructor can archive an active course;
+  \item Archived courses no longer appear in the student catalog;
+  \item Enrolled students retain access to their learning progress and course materials;
+  \item The course data is not lost and can be restored.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+%% ------------------------------------------------------------
+\section{Design}
+%% ------------------------------------------------------------
+
+The realization of Release 1 relies on the architectural foundations presented in
+Chapter~3. The following UML models focus only on the functionalities implemented during
+this release.
+
+\subsection{Static Modeling}
+
+\subsubsection{Class Diagram}
+
+Static modeling provides a structural view of the system by describing its main
+entities and the relationships between them. The class diagram presented in
+Figure~\ref{fig:class_r1} covers the entities introduced in Release 1, namely
+authentication, organization management, and the course content hierarchy.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{class_diagram_r1.png}}
+  \caption{Class Diagram — Release 1}
+  \label{fig:class_r1}
+\end{figure}
+
+The main entities and their relationships are as follows:
+
+\begin{itemize}
+  \item An \texttt{Organization} has one \texttt{OrganizationConfig} and many \texttt{Users}.
+        The \texttt{OrganizationConfig} record stores all tenant-specific settings, including
+        branding, payment configuration, and AI provider credentials;
+  \item A \texttt{User} belongs to one \texttt{Organization} and carries a \texttt{role}
+        attribute of \texttt{ADMIN}, \texttt{TEACHER}, or \texttt{STUDENT}, which determines
+        access permissions and workspace routing throughout the application;
+  \item A \texttt{Batch} (course) belongs to one \texttt{Organization} and is structured
+        hierarchically into \texttt{Subjects}, \texttt{Chapters}, \texttt{Topics}, and
+        \texttt{Content} items, enabling instructors to organize educational material into
+        clear and progressive learning units;
+  \item A \texttt{Teacher} entity extends the \texttt{User} entity with instructor-specific
+        profile data and serves as the anchor for course ownership and assignment management.
+\end{itemize}
+
+\subsubsection{Database Model of Release 1}
+
+In addition to the class diagram, a simplified database model was defined for Release 1
+in order to clarify the main tables involved in authentication, organization management,
+and course structuring. This model focuses only on the entities implemented during the
+first release and does not include the complete platform schema.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=0.95\textwidth]{database_model_r1.png}}
+  \caption{Database Model — Release 1}
+  \label{fig:db_model_r1}
+\end{figure}
+
+The database model highlights the central role of the \texttt{Organization} table. It is
+connected to users, instructors, courses, and configuration data. Course content is then
+organized through the \texttt{Batch}, \texttt{Subject}, \texttt{Chapter}, \texttt{Topic},
+and \texttt{Content} tables.
+
+\subsection{Dynamic Modeling}
+
+Dynamic modeling complements the static view by describing the temporal behavior of
+the system. The sequence diagrams presented in this section illustrate the most
+significant interaction flows of Release 1, covering authentication, password recovery,
+and the course validation workflow.
+
+\subsubsection{Login Sequence Diagram}
+
+Figure~\ref{fig:seq_login} illustrates the login sequence for an Organization
+Administrator or Instructor. The process begins with the user submitting their
+credentials on the frontend, which forwards them to the backend API. The backend
+validates the credentials, generates a JWT access token and a refresh token, and
+returns them to the client. The client stores the tokens and redirects the user to their
+role-specific workspace. The separation between the admin login endpoint
+(\texttt{/admin/auth/login}) and the student login endpoint (\texttt{/api/auth/login})
+ensures that each user profile accesses only its authorized workspace.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=0.9\textwidth]{seq_login.png}}
+  \caption{Login Sequence Diagram}
+  \label{fig:seq_login}
+\end{figure}
+
+\subsubsection{Password Reset Sequence Diagram}
+
+Figure~\ref{fig:seq_reset} illustrates the password reset flow. To prevent unauthorized
+access and protect user accounts, the reset mechanism relies on a time-limited,
+single-use token. The user initiates the process by providing their email address.
+The backend generates a UUID token, stores it in the \texttt{EmailToken} table with
+a type of \texttt{RESET\_PASSWORD}, and dispatches the reset link by email. Upon
+following the link, the user provides a new password. The backend validates the
+token's integrity and expiry, updates the password hash using bcrypt, and marks the
+token as used to prevent reuse.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=0.9\textwidth]{seq_reset_password.png}}
+  \caption{Password Reset Sequence Diagram}
+  \label{fig:seq_reset}
+\end{figure}
+
+\subsubsection{Course Submission and Validation Sequence Diagram}
+
+Figure~\ref{fig:seq_course} illustrates the course submission and validation flow,
+which reflects the collaborative quality control process between instructors and
+organization administrators. Once an instructor has completed the preparation of a
+course draft and structured its content, they submit it for review. The Organization
+Administrator is notified, examines the submitted course, and issues an approval or
+rejection decision. Upon approval, the course status transitions to \texttt{PUBLISHED}
+and the course becomes accessible to enrolled students.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=0.9\textwidth]{seq_course_validation.png}}
+  \caption{Course Submission and Validation Sequence Diagram}
+  \label{fig:seq_course}
+\end{figure}
+
+\subsection{Package Diagram}
+
+Figure~\ref{fig:pkg_r1} presents the package diagram of the backend for Release 1,
+illustrating the internal module organization of the Express.js API. This structure
+was designed to ensure a clear separation of concerns and to facilitate the
+independent development, testing, and maintenance of each functional area.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=0.85\textwidth]{pkg_backend_r1.png}}
+  \caption{Backend Package Diagram — Release 1}
+  \label{fig:pkg_r1}
+\end{figure}
+
+The backend is organized into the following main packages:
+
+\begin{itemize}
+  \item \textbf{routes}: HTTP routing definitions organized by actor and resource,
+        providing a clear mapping between API endpoints and their handlers;
+  \item \textbf{controllers}: request handlers responsible for parsing inputs,
+        delegating business logic to service functions, and formatting responses;
+  \item \textbf{middleware}: cross-cutting concerns including authentication
+        (\texttt{auth.ts}), role-based access control (\texttt{superAdmin.ts}),
+        request validation (\texttt{validate.ts}), and centralized error handling
+        (\texttt{errorHandler.ts});
+  \item \textbf{utils}: shared utilities including JWT token helpers, email sending,
+        a structured logger, and the Prisma client instance;
+  \item \textbf{prisma}: the Prisma schema definition and database migration files.
+\end{itemize}
+
+%% ------------------------------------------------------------
+\section{Implementation}
+%% ------------------------------------------------------------
+
+This section presents the concrete results of the Release 1 implementation. Each
+subsection describes the behavior of a delivered functional module and is accompanied
+by interface screenshots illustrating the final result.
+
+\subsection{Authentication Module}
+
+The authentication module implements two distinct access paths tailored to the
+different user profiles of the platform. Organization Administrators and Instructors
+authenticate through the \texttt{/admin/auth/login} endpoint, while Students use the
+\texttt{/api/auth/login} endpoint. Both paths share the same underlying security
+mechanism: bcrypt-based password verification, JWT access token generation with
+a 15-minute expiry, and a refresh token rotation strategy.
+
+The refresh token rotation mechanism stores each issued refresh token in the
+\texttt{RefreshToken} table. When a client presents a refresh token to obtain a new
+access token, the old token is immediately revoked by setting its \texttt{revokedAt}
+timestamp, and a new token pair is issued. This strategy ensures that stolen or
+replayed refresh tokens are detected and invalidated, significantly reducing the
+attack surface of the authentication layer.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{screenshot_login.png}}
+  \caption{Login Page — Organization Administrator Workspace}
+  \label{fig:sc_login}
+\end{figure}
+
+\subsection{User Profile Management}
+
+The user profile module allows authenticated users to update their personal information,
+including name, avatar, and profile details. Avatar images are uploaded to Supabase
+Storage and the resulting URL is stored in the user record, ensuring that profile
+pictures are served efficiently through the storage CDN. This functionality improves
+personalization and prepares the platform for role-specific dashboards introduced in
+subsequent releases.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{screenshot_user_profile.png}}
+  \caption{User Profile Management}
+  \label{fig:sc_user_profile}
+\end{figure}
+
+\subsection{Organization Management}
+
+The Super Administrator workspace provides a centralized dashboard for managing all
+organizations registered on the platform. From this interface, the Super Administrator
+can create new organizations, monitor their activation status, and suspend or reactivate
+them as needed. Each organization is identified by a unique slug and subdomain, which
+are automatically derived from the organization name and serve as the basis for
+multi-tenant routing throughout the platform.
+
+Upon creation, each organization is automatically provisioned with a default
+\texttt{OrganizationConfig} record, which defines its initial settings and can be
+customized later by the Organization Administrator. This provisioning step ensures
+that newly created organizations are immediately operational without requiring
+additional configuration.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{screenshot_superadmin_orgs.png}}
+  \caption{Organization Management — Super Administrator Dashboard}
+  \label{fig:sc_orgs}
+\end{figure}
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{screenshot_create_organization.png}}
+  \caption{Create Organization Form — Super Administrator}
+  \label{fig:sc_create_org}
+\end{figure}
+
+\subsection{Instructor Management}
+
+The Organization Administrator manages instructor accounts directly from the
+organization settings panel. When a new instructor account is created with the
+\texttt{TEACHER} role, an invitation email containing an email verification link is
+automatically dispatched to the instructor. This mechanism ensures that only users
+with access to the registered email address can activate their account and access the
+instructor workspace.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{screenshot_teachers.png}}
+  \caption{Instructor Management — Organization Administrator Dashboard}
+  \label{fig:sc_teachers}
+\end{figure}
+
+\subsection{Course Creation and Content Structure}
+
+The course editor provides instructors with a structured interface for defining both
+the metadata and the content of a course. In the first step, the instructor fills in the
+course metadata, including the title, description, level, category, and price. In the
+second step, the instructor builds the content hierarchy using the four-level structure
+adopted by the platform: Subject → Chapter → Topic → Content.
+
+Each Content item can be one of five types: an uploaded video, a YouTube-embedded
+video, a PDF document, a rich-text block, or an external link. This flexibility allows
+instructors to compose diverse and engaging learning materials tailored to the needs
+of their students. All uploaded media files are transmitted to Supabase Storage via
+presigned URLs generated by the backend, ensuring secure and efficient file handling.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{screenshot_course_editor.png}}
+  \caption{Course Content Editor}
+  \label{fig:sc_course_editor}
+\end{figure}
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{screenshot_course_subjects.png}}
+  \caption{Course Structure — Subject and Chapter Management}
+  \label{fig:sc_subjects}
+\end{figure}
+
+\subsection{Course Validation Dashboard}
+
+The Organization Administrator can review courses submitted by instructors before making
+them visible to students. The validation dashboard presents the list of submitted courses
+and allows the administrator to approve or reject each one. This validation step ensures
+that published content meets the organization's quality and completeness standards before
+reaching the student catalog.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{screenshot_course_validation.png}}
+  \caption{Course Validation Dashboard — Organization Administrator}
+  \label{fig:sc_course_validation}
+\end{figure}
+
+%% ------------------------------------------------------------
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+%% ------------------------------------------------------------
+
+This chapter presented the implementation of Release 1 of Tesla Academy, which
+establishes the foundational layer upon which the entire platform is built. The
+authentication module provides secure and role-aware access for all user profiles,
+supported by a JWT-based token rotation strategy. The Super Administrator workspace
+enables complete lifecycle management of organizations, ensuring that each tenant is
+properly isolated and configured from the moment of creation.
+
+The instructor management tools allow Organization Administrators to onboard teaching
+staff efficiently, while the course editor gives instructors full control over the structure
+and content of their educational material. Release 1 therefore provides the essential
+infrastructure required by subsequent releases: secure access, role separation, tenant
+isolation, organization administration, and structured course creation.
+
+The next chapter focuses on Release 2, which builds on these foundations to deliver
+the complete student learning experience, including the course catalog, enrollment
+management, lesson access, assignment workflows, progress tracking, certificate
+generation, and role-specific dashboards.
+ 

@@ -1,0 +1,1053 @@
+%% ============================================================
+%%  Chapter 5 — Release 2: Learning Experience and Course Access
+%% ============================================================
+\begingroup
+\renewcommand{\baselinestretch}{0.85}
+\chapter{Release 2: Learning Experience and Course Access}
+\minitoc
+\endgroup
+\newpage
+
+%% ------------------------------------------------------------
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+%% ------------------------------------------------------------
+
+With the foundational infrastructure established in Release 1, Release 2 shifts the
+focus toward the student-facing dimension of the platform. While the first release
+provided the tools necessary to create and structure educational content, this release
+delivers the mechanisms through which students can discover, access, and progress
+through that content. It represents the core of the learning experience that Tesla
+Academy is designed to offer.
+
+Release 2 corresponds to Sprints 3 and 4 of the project plan. Sprint 3 introduces the
+assignment workflow, lesson access and completion tracking, progress measurement, and
+student notifications. Sprint 4 extends the platform with certificate generation,
+role-specific dashboards for both students and instructors, the public course catalog
+with search and filtering capabilities, course reviews, and free course enrollment.
+
+The chapter follows the same structure as the previous one: sprint backlog, functional
+and technical specifications for all user stories, design models, and implementation
+results.
+
+%% ------------------------------------------------------------
+\section{Sprint Backlog}
+%% ------------------------------------------------------------
+
+\begin{table}[H]
+\centering
+\caption{Sprint Backlog — Release 2}
+\label{tab:backlog_r2}
+\renewcommand{\arraystretch}{1.25}
+\footnotesize
+\begin{tabularx}{\textwidth}{|p{1.4cm}|p{1.5cm}|p{2.8cm}|p{6.8cm}|p{1.5cm}|}
+\hline
+\textbf{Sprint} & \textbf{Code} & \textbf{Feature} & \textbf{User Story} & \textbf{Est. (h)} \\
+\hline
+\multirow{12}{*}{Sprint 3}
+  & US-019 & Assignment creation & Create an assignment with title, instructions, and deadline & 16 \\
+  \cline{2-5}
+  & US-020 & Assignment resources & Attach files and resources to an assignment & 8 \\
+  \cline{2-5}
+  & US-021 & Assignment publication & Publish an assignment to enrolled students & 8 \\
+  \cline{2-5}
+  & US-022 & Assignment submission & Submit an assignment response before the deadline & 16 \\
+  \cline{2-5}
+  & US-023 & Assignment review & Review submissions and provide feedback and grades & 16 \\
+  \cline{2-5}
+  & US-024 & My courses & View the list of enrolled courses & 8 \\
+  \cline{2-5}
+  & US-025 & Access lesson & Access lesson content such as videos and documents & 16 \\
+  \cline{2-5}
+  & US-026 & Complete lesson & Mark a lesson as completed & 8 \\
+  \cline{2-5}
+  & US-027 & Progress tracking & Track course progress percentage & 8 \\
+  \cline{2-5}
+  & US-028 & Consult assignments & View the list of assignments for enrolled courses & 8 \\
+  \cline{2-5}
+  & US-029 & Assignment feedback & Consult grades and feedback for submitted assignments & 8 \\
+  \cline{2-5}
+  & US-030 & Announcements & Consult announcements published by the instructor & 8 \\
+\hline
+\multirow{11}{*}{Sprint 4}
+  & US-031 & Certificate generation & Obtain a certificate after completing a course & 16 \\
+  \cline{2-5}
+  & US-032 & Certificate download & Download the certificate in PDF format & 8 \\
+  \cline{2-5}
+  & US-033 & Student dashboard & View courses, progress, assignments, and certificates & 16 \\
+  \cline{2-5}
+  & US-034 & Instructor dashboard & Monitor course statistics and student submissions & 16 \\
+  \cline{2-5}
+  & US-035 & Publish announcement & Publish announcements for enrolled students & 8 \\
+  \cline{2-5}
+  & US-036 & Course catalog & View the list of available courses & 16 \\
+  \cline{2-5}
+  & US-037 & Course search & Search for a course by keyword & 8 \\
+  \cline{2-5}
+  & US-038 & Catalog filters & Filter courses by category, level, or price & 8 \\
+  \cline{2-5}
+  & US-039 & Course details & View detailed information about a course & 8 \\
+  \cline{2-5}
+  & US-040 & Reviews and ratings & Rate and comment on a completed course & 8 \\
+  \cline{2-5}
+  & US-041 & Free course enrollment & Enroll in a free course without payment & 8 \\
+\hline
+\end{tabularx}
+\end{table}
+
+%% ------------------------------------------------------------
+\section{Functional and Technical Specifications}
+%% ------------------------------------------------------------
+
+This section provides a detailed breakdown of all user stories implemented in Release 2.
+For each functional area, a specification table describes the user story, the associated
+business rules, the technical implementation details, and the acceptance criteria that
+were used to validate the delivered functionality.
+
+%% ----------------------------
+\subsection{Assignment Workflow (US-019 to US-023)}
+%% ----------------------------
+
+The assignment module introduces a structured assessment workflow involving three
+actors: the instructor who creates and publishes assessments, the student who submits
+responses, and the system which handles deadline enforcement and feedback notification.
+The workflow supports multiple question types and accommodates both text-based and
+file-based submission formats, providing instructors with flexible evaluation tools.
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-019: Assignment Creation}
+\label{tab:us019}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Story} & As an Instructor, I want to create an assignment with a title, instructions, and a deadline so that students have a clear and time-bound assessment task. \\
+\hline
+\textbf{Precondition} & The instructor is authenticated and owns at least one published course. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item An assignment must be associated with an existing course;
+  \item The assignment must include a title, instructions, and a deadline;
+  \item Assignments are created in an unpublished state and are not visible to students until explicitly published.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Assignments are stored in the \texttt{Assignment} model, linked to a \texttt{Batch} and scoped by \texttt{organizationId};
+  \item Questions are stored in the \texttt{AssignmentQuestion} model and support four types: \texttt{QUIZ}, \texttt{TRUE\_FALSE}, \texttt{SHORT\_ANSWER}, and \texttt{FILE\_SUBMISSION};
+  \item The deadline is stored as a timestamp and enforced by the backend at submission time.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The instructor can create an assignment with all required fields;
+  \item The assignment is saved in unpublished state and not visible to students;
+  \item Missing required fields are rejected with appropriate validation messages.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-020: Assignment Resources}
+\label{tab:us020}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Story} & As an Instructor, I want to attach files and supporting resources to an assignment so that students have all necessary material to complete their work. \\
+\hline
+\textbf{Precondition} & The assignment has been created and the instructor is authenticated. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Resources must be attached to an existing assignment;
+  \item Supported resource types include documents and reference files;
+  \item Resources remain accessible to enrolled students once the assignment is published.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Attached files are uploaded to Supabase Storage via presigned URLs;
+  \item File URLs are stored in the \texttt{Assignment} model as a JSON array;
+  \item The backend validates ownership before accepting resource attachments.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The instructor can attach one or more files to an assignment;
+  \item Attached resources are stored successfully and linked to the assignment;
+  \item Students can access the resources once the assignment is published.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-021: Assignment Publication}
+\label{tab:us021}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Story} & As an Instructor, I want to publish an assignment so that enrolled students can view it and submit their responses. \\
+\hline
+\textbf{Precondition} & The assignment exists and contains at least one question. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item An assignment must be explicitly published before students can access it;
+  \item Publication is independent of the course publication state;
+  \item A published assignment cannot be deleted if students have already submitted responses.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The publication state is managed through a boolean field on the \texttt{Assignment} model;
+  \item Student-facing endpoints filter assignments by publication status before returning results;
+  \item The backend validates that the assignment contains at least one question before allowing publication.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The instructor can publish an assignment from the management interface;
+  \item Published assignments appear in the student workspace;
+  \item Unpublished assignments remain hidden from students.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-022: Assignment Submission}
+\label{tab:us022}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Story} & As a Student, I want to submit my assignment response with text or attached files before the deadline so that the instructor can evaluate my work. \\
+\hline
+\textbf{Precondition} & The student is enrolled in the course and the assignment is published with an active deadline. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Students can only submit if they are enrolled in the associated course;
+  \item Submissions are rejected after the deadline has passed;
+  \item A student can only submit one response per assignment.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Submissions are stored in the \texttt{AssignmentSubmission} table;
+  \item The \texttt{fileUrls} JSON field stores the URLs of uploaded attachment files;
+  \item The backend validates enrollment and deadline before persisting the submission;
+  \item File uploads follow the same presigned URL mechanism used elsewhere on the platform.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item An enrolled student can submit a response before the deadline;
+  \item Submissions after the deadline are rejected with an appropriate error;
+  \item The submission is stored and visible to the instructor for review.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-023: Assignment Review}
+\label{tab:us023}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Story} & As an Instructor, I want to review student submissions and provide feedback and grades so that students can understand their performance. \\
+\hline
+\textbf{Precondition} & At least one student has submitted a response to the assignment. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Instructors can review all submissions for assignments within their courses;
+  \item Each submission can receive a numeric grade and written feedback;
+  \item A notification email is sent to the student upon grading.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Grades and feedback are stored in the \texttt{marksAwarded} and \texttt{feedback} fields of the \texttt{AssignmentSubmission} record;
+  \item An email notification is dispatched to the student upon saving the grade;
+  \item The review interface is accessible only to instructors owning the associated course.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The instructor can view all submissions for an assignment;
+  \item The instructor can assign a grade and written feedback to each submission;
+  \item The student receives an email notification after grading.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+%% ----------------------------
+\subsection{Learning Experience (US-024 to US-030)}
+%% ----------------------------
+
+The learning experience module covers all interactions a student has with enrolled
+courses. It includes accessing the list of enrolled courses, navigating lesson content,
+marking topics as complete, tracking progress, consulting assignment tasks and feedback,
+and reading instructor announcements. These features collectively form the daily
+learning workflow of a student on the platform.
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-024: My Courses}
+\label{tab:us024}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Story} & As a Student, I want to view the list of courses I am enrolled in so that I can easily navigate to my learning content. \\
+\hline
+\textbf{Precondition} & The student is authenticated and is enrolled in at least one course. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Only courses for which the student holds an active enrollment record are displayed;
+  \item The list shows basic course information including title, progress, and instructor name.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The backend queries \texttt{BatchEnrollment} records filtered by the authenticated student's identifier;
+  \item Course progress is computed server-side and included in the response;
+  \item Results are scoped by \texttt{organizationId} to enforce tenant isolation.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The student can view all their enrolled courses in a dedicated workspace section;
+  \item Each course card displays the title, instructor, and current progress;
+  \item Courses from other organizations are never displayed.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-025: Access Lesson}
+\label{tab:us025}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Story} & As a Student, I want to access lesson content such as videos, documents, and text so that I can follow the course material at my own pace. \\
+\hline
+\textbf{Precondition} & The student is enrolled in the course and the lesson belongs to a published course. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item A student must be enrolled in a course to access any of its lesson content;
+  \item Content types include uploaded videos, YouTube videos, PDF documents, rich-text blocks, and external links;
+  \item Access to content files is controlled through the backend to prevent unauthorized downloads.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The backend verifies enrollment before returning content URLs or data;
+  \item Video files are served through Supabase Storage URLs;
+  \item The lesson viewer renders each content type using its corresponding component on the frontend.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item An enrolled student can access all lesson content within a published course;
+  \item Non-enrolled users are denied access and redirected appropriately;
+  \item All content types are rendered correctly in the lesson viewer.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-026 and US-027: Lesson Completion and Progress Tracking}
+\label{tab:us026}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Stories} & US-026: Complete lesson; US-027: Track course progress percentage. \\
+\hline
+\textbf{User Story} & As a Student, I want to mark lessons as completed and track my overall progress so that I can follow my advancement through the course. \\
+\hline
+\textbf{Precondition} & The student is enrolled in the course and has accessed the lesson content. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item A student must explicitly mark a topic as complete;
+  \item Course progress is computed as the ratio of completed topics to the total number of topics;
+  \item Reaching 100\% completion is a prerequisite for certificate generation.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Completion events are stored in the \texttt{ContentProgress} table, with fields for \texttt{topicId}, \texttt{userId}, and \texttt{completedAt};
+  \item A dedicated endpoint (\texttt{POST /api/batches/:batchId/topics/:topicId/complete}) handles the completion request;
+  \item The overall progress percentage is computed server-side and returned in the enrollment detail response.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The student can mark any topic as complete from the lesson viewer;
+  \item The progress bar updates immediately after marking a topic;
+  \item The dashboard displays the correct progress percentage for each enrolled course.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-028 and US-029: Consult Assignments and Feedback}
+\label{tab:us028}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Stories} & US-028: Consult assignments; US-029: Consult feedback. \\
+\hline
+\textbf{User Story} & As a Student, I want to view all assignments for my enrolled courses and consult the grades and feedback I have received so that I can follow my assessment results. \\
+\hline
+\textbf{Precondition} & The student is enrolled in the course and assignments have been published by the instructor. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Only published assignments belonging to enrolled courses are visible to the student;
+  \item Feedback and grades are visible only after the instructor has reviewed the submission;
+  \item Students can view the deadline, submission status, and feedback for each assignment.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The backend returns assignments filtered by the student's enrollment and publication status;
+  \item The \texttt{AssignmentSubmission} record is queried to retrieve the submission status, grade, and feedback;
+  \item Results are scoped by \texttt{organizationId} to preserve tenant isolation.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The student can view the list of published assignments for all enrolled courses;
+  \item After submission review, the student can access the assigned grade and written feedback;
+  \item Assignments from non-enrolled courses are not displayed.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-030: Announcements}
+\label{tab:us030}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Story} & As a Student, I want to consult announcements published by my instructor so that I stay informed about course updates and important information. \\
+\hline
+\textbf{Precondition} & The student is enrolled in the course and the instructor has published at least one announcement. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Announcements are scoped to a specific course and visible only to enrolled students;
+  \item Announcements are displayed in reverse chronological order.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Announcements are stored in a dedicated model linked to the \texttt{Batch} and scoped by \texttt{organizationId};
+  \item The backend filters announcements by enrollment and organization context before returning results.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The student can view all announcements published for their enrolled courses;
+  \item Announcements from non-enrolled courses are not accessible;
+  \item Announcements are displayed with their publication date and content.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+%% ----------------------------
+\subsection{Certificates and Dashboards (US-031 to US-035)}
+%% ----------------------------
+
+This group of user stories introduces the tools through which students and instructors
+can track and monitor platform activity at a high level. Certificate generation
+formalizes course completion as a verifiable achievement, while the dashboards provide
+consolidated views of learning progress, course statistics, and upcoming activities.
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-031 and US-032: Certificate Generation and Download}
+\label{tab:us031}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Stories} & US-031: Certificate generation; US-032: Certificate download. \\
+\hline
+\textbf{User Story} & As a Student, I want to obtain and download a certificate after completing a course so that I can share a formal proof of my achievement. \\
+\hline
+\textbf{Precondition} & The student has completed 100\% of the topics in an enrolled course. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item A certificate is issued automatically when all course topics have been completed;
+  \item Each certificate carries a unique \texttt{credentialId} for public verification;
+  \item A student can only receive one certificate per course;
+  \item The certificate is downloadable in PDF format at any time.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The completion check is triggered server-side when a topic is marked complete;
+  \item A \texttt{BatchCertificateIssue} record is created with the \texttt{credentialId}, \texttt{userId}, \texttt{batchId}, and \texttt{issuedAt} timestamp;
+  \item PDF generation is performed server-side using course and student metadata;
+  \item The public verification URL follows the format \texttt{/certificates/:credentialId}.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item A certificate is automatically issued upon 100\% course completion;
+  \item The student can view and download the certificate from their dashboard;
+  \item The certificate includes the student name, course title, organization name, and completion date;
+  \item The credential ID enables public online verification of the certificate.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-033: Student Dashboard}
+\label{tab:us033}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Story} & As a Student, I want to view a consolidated dashboard showing my enrolled courses, progress, upcoming assignments, and earned certificates so that I can manage my learning activities efficiently. \\
+\hline
+\textbf{Precondition} & The student is authenticated and has at least one enrollment record. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The dashboard aggregates data from enrollments, progress records, assignments, and certificates;
+  \item Only data belonging to the authenticated student is displayed;
+  \item The dashboard provides quick navigation to each enrolled course and active assignment.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item A dedicated dashboard endpoint aggregates enrollment, progress, assignment, and certificate data for the authenticated student;
+  \item All queries are scoped by both \texttt{userId} and \texttt{organizationId};
+  \item Upcoming deadlines are computed by filtering assignments where the deadline has not yet passed.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The student dashboard displays enrolled courses with their progress percentages;
+  \item Upcoming assignment deadlines are visible and sorted chronologically;
+  \item Earned certificates are accessible directly from the dashboard.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-034: Instructor Dashboard}
+\label{tab:us034}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Story} & As an Instructor, I want to monitor course statistics and student submissions from a dedicated dashboard so that I can track learner engagement and manage my assessment workload. \\
+\hline
+\textbf{Precondition} & The instructor is authenticated and owns at least one published course. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The dashboard displays statistics only for courses owned by the authenticated instructor;
+  \item Submission counts include both pending and graded submissions;
+  \item Average progress is computed across all enrolled students per course.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item A dedicated endpoint aggregates enrollment counts, average progress, and pending submission counts for each course owned by the instructor;
+  \item All queries are scoped by \texttt{teacherId} and \texttt{organizationId};
+  \item Pending submissions are identified by filtering \texttt{AssignmentSubmission} records where \texttt{marksAwarded} is null.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The instructor can view enrollment counts and average progress for each of their courses;
+  \item Pending assignment submissions requiring review are highlighted;
+  \item Statistics from courses owned by other instructors are not displayed.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-035: Publish Announcement}
+\label{tab:us035}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Story} & As an Instructor, I want to publish announcements for my enrolled students so that I can communicate course updates and important information effectively. \\
+\hline
+\textbf{Precondition} & The instructor is authenticated and owns at least one course with enrolled students. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Announcements are linked to a specific course and visible only to its enrolled students;
+  \item Only the instructor who owns the course can publish announcements for it;
+  \item Announcements are displayed to students in reverse chronological order.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Announcements are stored in a model linked to the \texttt{Batch} and scoped by \texttt{organizationId};
+  \item The backend validates that the authenticated instructor owns the referenced course before saving;
+  \item Student-facing endpoints filter announcements by the student's enrollment records.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The instructor can create and publish an announcement for a specific course;
+  \item Enrolled students can see the announcement in their course workspace;
+  \item Announcements from courses the student is not enrolled in are not displayed.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+%% ----------------------------
+\subsection{Course Catalog and Enrollment (US-036 to US-041)}
+%% ----------------------------
+
+The course catalog is the public-facing entry point of each organization's learning
+space. It allows students to discover available courses, explore their content and
+instructor information, and enroll directly. The catalog is fully scoped to the current
+tenant, ensuring that students see only the courses published by their organization.
+Free enrollment is handled as an immediate operation, while paid enrollment is deferred
+to the payment workflow introduced in Release 3.
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-036: Course Catalog}
+\label{tab:us036}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Story} & As a Student, I want to view the list of available courses in my organization so that I can explore the learning offerings and choose courses to enroll in. \\
+\hline
+\textbf{Precondition} & The student is authenticated and belongs to an active organization. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The catalog displays only published courses belonging to the student's organization;
+  \item Archived or draft courses are excluded from the catalog;
+  \item Each course card shows the title, category, level, instructor name, and price.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Catalog queries filter \texttt{Batch} records by \texttt{status = PUBLISHED} and \texttt{organizationId};
+  \item The response includes aggregated enrollment counts and average ratings where available;
+  \item Results are paginated to support large course catalogs.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The student can view all published courses in their organization;
+  \item Draft and archived courses are not visible in the catalog;
+  \item Each course card displays the relevant information clearly.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-037 and US-038: Course Search and Catalog Filters}
+\label{tab:us037}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Stories} & US-037: Course search; US-038: Catalog filters. \\
+\hline
+\textbf{User Story} & As a Student, I want to search for courses by keyword and filter results by category, level, or price so that I can quickly find courses that match my interests. \\
+\hline
+\textbf{Precondition} & The student is on the course catalog page. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Search applies to course titles and descriptions;
+  \item Filters can be combined: category, level, and price range can be applied simultaneously;
+  \item All search and filter results remain scoped to the student's organization.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Full-text search is implemented via a Prisma \texttt{contains} query on the \texttt{title} and \texttt{description} fields;
+  \item Filters are applied as additional \texttt{WHERE} conditions on the catalog query;
+  \item Search and filter parameters are passed as query parameters to the catalog endpoint.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The student can search for courses by entering a keyword;
+  \item The student can filter results by category, level, and price range;
+  \item Search and filter results update dynamically and remain scoped to the organization.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-039: Course Details}
+\label{tab:us039}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Story} & As a Student, I want to view detailed information about a course so that I can make an informed decision before enrolling. \\
+\hline
+\textbf{Precondition} & The course is published and the student is browsing the catalog. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The detail page is publicly accessible to all authenticated users of the organization;
+  \item It displays the course description, instructor information, content outline, enrollment count, and student reviews.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The detail endpoint returns the full course metadata along with the content hierarchy summary, instructor profile, and aggregated reviews;
+  \item The content outline lists subjects and chapters without exposing individual topic content to non-enrolled users.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The student can access the course detail page from the catalog;
+  \item The page displays complete course information including description, instructor, and reviews;
+  \item The content outline is visible but lesson content remains inaccessible without enrollment.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-040: Reviews and Ratings}
+\label{tab:us040}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Story} & As a Student, I want to rate and comment on a course I have completed so that I can share my experience with other learners. \\
+\hline
+\textbf{Precondition} & The student has completed the course and does not yet have a submitted review for it. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Only students who have completed the course can submit a review;
+  \item Each student can submit only one review per course;
+  \item Reviews include a star rating from 1 to 5 and an optional text comment.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Reviews are stored in the \texttt{BatchReview} table, linked to the \texttt{Batch} and \texttt{User};
+  \item The backend verifies course completion before accepting a review submission;
+  \item Uniqueness is enforced by a composite constraint on \texttt{userId} and \texttt{batchId}.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item A student who has completed a course can submit a rating and comment;
+  \item A second review submission for the same course is rejected;
+  \item Reviews appear on the course detail page and contribute to the average rating.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Specification — US-041: Free Course Enrollment}
+\label{tab:us041}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
+\textbf{User Story} & As a Student, I want to enroll in a free course without payment so that I can start learning immediately. \\
+\hline
+\textbf{Precondition} & The student is authenticated, the course is published, its price is set to zero, and the student is not already enrolled. \\
+\hline
+\textbf{Business Rules} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item Free enrollment is available only for courses with a price of zero;
+  \item A student cannot enroll twice in the same course;
+  \item Enrollment grants immediate access to all lesson content within the course.
+\end{itemize} \\
+\hline
+\textbf{Technical Specification} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The enrollment endpoint verifies the course price before creating a \texttt{BatchEnrollment} record;
+  \item For free courses, the record is created directly without initiating a payment flow;
+  \item A uniqueness check on \texttt{userId} and \texttt{batchId} prevents duplicate enrollments.
+\end{itemize} \\
+\hline
+\textbf{Acceptance Criteria} &
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item The student can enroll in a free course with a single action;
+  \item Enrollment is confirmed immediately and the course appears in the student's course list;
+  \item Attempting to enroll a second time returns an appropriate error.
+\end{itemize} \\
+\hline
+\end{tabularx}
+\end{table}
+
+%% ------------------------------------------------------------
+\section{Design}
+%% ------------------------------------------------------------
+
+The realization of Release 2 relies on the architectural foundations presented in
+Chapter~3 and extends the data model introduced in Release 1. The following UML
+models focus on the entities and interaction flows specific to this release.
+
+\subsection{Static Modeling}
+
+\subsubsection{Class Diagram}
+
+Figure~\ref{fig:class_r2} presents the class diagram for Release 2. It extends the
+data model of Release 1 by introducing the entities that support the learning
+experience: assignments, content progress, enrollments, certificates, and reviews.
+These entities collectively describe the relationship between a student and the courses
+they interact with throughout their learning journey.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{class_diagram_r2.png}}
+  \caption{Class Diagram — Release 2}
+  \label{fig:class_r2}
+\end{figure}
+
+The main relationships introduced in this release are as follows:
+
+\begin{itemize}
+  \item A \texttt{BatchEnrollment} links a \texttt{User} (student) to a \texttt{Batch}
+        (course) and serves as the gateway to all learning activities. Without an active
+        enrollment record, a student cannot access any of the associated lessons,
+        assignments, or certificates;
+  \item A \texttt{ContentProgress} record tracks whether a student has completed a
+        specific \texttt{Topic}, enabling the server-side computation of the overall
+        course progress percentage;
+  \item An \texttt{Assignment} belongs to a \texttt{Batch} and is composed of multiple
+        \texttt{AssignmentQuestion} items; each enrolled student produces one
+        \texttt{AssignmentSubmission} per assignment;
+  \item A \texttt{BatchCertificateIssue} is automatically created by the backend when a
+        student has completed all topics in their enrolled course, formalizing the
+        achievement with a unique and verifiable credential identifier;
+  \item A \texttt{BatchReview} records the student's rating and comment following course
+        completion, contributing to the course quality indicators visible in the catalog.
+\end{itemize}
+
+\subsubsection{Database Model of Release 2}
+
+Figure~\ref{fig:db_model_r2} presents the simplified database model for Release 2,
+highlighting the new tables introduced to support the learning experience. It extends
+the model of Release 1 with the enrollment, progress tracking, assignment, submission,
+certificate, and review entities.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=0.95\textwidth]{database_model_r2.png}}
+  \caption{Database Model — Release 2}
+  \label{fig:db_model_r2}
+\end{figure}
+
+\subsection{Dynamic Modeling}
+
+The dynamic models of Release 2 focus on the three most significant interaction flows
+from the student perspective: lesson access and completion, assignment submission, and
+catalog browsing with enrollment.
+
+\subsubsection{Lesson Access and Completion Sequence Diagram}
+
+Figure~\ref{fig:seq_lesson} illustrates the sequence of interactions when a student
+accesses a lesson and marks it as complete. Before returning any content, the backend
+verifies that the student holds an active enrollment in the course. Upon successful
+verification, the lesson resource is served. When the student explicitly marks the
+topic as complete, the backend records the progress event in the \texttt{ContentProgress}
+table and evaluates whether all topics in the course have been completed. If so, the
+certificate issuance process is triggered automatically.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=0.9\textwidth]{seq_lesson_completion.png}}
+  \caption{Lesson Access and Completion Sequence Diagram}
+  \label{fig:seq_lesson}
+\end{figure}
+
+\subsubsection{Assignment Submission Sequence Diagram}
+
+Figure~\ref{fig:seq_assignment} illustrates the assignment submission flow from the
+student's perspective. After selecting an assignment, the student fills in their
+response and submits it before the configured deadline. The backend validates both the
+enrollment status and the submission deadline before persisting the record. Once the
+instructor reviews the submission and assigns a grade, the student is automatically
+notified by email and can consult the feedback from their dashboard.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=0.9\textwidth]{seq_assignment_submission.png}}
+  \caption{Assignment Submission Sequence Diagram}
+  \label{fig:seq_assignment}
+\end{figure}
+
+\subsubsection{Course Catalog and Free Enrollment Sequence Diagram}
+
+Figure~\ref{fig:seq_catalog} illustrates the flow from catalog browsing to free course
+enrollment. The student navigates to the catalog, which returns only the published
+courses scoped to their organization. After applying optional filters and selecting a
+course to view its details, the student clicks the enrollment button. For courses with
+a price of zero, the backend creates the \texttt{BatchEnrollment} record immediately
+and redirects the student to the course viewer without initiating a payment flow.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=0.9\textwidth]{seq_catalog_enrollment.png}}
+  \caption{Course Catalog and Free Enrollment Sequence Diagram}
+  \label{fig:seq_catalog}
+\end{figure}
+
+%% ------------------------------------------------------------
+\section{Implementation}
+%% ------------------------------------------------------------
+
+This section presents the implementation results of Release 2. Each subsection
+describes one delivered functional module and is supported by interface screenshots
+that illustrate the final state of the feature.
+
+\subsection{Assignment Management}
+
+The assignment module provides instructors with a comprehensive assessment creation
+tool supporting four question types: multiple choice, true/false, short answer, and
+file submission. Instructors can attach supporting resources to an assignment and
+control its visibility independently of the course publication state, publishing it
+only when the content is ready for students.
+
+On the student side, the submission interface presents each assignment question in
+sequence and allows the student to provide text answers or upload files as required.
+The instructor's review interface consolidates all received submissions and provides
+a grading panel where marks and written feedback can be entered directly. Upon
+grading, the student receives an email notification and can consult the instructor's
+feedback from their personal dashboard.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{screenshot_assignment_editor.png}}
+  \caption{Assignment Editor — Instructor View}
+  \label{fig:sc_assignment_editor}
+\end{figure}
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{screenshot_assignment_submission.png}}
+  \caption{Assignment Submission — Student View}
+  \label{fig:sc_assignment_submission}
+\end{figure}
+
+\subsection{Lesson Viewer and Progress Tracking}
+
+The lesson viewer provides a unified interface for all supported content types.
+Uploaded video files and YouTube-embedded videos are displayed in an adaptive video
+player, while PDF documents are rendered inline using a browser-native renderer.
+Rich-text content is displayed from stored HTML, and external links open in a new
+browser tab. At the bottom of each lesson page, a completion button allows the student
+to explicitly mark the topic as done, which immediately updates the course progress
+bar and persists the completion event on the server.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{screenshot_lesson_viewer.png}}
+  \caption{Lesson Viewer and Progress Bar — Student View}
+  \label{fig:sc_lesson}
+\end{figure}
+
+\subsection{Student and Instructor Dashboards}
+
+The student dashboard serves as a personal learning hub, consolidating in one view
+the list of enrolled courses with their current progress percentages, upcoming
+assignment deadlines, recent instructor announcements, and earned certificates. This
+centralized overview allows students to manage their learning activities efficiently
+without navigating between multiple sections of the platform.
+
+The instructor dashboard is oriented toward monitoring and supervision. It presents
+course-level statistics including total enrollment counts, average student progress,
+and the number of assignment submissions awaiting review. This information enables
+instructors to quickly identify courses that require attention and prioritize their
+grading activities.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{screenshot_student_dashboard.png}}
+  \caption{Student Dashboard}
+  \label{fig:sc_student_dashboard}
+\end{figure}
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{screenshot_instructor_dashboard.png}}
+  \caption{Instructor Dashboard}
+  \label{fig:sc_instructor_dashboard}
+\end{figure}
+
+\subsection{Course Catalog}
+
+The course catalog presents students with a browsable and searchable listing of all
+published courses within their organization. Each course card displays the title,
+category, difficulty level, instructor name, enrollment count, and price at a glance.
+A filter sidebar allows students to narrow results by category and level, while the
+search bar performs live filtering on the course title. The tenant isolation mechanism
+ensures that each student sees only the courses belonging to their own organization.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{screenshot_catalog.png}}
+  \caption{Course Catalog — Student View}
+  \label{fig:sc_catalog}
+\end{figure}
+
+\subsection{Certificate Generation}
+
+Upon completing all topics of an enrolled course, the platform automatically issues a
+digital certificate to the student. The certificate document includes the student's
+full name, the course title, the organization name, the date of completion, and a
+unique credential identifier that can be used for public online verification. The
+certificate is accessible from the student dashboard and can be downloaded at any
+time in PDF format, providing students with a portable and shareable record of their
+achievement.
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{screenshot_certificate.png}}
+  \caption{Certificate — Student View}
+  \label{fig:sc_certificate}
+\end{figure}
+
+%% ------------------------------------------------------------
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+%% ------------------------------------------------------------
+
+This chapter presented the implementation of Release 2 of Tesla Academy, which
+delivers the complete student-facing learning experience. Students can now discover
+courses through the catalog, enroll in free offerings, access multimedia lesson content,
+track their progress through the platform, submit assignments and receive instructor
+feedback, and obtain verifiable digital certificates upon course completion.
+Role-specific dashboards for both students and instructors provide consolidated views
+of platform activity and support informed decision-making throughout the learning cycle.
+
+The next chapter presents Release 3, which extends the platform with paid course
+purchases via the Konnect payment gateway, live session management powered by
+LiveKit, and AI-powered features including the contextual learning assistant,
+AI-assisted assignment feedback, automatic question generation, and dynamic theme
+generation.

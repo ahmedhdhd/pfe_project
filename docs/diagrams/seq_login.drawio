@@ -1,0 +1,171 @@
+<mxfile host="app.diagrams.net" version="21.0.0">
+  <diagram name="Login Sequence Diagram" id="seq_login">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1400" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- TITLE -->
+        <mxCell id="title" value="Diagramme de Séquence — Login (US-002)" style="text;html=1;fontSize=16;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="50" y="10" width="1300" height="35" as="geometry"/>
+        </mxCell>
+
+        <!-- LIFELINE HEADERS -->
+        <mxCell id="h1" value=":Utilisateur&lt;br/&gt;(Navigateur)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="60" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="100" y="110" as="sourcePoint"/><mxPoint x="100" y="1100" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h2" value=":Frontend&lt;br/&gt;(Next.js)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="240" y="60" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="310" y="110" as="sourcePoint"/><mxPoint x="310" y="1100" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h3" value=":Backend API&lt;br/&gt;(Express.js)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="470" y="60" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l3" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="540" y="110" as="sourcePoint"/><mxPoint x="540" y="1100" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h4" value=":Auth&lt;br/&gt;Middleware" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="680" y="60" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l4" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="750" y="110" as="sourcePoint"/><mxPoint x="750" y="1100" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h5" value=":Base de Données&lt;br/&gt;(PostgreSQL)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="60" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l5" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="970" y="110" as="sourcePoint"/><mxPoint x="970" y="1100" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="h6" value=":JWT Utils&lt;br/&gt;(jsonwebtoken)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="60" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l6" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1195" y="110" as="sourcePoint"/><mxPoint x="1195" y="1100" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- Activation Bars -->
+        <mxCell id="act_fe" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="305" y="155" width="10" height="545" as="geometry" />
+        </mxCell>
+        <mxCell id="act_be" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="535" y="195" width="10" height="425" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="965" y="235" width="10" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db2" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="965" y="555" width="10" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jwt1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="435" width="10" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jwt2" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="495" width="10" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Messages -->
+        <mxCell id="m1" value="1: Soumettre le formulaire (email, password)" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="100" y="155" as="sourcePoint"/><mxPoint x="310" y="155" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m2" value="2: Demande de connexion avec les identifiants" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="310" y="195" as="sourcePoint"/><mxPoint x="540" y="195" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m3" value="3: Vérifier l&#39;existence et le rôle de l&#39;utilisateur" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="540" y="235" as="sourcePoint"/><mxPoint x="970" y="235" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m4" value="4: Retourne les informations du profil utilisateur" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="970" y="265" as="sourcePoint"/><mxPoint x="540" y="265" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- ALT -->
+        <mxCell id="alt1" value="[alt] Email ou mot de passe invalide / compte non vérifié" style="swimlane;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="160" y="285" width="820" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="alt1msg" value="→ Réponse 401: « Invalid credentials » ou « Please verify your email first »" style="text;html=1;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="alt1">
+          <mxGeometry x="5" y="30" width="800" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- 5. Self-loop: password check -->
+        <mxCell id="m5" value="5: Vérifier la validité du mot de passe (crypté)" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="540" y="385" as="sourcePoint"/>
+            <mxPoint x="540" y="385" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="620" y="385"/>
+              <mxPoint x="620" y="405"/>
+              <mxPoint x="540" y="405"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m6" value="6: Générer une session courte (Jeton d&#39;accès)" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="540" y="435" as="sourcePoint"/><mxPoint x="1195" y="435" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m7" value="7: Retourne le jeton d&#39;accès" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1195" y="465" as="sourcePoint"/><mxPoint x="540" y="465" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m8" value="8: Générer une session prolongée (Jeton de rafraîchissement)" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="540" y="495" as="sourcePoint"/><mxPoint x="1195" y="495" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m9" value="9: Retourne le jeton de rafraîchissement" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1195" y="525" as="sourcePoint"/><mxPoint x="540" y="525" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m10" value="10: Enregistrer la session prolongée en base" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="540" y="555" as="sourcePoint"/><mxPoint x="970" y="555" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m11" value="11: Session prolongée sauvegardée" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="970" y="585" as="sourcePoint"/><mxPoint x="540" y="585" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m12" value="12: Réponse : Connexion réussie (avec jetons et infos utilisateur)" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="540" y="620" as="sourcePoint"/><mxPoint x="310" y="620" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- 13. Self-loop: store tokens -->
+        <mxCell id="m13" value="13: Sauvegarder la session localement" style="html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="650" as="sourcePoint"/>
+            <mxPoint x="310" y="650" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="400" y="650"/>
+              <mxPoint x="400" y="670"/>
+              <mxPoint x="310" y="670"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m14" value="14: Rediriger vers le workspace selon le rôle (ADMIN → /admin, TEACHER → /admin, STUDENT → /)" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="310" y="700" as="sourcePoint"/><mxPoint x="100" y="700" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m15" value="15: Afficher le tableau de bord (Dashboard)" style="html=1;endArrow=none;dashed=0;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="100" y="735" as="sourcePoint"/><mxPoint x="100" y="735" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- NOTE -->
+        <mxCell id="note1" value="Note: Pour le Super Admin, les identifiants sont lus depuis les variables d&#39;environnement (SUPER_ADMIN_EMAIL / SUPER_ADMIN_PASSWORD_HASH). Aucun enregistrement en DB n&#39;est nécessaire. Le refreshToken n&#39;est pas stocké en base pour le Super Admin." style="shape=note;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff9c4;strokeColor=#d6b656;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="160" y="790" width="870" height="70" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
