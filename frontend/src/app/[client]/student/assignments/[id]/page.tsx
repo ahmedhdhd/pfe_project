@@ -142,6 +142,8 @@ function QuestionInput({
     return (
       <div className="space-y-3">
         <FileUpload
+          accept=".pdf"
+          endpoint="student"
           maxSize={50}
           onUploadComplete={(file) => onChange(file.url)}
         />
@@ -152,7 +154,7 @@ function QuestionInput({
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
-            Upload your file before submitting.
+            Upload a PDF file before submitting.
           </p>
         )}
       </div>

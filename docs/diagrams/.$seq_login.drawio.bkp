@@ -92,10 +92,13 @@
 
         <!-- ALT -->
         <mxCell id="alt1" value="[alt] Email ou mot de passe invalide / compte non vérifié" style="swimlane;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" vertex="1" parent="1">
-          <mxGeometry x="160" y="285" width="820" height="70" as="geometry"/>
+          <mxGeometry x="80" y="285" width="950" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="alt1msg" value="→ Réponse 401: « Invalid credentials » ou « Please verify your email first »" style="text;html=1;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="alt1">
-          <mxGeometry x="5" y="30" width="800" height="30" as="geometry"/>
+        <mxCell id="alt1_m1" value="Réponse 401: « Invalid credentials » ou « Please verify »" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="540" y="325" as="sourcePoint"/><mxPoint x="310" y="325" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="alt1_m2" value="Afficher le message d'erreur" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="310" y="345" as="sourcePoint"/><mxPoint x="100" y="345" as="targetPoint"/></mxGeometry>
         </mxCell>
 
         <!-- 5. Self-loop: password check -->

@@ -844,7 +844,7 @@ export default function PageEditorPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>Contact email</Label>
                   <Input

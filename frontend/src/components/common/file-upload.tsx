@@ -58,6 +58,32 @@ export function FileUpload({
   const directUploadMutation =
     endpoint === "student" ? studentUploadMutation : adminUploadMutation;
 
+  const matchesAccept = (file: File) => {
+    const patterns = accept
+      .split(",")
+      .map((pattern) => pattern.trim().toLowerCase())
+      .filter(Boolean);
+
+    if (patterns.length === 0) return true;
+
+    const fileName = file.name.toLowerCase();
+    const fileType = file.type.toLowerCase();
+
+    return patterns.some((pattern) => {
+      if (pattern === "*/*") return true;
+      if (pattern.startsWith(".")) return fileName.endsWith(pattern);
+      if (pattern.endsWith("/*")) return fileType.startsWith(pattern.slice(0, -1));
+      return fileType === pattern;
+    });
+  };
+
+  const getAcceptError = () => {
+    const normalized = accept.replace(/,/g, ", ");
+    return normalized === ".pdf"
+      ? "Only PDF files are allowed."
+      : `Only ${normalized} files are allowed.`;
+  };
+
   // Auto-upload pending files
   useEffect(() => {
     const pendingFiles = files.filter((f) => f.status === "pending");
@@ -78,6 +104,15 @@ export function FileUpload({
     const maxSizeBytes = maxSize * 1024 * 1024;
 
     const newFiles: UploadedFile[] = Array.from(selectedFiles).map((file) => {
+      if (!matchesAccept(file)) {
+        return {
+          file,
+          progress: 0,
+          status: "error",
+          error: getAcceptError(),
+        };
+      }
+
       if (file.size > maxSizeBytes) {
         return {
           file,

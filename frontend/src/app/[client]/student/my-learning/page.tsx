@@ -6,22 +6,17 @@ import {
   ArrowRight,
   Award,
   BookOpen,
-  CalendarDays,
-  CheckCircle2,
   Clock3,
-  FileText,
   PlayCircle,
   Search,
   TrendingUp,
 } from "@/components/icons";
 import { MyLearningMobile } from "@/components/student/mobile/my-learning-mobile";
 import { StudentHeader } from "@/components/student/student-header";
-import { useClientMyEnrollments } from "@/hooks/test-series-client";
 import { useGetMyBatches, useIsMobile } from "@/hooks";
 import { useRecentlyWatched, useWatchStats } from "@/hooks/api";
 import apiClient from "@/lib/api/client";
 import { tokenManager } from "@/lib/api/client";
-import { useTestAttemptStats } from "@/hooks/test-attempts-client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -55,15 +50,6 @@ interface PurchasedBatch {
   totalLessons: number;
 }
 
-interface PurchasedTestSeries {
-  id: string;
-  title: string;
-  exam: string;
-  imageUrl?: string;
-  totalTests: number;
-  validUntil: Date;
-}
-
 export default function MyLearningPage() {
   const { isMobile, isClient } = useIsMobile();
   const user = tokenManager.getUser();
@@ -78,25 +64,7 @@ export default function MyLearningPage() {
 
   const recentVideos =
     recentlyWatchedResponse?.data?.videos?.map((video) => {
-      const content = video.content as {
-        id: string;
-        name: string;
-        topicId?: string;
-        subject?: { name: string; id?: string };
-        videoThumbnail?: string;
-        batch?: { name: string; id?: string };
-        topic?: {
-          id?: string;
-          chapterId?: string;
-          chapter?: {
-            id?: string;
-            subject?: {
-              batchId?: string;
-            };
-          };
-        };
-      };
-
+      const content = video.content as any;
       const contentId = content.id;
       const topicId = content.topicId || content.topic?.id;
       const chapterId = content.topic?.chapterId || content.topic?.chapter?.id;
@@ -146,7 +114,7 @@ export default function MyLearningPage() {
             params: { batchId: batch.id },
           })
           .then((res) => res.data),
-      enabled: isClient && isMobile === false && !!batch.id,
+      enabled: isClient && !isMobile && !!batch.id,
       staleTime: 60 * 1000,
     })),
   });
@@ -174,7 +142,6 @@ export default function MyLearningPage() {
       course.totalLessons > 0 && course.completedLessons >= course.totalLessons
   ).length;
 
-  // Greeting based on time of day
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
@@ -182,47 +149,47 @@ export default function MyLearningPage() {
     return "Good evening";
   };
 
-  if (!isClient) {
-    return null;
-  }
-
-  if (isMobile) {
-    return <MyLearningMobile />;
-  }
+  if (!isClient) return null;
+  if (isMobile) return <MyLearningMobile />;
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-white dark:bg-zinc-950">
       <StudentHeader />
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
-        {/* ── Welcome Section ── */}
-        <section className="mb-8 animate-slide-up">
-          <div className="rounded-2xl bg-primary/5 border border-primary/10 p-6 md:p-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium text-primary mb-1">
+      <main className="mx-auto max-w-7xl px-6 py-10">
+        {/* Welcome Hero */}
+        <section className="mb-12">
+          <div className="rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/10 p-8 md:p-12 overflow-hidden relative">
+            <div className="absolute right-8 top-8 text-[180px] font-black text-primary/5 select-none pointer-events-none">
+              LEARN
+            </div>
+
+            <div className="flex flex-col md:flex-row md:items-end gap-8 relative">
+              <div className="flex-1">
+                <p className="text-primary font-medium tracking-widest text-sm mb-2">
                   {getGreeting()},
                 </p>
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+                <h1 className="text-4xl md:text-5xl font-bold tracking-tighter">
                   {user?.username || "Student"}
                 </h1>
-                <p className="mt-1.5 text-muted-foreground text-sm max-w-lg">
+                <p className="mt-4 text-lg text-muted-foreground max-w-md">
                   {nextLesson
-                    ? "You have a lesson in progress. Pick up where you left off."
-                    : "Ready to learn something new? Explore available courses."}
+                    ? "You're making great progress. Let's keep the momentum going."
+                    : "Your learning journey starts here. What will you master today?"}
                 </p>
               </div>
-              <div className="flex gap-3 shrink-0">
-                <Button variant="outline" asChild className="rounded-xl">
+
+              <div className="flex gap-4">
+                <Button variant="outline" size="lg" className="rounded-2xl" asChild>
                   <Link href="/student/explore">
-                    <Search className="mr-2 h-4 w-4" />
-                    Explore
+                    <Search className="mr-2 h-5 w-5" />
+                    Discover
                   </Link>
                 </Button>
-                <Button asChild className="rounded-xl">
+                <Button size="lg" className="rounded-2xl shadow-lg" asChild>
                   <Link href={nextLesson?.href || "/student/explore"}>
-                    <PlayCircle className="mr-2 h-4 w-4" />
-                    {nextLesson ? "Continue Learning" : "Find a Course"}
+                    <PlayCircle className="mr-2 h-5 w-5" />
+                    {nextLesson ? "Continue" : "Start Learning"}
                   </Link>
                 </Button>
               </div>
@@ -230,38 +197,23 @@ export default function MyLearningPage() {
           </div>
         </section>
 
-        {/* ── Stats Row ── */}
-        <section className="grid gap-4 md:grid-cols-3 mb-8 stagger-children">
-          <StatCard
-            icon={BookOpen}
-            label="Courses Enrolled"
-            value={courses.length}
-          />
-          <StatCard
-            icon={TrendingUp}
-            label="Avg. Progress"
-            value={`${averageCourseProgress}%`}
-          />
-          <StatCard
-            icon={Award}
-            label="Completed"
-            value={completedCourses}
-          />
+        {/* Stats */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <StatCard icon={BookOpen} label="Courses Enrolled" value={courses.length} />
+          <StatCard icon={TrendingUp} label="Average Progress" value={`${averageCourseProgress}%`} />
+          <StatCard icon={Award} label="Completed Courses" value={completedCourses} />
         </section>
 
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_340px]">
-          {/* ── Main Content ── */}
-          <div className="space-y-8">
-            {/* Continue Learning Hero */}
+        <div className="grid gap-10 xl:grid-cols-[1fr_360px]">
+          <div className="space-y-12">
             <ContinueHero lesson={nextLesson} />
 
-            {/* Course Grid */}
             <section>
               <SectionHeader
                 title="My Courses"
-                subtitle="Your enrolled courses and progress"
+                subtitle="Keep pushing forward"
                 href="/student/explore"
-                action="Explore More"
+                action="Browse all"
               />
 
               {isLoadingBatches ? (
@@ -275,7 +227,7 @@ export default function MyLearningPage() {
                   action="Browse Courses"
                 />
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 stagger-children">
+                <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                   {courses.map((course) => (
                     <CourseCard key={course.id} course={course} />
                   ))}
@@ -284,8 +236,8 @@ export default function MyLearningPage() {
             </section>
           </div>
 
-          {/* ── Right Sidebar ── */}
-          <aside className="space-y-5">
+          {/* Sidebar */}
+          <aside>
             <ProgressPanel
               totalWatchTime={
                 watchStats?.data?.totalWatchTimeFormatted || "0h 0m"
@@ -294,7 +246,6 @@ export default function MyLearningPage() {
               averageCourseProgress={averageCourseProgress}
               completedCourses={completedCourses}
             />
-
           </aside>
         </div>
       </main>
@@ -302,33 +253,37 @@ export default function MyLearningPage() {
   );
 }
 
-// ── Sub-Components ──
+/* ====================== SUB COMPONENTS ====================== */
 
 function StatCard({
   icon: Icon,
   label,
   value,
 }: {
-  icon: typeof BookOpen;
+  icon: any;
   label: string;
   value: string | number;
 }) {
   return (
-    <div className="rounded-xl border border-border/60 bg-card p-5 border-l-4 border-l-primary/70 hover-lift">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <Icon className="h-4 w-4" />
+    <div className="group rounded-2xl border border-border/60 bg-card p-8 hover:border-primary/30 transition-all hover:-translate-y-0.5">
+      <div className="flex items-center justify-between">
+        <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+          <Icon className="h-6 w-6" />
+        </div>
+        <div className="text-right">
+          <p className="text-4xl font-semibold tracking-tighter text-foreground">
+            {value}
+          </p>
         </div>
       </div>
-      <p className="text-2xl font-bold text-foreground">{value}</p>
-      <p className="text-xs text-muted-foreground mt-1">{label}</p>
+      <p className="mt-6 text-sm text-muted-foreground font-medium">{label}</p>
     </div>
   );
 }
 
 function CircularProgress({
   percent,
-  size = 56,
+  size = 64,
   strokeWidth = 5,
 }: {
   percent: number;
@@ -342,7 +297,6 @@ function CircularProgress({
   return (
     <div className="relative inline-flex items-center justify-center">
       <svg width={size} height={size} className="-rotate-90">
-        {/* Background circle */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -351,7 +305,6 @@ function CircularProgress({
           className="stroke-muted"
           strokeWidth={strokeWidth}
         />
-        {/* Progress circle */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -362,114 +315,82 @@ function CircularProgress({
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          style={
-            {
-              "--ring-circumference": circumference,
-              "--ring-offset": offset,
-            } as React.CSSProperties
-          }
         />
       </svg>
-      <span className="absolute text-xs font-bold text-foreground">
+      <span className="absolute text-sm font-bold text-foreground">
         {percent}%
       </span>
     </div>
   );
 }
 
-function ContinueHero({
-  lesson,
-}: {
-  lesson?: {
-    title: string;
-    subject: string;
-    batchName: string;
-    thumbnail: string;
-    href?: string;
-    watchedDuration: number;
-    duration: number;
-  };
-}) {
+function ContinueHero({ lesson }: { lesson?: any }) {
   const percent =
     lesson && lesson.duration > 0
-      ? Math.min(
-          100,
-          Math.round((lesson.watchedDuration / lesson.duration) * 100)
-        )
+      ? Math.min(100, Math.round((lesson.watchedDuration / lesson.duration) * 100))
       : 0;
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-border/60 bg-card hover-lift">
-      <div className="grid md:grid-cols-[280px_minmax(0,1fr)]">
-        {/* Thumbnail */}
-        <div className="relative min-h-48 bg-muted overflow-hidden">
+    <div className="rounded-3xl overflow-hidden border border-border bg-card group">
+      <div className="grid md:grid-cols-[1.1fr_1fr]">
+        <div className="relative aspect-video md:aspect-auto bg-zinc-900 overflow-hidden">
           {lesson?.thumbnail ? (
             <img
               src={lesson.thumbnail}
               alt={lesson.title}
-              className="h-full w-full object-cover"
+              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700"
             />
           ) : (
-            <div className="flex h-full min-h-48 items-center justify-center bg-primary/5">
-              <PlayCircle className="h-14 w-14 text-primary/30" />
+            <div className="flex items-center justify-center h-full bg-gradient-to-br from-primary/10 to-transparent">
+              <PlayCircle className="h-20 w-20 text-primary/30" />
             </div>
           )}
-          {/* Play overlay on hover */}
           {lesson && (
-            <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 hover:opacity-100">
-              <div className="h-14 w-14 rounded-full bg-primary/90 flex items-center justify-center shadow-lg">
-                <PlayCircle className="h-7 w-7 text-primary-foreground" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex items-end p-8">
+              <div className="text-white">
+                <div className="uppercase tracking-widest text-xs mb-2 opacity-75">NOW PLAYING</div>
+                <p className="text-xl font-semibold line-clamp-2">{lesson.title}</p>
               </div>
             </div>
           )}
         </div>
 
-        {/* Content */}
-        <div className="flex flex-col justify-between gap-5 p-6">
+        <div className="p-8 flex flex-col justify-between">
           <div>
-            <Badge
-              variant="outline"
-              className="mb-3 text-xs bg-primary/5 text-primary border-primary/20"
-            >
-              Continue Learning
-            </Badge>
-            <h2 className="text-xl font-bold text-foreground tracking-tight line-clamp-2">
-              {lesson?.title || "No lesson in progress"}
-            </h2>
-            <p className="mt-1.5 text-sm text-muted-foreground">
+            <Badge className="mb-4">Continue where you left off</Badge>
+            <h3 className="text-2xl font-semibold tracking-tight leading-tight">
+              {lesson?.title || "No active lesson"}
+            </h3>
+            <p className="text-muted-foreground mt-3">
               {lesson
-                ? `${lesson.batchName} · ${lesson.subject}`
-                : "Start a course and your next lesson will appear here."}
+                ? `${lesson.batchName} • ${lesson.subject}`
+                : "Start a course to see your progress here"}
             </p>
           </div>
 
-          <div className="space-y-4">
-            {lesson ? (
-              <div className="flex items-center gap-5">
+          {lesson && (
+            <div className="mt-auto pt-8">
+              <div className="flex items-center gap-4">
                 <CircularProgress percent={percent} />
-                <div className="flex-1 space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      Lesson progress
-                    </span>
-                    <span className="font-semibold text-foreground">
-                      {percent}%
-                    </span>
+                <div className="flex-1">
+                  <Progress value={percent} className="h-2.5" />
+                  <div className="flex justify-between text-sm mt-2.5">
+                    <span className="text-muted-foreground">Progress</span>
+                    <span className="font-medium">{percent}%</span>
                   </div>
-                  <Progress value={percent} className="h-2" />
                 </div>
               </div>
-            ) : null}
-            <Button asChild className="w-fit rounded-xl">
-              <Link href={lesson?.href || "/student/explore"}>
-                {lesson ? "Continue Lesson" : "Explore Courses"}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
+            </div>
+          )}
+
+          <Button asChild className="mt-8 w-full md:w-auto rounded-2xl" size="lg">
+            <Link href={lesson?.href || "/student/explore"}>
+              {lesson ? "Resume Lesson" : "Browse Courses"} <ArrowRight className="ml-2" />
+            </Link>
+          </Button>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -478,143 +399,71 @@ function SectionHeader({
   subtitle,
   href,
   action,
-  compact,
 }: {
   title: string;
   subtitle: string;
   href: string;
   action: string;
-  compact?: boolean;
 }) {
   return (
-    <div className="flex items-end justify-between gap-4 mb-4">
+    <div className="flex items-end justify-between gap-4 mb-6">
       <div>
-        <h2
-          className={
-            compact
-              ? "text-lg font-bold text-foreground"
-              : "text-xl font-bold text-foreground"
-          }
-        >
-          {title}
-        </h2>
-        <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>
+        <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
+        <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
       </div>
-      <Button
-        asChild
-        variant="ghost"
-        size="sm"
-        className="text-primary hover:text-primary/80 shrink-0"
-      >
+      <Button variant="ghost" asChild className="text-primary hover:text-primary/80">
         <Link href={href}>
-          {action}
-          <ArrowRight className="ml-1 h-3.5 w-3.5" />
+          {action} <ArrowRight className="ml-1 h-4 w-4" />
         </Link>
       </Button>
     </div>
   );
 }
 
-function CourseCard({ course }: { course: PurchasedBatch }) {
+function CourseCard({ course }: { course: PurchasedBatch & { progress: number } }) {
   return (
     <Link
       href={`/student/batches/${course.id}`}
-      className="group block rounded-xl border border-border/60 bg-card overflow-hidden hover-lift"
+      className="group block rounded-2xl border border-border/70 bg-card overflow-hidden hover:shadow-xl hover:border-primary/30 transition-all duration-300"
     >
-      {/* Thumbnail */}
-      <div className="h-36 overflow-hidden bg-muted">
+      <div className="relative h-52 bg-zinc-100 overflow-hidden">
         {course.imageUrl ? (
           <img
             src={course.imageUrl}
             alt={course.name}
-            className="h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
         ) : (
-          <div className="flex h-full items-center justify-center bg-primary/5">
-            <BookOpen className="h-10 w-10 text-primary/20" />
+          <div className="h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-transparent">
+            <BookOpen className="h-16 w-16 text-primary/20" />
           </div>
         )}
-      </div>
-
-      {/* Content */}
-      <div className="p-4 space-y-3">
-        <div className="flex gap-1.5 flex-wrap">
-          <Badge
-            variant="secondary"
-            className="text-[11px] bg-primary/10 text-primary border-0"
-          >
-            {course.exam}
-          </Badge>
-          <Badge
-            variant="outline"
-            className="text-[11px] text-muted-foreground"
-          >
-            {course.language}
+        <div className="absolute top-4 right-4">
+          <Badge variant="secondary" className="backdrop-blur-md bg-white/90 text-black text-xs">
+            {course.progress}%
           </Badge>
         </div>
+      </div>
 
-        <h3 className="text-sm font-semibold text-foreground line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+      <div className="p-6">
+        <div className="flex gap-2 mb-4">
+          <Badge variant="outline" className="text-xs">{course.exam}</Badge>
+          <Badge variant="outline" className="text-xs">{course.language}</Badge>
+        </div>
+
+        <h3 className="font-semibold text-lg leading-tight line-clamp-2 group-hover:text-primary transition-colors">
           {course.name}
         </h3>
 
-        {/* Progress */}
-        <div className="space-y-1.5">
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>
-              {course.completedLessons}/{course.totalLessons} lessons
+        <div className="mt-6">
+          <div className="flex justify-between text-sm mb-2">
+            <span className="text-muted-foreground">
+              {course.completedLessons} / {course.totalLessons} lessons
             </span>
-            <span className="font-semibold text-foreground">
-              {course.progress}%
-            </span>
+            <span className="font-medium">{course.progress}%</span>
           </div>
           <Progress value={course.progress} className="h-1.5" />
         </div>
-
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-xs text-muted-foreground">
-            Ends{" "}
-            {course.endDate.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-            })}
-          </span>
-          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-function PracticeCard({ series }: { series: PurchasedTestSeries }) {
-  return (
-    <Link
-      href={`/student/test-series/${series.id}`}
-      className="block rounded-xl border border-border/60 bg-card p-4 hover-lift group"
-    >
-      <div className="flex gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <FileText className="h-5 w-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="line-clamp-2 text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-            {series.title}
-          </p>
-          <div className="mt-1.5 flex flex-wrap gap-2 text-xs text-muted-foreground">
-            <span>{series.exam}</span>
-            <span>·</span>
-            <span>{series.totalTests} tests</span>
-          </div>
-        </div>
-      </div>
-      <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-        <CalendarDays className="h-3.5 w-3.5" />
-        <span>
-          Valid until{" "}
-          {series.validUntil.toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-          })}
-        </span>
       </div>
     </Link>
   );
@@ -632,54 +481,33 @@ function ProgressPanel({
   completedCourses: number;
 }) {
   return (
-    <section className="rounded-xl border border-border/60 bg-card p-5">
-      <div className="flex items-center justify-between mb-5">
+    <div className="rounded-2xl border border-border/60 bg-card p-8 sticky top-6">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-bold text-foreground">Progress</h2>
-          <p className="text-xs text-muted-foreground">
-            Based on your real activity
-          </p>
+          <h2 className="text-xl font-semibold">Your Progress</h2>
+          <p className="text-sm text-muted-foreground">Real activity • This month</p>
         </div>
-        <CircularProgress percent={averageCourseProgress} size={48} strokeWidth={4} />
+        <CircularProgress percent={averageCourseProgress} size={56} />
       </div>
-      <div className="space-y-3.5">
+
+      <div className="space-y-5">
         <ProgressLine icon={Clock3} label="Watch time" value={totalWatchTime} />
-        <ProgressLine
-          icon={PlayCircle}
-          label="Videos completed"
-          value={String(videosCompleted)}
-        />
-        <ProgressLine
-          icon={TrendingUp}
-          label="Avg. progress"
-          value={`${averageCourseProgress}%`}
-        />
-        <ProgressLine
-          icon={Award}
-          label="Completed"
-          value={String(completedCourses)}
-        />
+        <ProgressLine icon={PlayCircle} label="Videos completed" value={String(videosCompleted)} />
+        <ProgressLine icon={TrendingUp} label="Avg. progress" value={`${averageCourseProgress}%`} />
+        <ProgressLine icon={Award} label="Courses completed" value={String(completedCourses)} />
       </div>
-    </section>
+    </div>
   );
 }
 
-function ProgressLine({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof BookOpen;
-  label: string;
-  value: string;
-}) {
+function ProgressLine({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2.5">
-        <Icon className="h-4 w-4 text-muted-foreground" />
+    <div className="flex items-center justify-between gap-3 py-1">
+      <div className="flex items-center gap-3">
+        <Icon className="h-5 w-5 text-muted-foreground" />
         <span className="text-sm text-muted-foreground">{label}</span>
       </div>
-      <span className="text-sm font-semibold text-foreground">{value}</span>
+      <span className="font-semibold text-foreground">{value}</span>
     </div>
   );
 }
@@ -690,29 +518,21 @@ function EmptyState({
   text,
   href,
   action,
-  compact,
 }: {
-  icon: typeof BookOpen;
+  icon: any;
   title: string;
   text: string;
   href: string;
   action: string;
-  compact?: boolean;
 }) {
   return (
-    <div
-      className={`rounded-xl border border-dashed border-border bg-card text-center ${
-        compact ? "p-6" : "p-10"
-      }`}
-    >
-      <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-primary/5 text-primary/40 mx-auto mb-3">
-        <Icon className="h-6 w-6" />
+    <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
+      <div className="mx-auto h-16 w-16 rounded-2xl bg-primary/5 flex items-center justify-center text-primary/40 mb-6">
+        <Icon className="h-8 w-8" />
       </div>
-      <h3 className="font-semibold text-foreground text-sm">{title}</h3>
-      <p className="mx-auto mt-1.5 max-w-xs text-xs text-muted-foreground">
-        {text}
-      </p>
-      <Button asChild className="mt-4 rounded-xl" variant="outline" size="sm">
+      <h3 className="font-semibold text-xl">{title}</h3>
+      <p className="mt-3 text-muted-foreground max-w-xs mx-auto">{text}</p>
+      <Button asChild className="mt-6 rounded-2xl" variant="outline">
         <Link href={href}>{action}</Link>
       </Button>
     </div>
@@ -721,29 +541,16 @@ function EmptyState({
 
 function LoadingGrid() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {[1, 2, 3].map((item) => (
-        <div key={item} className="rounded-xl border border-border/60 bg-card overflow-hidden">
-          <div className="h-36 animate-pulse bg-muted" />
-          <div className="p-4 space-y-3">
-            <div className="h-4 w-20 animate-pulse rounded bg-muted" />
-            <div className="h-4 w-full animate-pulse rounded bg-muted" />
-            <div className="h-2 w-full animate-pulse rounded bg-muted" />
+    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+          <div className="h-52 bg-muted animate-pulse" />
+          <div className="p-6 space-y-4">
+            <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+            <div className="h-5 bg-muted animate-pulse rounded" />
+            <div className="h-2 bg-muted animate-pulse rounded" />
           </div>
         </div>
-      ))}
-    </div>
-  );
-}
-
-function LoadingRows() {
-  return (
-    <div className="space-y-3">
-      {[1, 2].map((item) => (
-        <div
-          key={item}
-          className="h-24 animate-pulse rounded-xl bg-muted"
-        />
       ))}
     </div>
   );
