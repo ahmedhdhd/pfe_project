@@ -23,6 +23,7 @@ import { Course, CourseContent, Chapter } from "./types";
 import apiClient from "@/lib/api/client";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { stripHtmlToText } from "@/lib/utils";
 import DOMPurify from "dompurify";
 
 const isRichTextEmpty = (html: string) => {
@@ -185,10 +186,13 @@ export function CoursePlayerTabs({
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-2">Description</h3>
-              <div 
+              <div
                 className="prose dark:prose-invert max-w-none text-muted-foreground"
-                dangerouslySetInnerHTML={{ __html: course.description as string || "No description provided." }}
-              />
+              >
+                {course.description
+                  ? stripHtmlToText(course.description as string)
+                  : "No description provided."}
+              </div>
             </div>
           </TabsContent>
 

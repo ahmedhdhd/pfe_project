@@ -54,6 +54,7 @@ function ClientHomepageContent({ slug }: { slug: string }) {
       name: t.name,
       role: "Learner",
       content: t.message,
+      avatar: t.avatar || "",
     })),
     faq: (config?.faq || []).map((item, index) => ({
       id: index,

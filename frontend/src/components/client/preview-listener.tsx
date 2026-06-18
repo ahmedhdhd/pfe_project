@@ -5,7 +5,13 @@ import { useEffect } from "react";
 interface PreviewPatch {
   heroTitle?: string;
   heroSubtitle?: string;
+  heroDescription?: string;
+  motto?: string;
   ctaText?: string;
+  ctaUrl?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  supportEmail?: string;
   primaryColor?: string;
   secondaryColor?: string;
   fontFamily?: string;
@@ -35,11 +41,73 @@ export function PreviewListener() {
             el.textContent = patch.heroSubtitle!;
           });
       }
+      if (patch.heroDescription !== undefined) {
+        document
+          .querySelectorAll("[data-preview='hero-description']")
+          .forEach((el) => {
+            el.textContent = patch.heroDescription!;
+          });
+      }
+      if (patch.motto !== undefined) {
+        document
+          .querySelectorAll("[data-preview='motto']")
+          .forEach((el) => {
+            el.textContent = patch.motto!;
+            if (patch.motto?.trim()) {
+              el.removeAttribute("hidden");
+            } else {
+              el.setAttribute("hidden", "true");
+            }
+          });
+      }
       if (patch.ctaText !== undefined) {
         document
           .querySelectorAll("[data-preview='cta-text']")
           .forEach((el) => {
             el.textContent = patch.ctaText!;
+          });
+      }
+      if (patch.ctaUrl !== undefined) {
+        document.querySelectorAll("[data-preview='cta-url']").forEach((el) => {
+          el.setAttribute("href", patch.ctaUrl!);
+        });
+      }
+      if (patch.contactEmail !== undefined) {
+        document
+          .querySelectorAll("[data-preview='contact-email']")
+          .forEach((el) => {
+            el.textContent = patch.contactEmail!;
+            el.setAttribute("href", `mailto:${patch.contactEmail!}`);
+            if (patch.contactEmail?.trim()) {
+              el.removeAttribute("hidden");
+            } else {
+              el.setAttribute("hidden", "true");
+            }
+          });
+      }
+      if (patch.contactPhone !== undefined) {
+        document
+          .querySelectorAll("[data-preview='contact-phone']")
+          .forEach((el) => {
+            el.textContent = patch.contactPhone!;
+            if (patch.contactPhone?.trim()) {
+              el.removeAttribute("hidden");
+            } else {
+              el.setAttribute("hidden", "true");
+            }
+          });
+      }
+      if (patch.supportEmail !== undefined) {
+        document
+          .querySelectorAll("[data-preview='support-email']")
+          .forEach((el) => {
+            el.textContent = patch.supportEmail!;
+            el.setAttribute("href", `mailto:${patch.supportEmail!}`);
+            if (patch.supportEmail?.trim()) {
+              el.removeAttribute("hidden");
+            } else {
+              el.setAttribute("hidden", "true");
+            }
           });
       }
 

@@ -20,6 +20,7 @@ import {
   type CourseHierarchySubject,
   type CourseOutlineChapter,
 } from "@/lib/course-navigation";
+import { stripHtmlToText } from "@/lib/utils";
 import "@/app/[client]/student/batches/[id]/subjects/[subjectId]/chapters/[chapterId]/topics/[topicId]/content/[contentId]/video-player.css";
 
 const INTRO_CONTENT_ID = "course-introduction";
@@ -80,7 +81,7 @@ export default function CourseIntroductionPlayerPage() {
         typeof courseData.imageUrl === "string" ? courseData.imageUrl : undefined,
       description:
         typeof courseData.description === "string"
-          ? courseData.description
+          ? stripHtmlToText(courseData.description)
           : undefined,
     };
   }, [courseData]);

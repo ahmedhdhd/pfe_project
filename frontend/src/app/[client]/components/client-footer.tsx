@@ -58,23 +58,31 @@ export function ClientFooter({ homepage, client }: ClientFooterProps) {
           </div>
 
           <div className="flex flex-col items-center md:items-end gap-4">
-            {(homepage.contactEmail ||
-              homepage.supportEmail ||
-              homepage.contactPhone) && (
-              <div className="flex flex-col items-center md:items-end gap-1 text-sm text-muted-foreground">
-                {(homepage.contactEmail || homepage.supportEmail) && (
-                  <a
-                    href={`mailto:${
-                      homepage.supportEmail || homepage.contactEmail
-                    }`}
-                    className="hover:text-primary transition-colors"
-                  >
-                    {homepage.supportEmail || homepage.contactEmail}
-                  </a>
-                )}
-                {homepage.contactPhone && <span>{homepage.contactPhone}</span>}
-              </div>
-            )}
+            <div className="flex flex-col items-center md:items-end gap-1 text-sm text-muted-foreground">
+              <a
+                href={`mailto:${homepage.contactEmail || homepage.supportEmail || ""}`}
+                className="hover:text-primary transition-colors"
+                data-preview="contact-email"
+                hidden={!homepage.contactEmail}
+              >
+                {homepage.contactEmail}
+              </a>
+              <a
+                href={`mailto:${homepage.supportEmail || homepage.contactEmail || ""}`}
+                className="hover:text-primary transition-colors"
+                data-preview="support-email"
+                hidden={!homepage.supportEmail}
+              >
+                {homepage.supportEmail}
+              </a>
+              <span
+                className=""
+                data-preview="contact-phone"
+                hidden={!homepage.contactPhone}
+              >
+                {homepage.contactPhone}
+              </span>
+            </div>
 
             {socialEntries.length > 0 && (
               <div className="flex items-center gap-4">

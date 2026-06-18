@@ -128,7 +128,10 @@ export function ClientHeroSection({ homepage }: ClientHeroSectionProps) {
                 <TypewriterText text={homepage.tagline} />
               </div>
 
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              <p
+                className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+                data-preview="hero-description"
+              >
                 {homepage.description}
               </p>
 
@@ -143,7 +146,7 @@ export function ClientHeroSection({ homepage }: ClientHeroSectionProps) {
                   className="h-12 px-8 text-base rounded-full shadow-[0_0_20px_-5px_var(--primary)] hover:shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300 bg-primary text-primary-foreground border border-primary/20"
                   asChild
                 >
-                  <Link href={homepage.ctaUrl}>
+                  <Link href={homepage.ctaUrl} data-preview="cta-url">
                     <span data-preview="cta-text">{homepage.ctaText}</span>
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>

@@ -28,3 +28,22 @@ export function decodeHtmlEntities(html: string): string {
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, " ");
 }
+
+export function stripHtmlToText(html: string): string {
+  if (!html) return "";
+
+  const decoded = decodeHtmlEntities(html);
+
+  if (typeof document !== "undefined") {
+    const parser = new DOMParser();
+    const parsed = parser.parseFromString(decoded, "text/html");
+    return parsed.body.textContent?.replace(/\s+/g, " ").trim() || "";
+  }
+
+  return decoded
+    .replace(/<script[^>]*>.*?<\/script>/gis, " ")
+    .replace(/<style[^>]*>.*?<\/style>/gis, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}

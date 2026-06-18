@@ -48,11 +48,13 @@ export function ClientHeader({
                     Powered by TeslaAcademy
                   </span>
                 </div>
-                {homepage.motto && (
-                  <p className="hidden md:block text-xs text-muted-foreground line-clamp-1 font-medium">
-                    {homepage.motto}
-                  </p>
-                )}
+                <p
+                  className="hidden md:block text-xs text-muted-foreground line-clamp-1 font-medium"
+                  data-preview="motto"
+                  hidden={!homepage.motto}
+                >
+                  {homepage.motto}
+                </p>
               </div>
             </div>
 
@@ -83,7 +85,7 @@ export function ClientHeader({
                 size="sm"
                 className="hidden sm:inline-flex h-9 px-5 rounded-full shadow-md shadow-primary/10 hover:shadow-primary/20 transition-all bg-primary/90 hover:bg-primary backdrop-blur-sm"
               >
-                <Link href={homepage.ctaUrl }>
+                <Link href={homepage.ctaUrl} data-preview="cta-url">
                   Login
                   <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                 </Link>
@@ -94,7 +96,7 @@ export function ClientHeader({
                 variant="outline"
                 className="sm:hidden h-9 rounded-full"
               >
-                <Link href={homepage.ctaUrl}>
+                <Link href={homepage.ctaUrl} data-preview="cta-url">
                   Login
                   <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                 </Link>

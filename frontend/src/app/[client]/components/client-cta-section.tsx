@@ -61,7 +61,7 @@ export function ClientCTASection({ homepage, client }: ClientCTASectionProps) {
                 className="h-14 px-8 text-lg rounded-full bg-white text-primary hover:bg-white/90 dark:bg-primary dark:text-primary-foreground shadow-xl shadow-black/10 border-0"
                 asChild
               >
-                <Link href={homepage.ctaUrl}>
+                <Link href={homepage.ctaUrl} data-preview="cta-url">
                   {homepage.ctaText}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>

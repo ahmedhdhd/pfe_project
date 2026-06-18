@@ -12,6 +12,7 @@ import { UnifiedVideoPlayer } from "@/components/common/unified-video-player";
 import type { Content } from "../utils/content-player-utils";
 import { getVideoType } from "../utils/content-player-utils";
 import { buildExternalResourceDisplay } from "@/lib/utils/external-resource";
+import { stripHtmlToText } from "@/lib/utils";
 
 const PDFViewer = dynamic(
   () =>
@@ -98,7 +99,7 @@ export function VideoPlayerWrapper({
                   Lesson Description
                 </h2>
                 <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-                  {content.description}
+                  {stripHtmlToText(content.description)}
                 </p>
               </div>
             </div>
@@ -120,7 +121,7 @@ export function VideoPlayerWrapper({
                   Resource Description
                 </h2>
                 <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-                  {content.description}
+                  {stripHtmlToText(content.description)}
                 </p>
               </div>
             </div>
@@ -182,7 +183,7 @@ export function VideoPlayerWrapper({
                   Lesson Description
                 </h2>
                 <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-                  {content.description}
+                  {stripHtmlToText(content.description)}
                 </p>
               </div>
             ) : null}
@@ -204,7 +205,7 @@ export function VideoPlayerWrapper({
                   Playground Description
                 </h2>
                 <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-                  {content.description}
+                  {stripHtmlToText(content.description)}
                 </p>
               </div>
             ) : null}
@@ -260,7 +261,7 @@ export function VideoPlayerWrapper({
                   Resource Description
                 </h2>
                 <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-                  {content.description}
+                  {stripHtmlToText(content.description)}
                 </p>
               </div>
             </div>

@@ -2,6 +2,7 @@
 
 import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "@/components/icons";
 import type { ClientHomepageData } from "../types";
@@ -16,10 +17,12 @@ function TestimonialCard({
   name,
   role,
   content,
+  avatar,
 }: {
   name: string;
   role: string;
   content: string;
+  avatar?: string;
 }) {
   return (
     <Card className="h-full border-muted/40 bg-background/60 backdrop-blur-sm hover:border-primary/30 transition-all duration-300 relative overflow-hidden group">
@@ -32,9 +35,21 @@ function TestimonialCard({
         </CardDescription>
 
         <div className="flex items-center space-x-4 pt-2 border-t border-border/40 mt-auto">
-          <div className="h-12 w-12 rounded-full bg-linear-to-br from-primary to-primary/60 flex items-center justify-center shadow-md text-primary-foreground">
-            <span className="text-lg font-bold">{name.charAt(0)}</span>
-          </div>
+          {avatar ? (
+            <div className="relative h-12 w-12 overflow-hidden rounded-full border border-border/40 shadow-md bg-background shrink-0">
+              <Image
+                src={avatar}
+                alt={`${name} avatar`}
+                fill
+                sizes="48px"
+                className="object-cover"
+              />
+            </div>
+          ) : (
+            <div className="h-12 w-12 rounded-full bg-linear-to-br from-primary to-primary/60 flex items-center justify-center shadow-md text-primary-foreground">
+              <span className="text-lg font-bold">{name.charAt(0)}</span>
+            </div>
+          )}
           <div className="text-left">
             <p className="font-semibold text-base text-foreground">{name}</p>
             <p className="text-sm text-muted-foreground">{role}</p>
@@ -87,6 +102,7 @@ export function ClientTestimonialsSection({
                   name={testimonial.name}
                   role={testimonial.role}
                   content={testimonial.content}
+                  avatar={testimonial.avatar}
                 />
               </motion.div>
             ))}
@@ -106,6 +122,7 @@ export function ClientTestimonialsSection({
                       name={testimonial.name}
                       role={testimonial.role}
                       content={testimonial.content}
+                      avatar={testimonial.avatar}
                     />
                   </div>
                 ))}

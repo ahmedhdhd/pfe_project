@@ -10,6 +10,7 @@ export interface ClientHomepageTestimonial {
   name: string;
   role: string;
   content: string;
+  avatar?: string;
 }
 
 export interface ClientHomepageFAQ {
@@ -34,5 +35,4 @@ export interface ClientHomepageData {
   faq: ClientHomepageFAQ[];
   socialLinks: Record<string, string>;
 }
-
 
