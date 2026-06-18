@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Sparkles, Code, LayoutTemplate, Loader2, RotateCcw } from "lucide-react";
+import { Sparkles, Code, LayoutTemplate, Loader2, RotateCcw } from "@/components/icons";
 import {
   Dialog,
   DialogContent,

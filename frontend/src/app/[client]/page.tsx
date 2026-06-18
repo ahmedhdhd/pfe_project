@@ -7,7 +7,7 @@ import { useOrganizationConfigStore } from "@/lib/store/organization-config";
 import { useTheme } from "@/components/providers/theme-provider";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { CheckCircle2, CreditCard } from "lucide-react";
+import { CheckCircle2, CreditCard } from "@/components/icons";
 import { ClientHeader } from "./components/client-header";
 import { ClientHeroSection } from "./components/client-hero";
 import { ClientFeaturesSection } from "./components/client-features";

@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLeaderboard } from "@/hooks/test-attempts-client";
-import { Loader2, Trophy, Medal, Award, TrendingUp } from "lucide-react";
+import { Loader2, Trophy, Medal, Award, TrendingUp } from "@/components/icons";
 import Link from "next/link";
 
 export default function TestLeaderboardPage() {

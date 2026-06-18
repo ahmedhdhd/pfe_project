@@ -46,7 +46,7 @@ import {
   Check,
   Brain,
   AlertTriangle,
-} from "lucide-react";
+} from "@/components/icons";
 import {
   useGetSubject,
   useDeleteSubject,

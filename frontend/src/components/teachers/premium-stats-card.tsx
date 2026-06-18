@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
+import { LucideIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 interface PremiumStatsCardProps {

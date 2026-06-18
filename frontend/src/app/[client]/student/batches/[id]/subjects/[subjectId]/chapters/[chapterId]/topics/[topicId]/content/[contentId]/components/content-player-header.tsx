@@ -6,7 +6,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Sparkles,
-} from "lucide-react";
+} from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Building2, FileWarning, LayoutDashboard, LogOut } from "lucide-react";
+import { Building2, FileWarning, LayoutDashboard, LogOut } from "@/components/icons";
 import { tokenManager } from "@/lib/api/client";
 import { useLogout } from "@/hooks/api";
 import { Button } from "@/components/ui/button";

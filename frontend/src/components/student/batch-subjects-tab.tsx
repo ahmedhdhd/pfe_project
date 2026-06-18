@@ -7,7 +7,7 @@ import {
   useGetClientChaptersBySubject,
 } from "@/hooks";
 import { useParams } from "next/navigation";
-import { ChevronRight, PlayCircle } from "lucide-react";
+import { ChevronRight, PlayCircle } from "@/components/icons";
 import Link from "next/link";
 
 interface Subject {

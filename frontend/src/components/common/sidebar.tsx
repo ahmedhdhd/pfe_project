@@ -26,7 +26,7 @@ import {
   GraduationCap,
   Shapes,
   UserIcon,
-} from "lucide-react";
+} from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { useRole } from "@/lib/store";
 import { getNavigationItems, ROLES } from "@/lib/constants";

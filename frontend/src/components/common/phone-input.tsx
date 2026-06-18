@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { Phone } from "lucide-react";
+import { Phone } from "@/components/icons";
 
 interface CountryCode {
   code: string;

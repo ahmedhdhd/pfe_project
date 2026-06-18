@@ -7,7 +7,7 @@ import {
   Search,
   Star,
   X,
-} from "lucide-react";
+} from "@/components/icons";
 import { StudentHeader } from "@/components/student/student-header";
 import { useGetCategories, useGetExploreBatches } from "@/hooks";
 import { ExploreCardsGridShimmer } from "@/components/common/explore-card-shimmer";

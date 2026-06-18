@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Edit, Star, Clock, GraduationCap, Award } from "lucide-react";
+import { Edit, Star, Clock, GraduationCap, Award } from "@/components/icons";
 import { decodeHtmlEntities } from "@/lib/utils";
 
 interface Teacher {

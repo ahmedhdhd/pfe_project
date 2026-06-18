@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Video } from "lucide-react";
+import { FileText, Video } from "@/components/icons";
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { PremiumTabsTrigger } from "./premium-tabs-trigger";
 import { ReactNode } from "react";

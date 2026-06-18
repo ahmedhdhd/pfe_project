@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Camera, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { Camera, CheckCircle2, Eye, EyeOff } from "@/components/icons";
 import { MutableRefObject } from "react";
 
 // Shows camera status, video preview and enable/fullscreen controls

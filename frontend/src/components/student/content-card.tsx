@@ -13,7 +13,7 @@ import {
   PlayCircle,
   Clock,
   CheckCircle2,
-} from "lucide-react";
+} from "@/components/icons";
 import { Progress } from "@/components/ui/progress";
 import { useContentProgress } from "@/hooks/api";
 import { normalizeExternalUrl } from "@/lib/utils/external-resource";

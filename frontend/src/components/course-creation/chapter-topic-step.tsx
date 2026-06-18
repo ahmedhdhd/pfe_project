@@ -27,7 +27,7 @@ import {
   ChevronRight,
   BookOpen,
   FileText,
-} from "lucide-react";
+} from "@/components/icons";
 
 interface Topic {
   id: string;

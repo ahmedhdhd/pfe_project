@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Clock, CheckCircle2, Flag, FileText } from "lucide-react";
+import { Clock, CheckCircle2, Flag, FileText } from "@/components/icons";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 

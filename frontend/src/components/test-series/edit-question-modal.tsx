@@ -20,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus } from "@/components/icons";
 import {
   useUpdateQuestion,
   Question,

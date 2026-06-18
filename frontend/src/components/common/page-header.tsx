@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronRight, Home } from "@/components/icons";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";

@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText } from "lucide-react";
+import { FileText } from "@/components/icons";
 import { useGetClientTopicsByChapter } from "@/hooks";
 
 export interface ChapterTopicCountProps {

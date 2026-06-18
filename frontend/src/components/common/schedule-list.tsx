@@ -5,7 +5,7 @@ import { ScheduleCard } from "./schedule-card";
 import { EmptyStateCard } from "./empty-state-card";
 import { LoadingSpinner } from "./loading-spinner";
 import { ContentGrid } from "./content-grid";
-import { Calendar } from "lucide-react";
+import { Calendar } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 export interface ScheduleListProps {

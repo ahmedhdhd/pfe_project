@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Clock, ChevronUp, ChevronDown } from "lucide-react";
+import { Clock, ChevronUp, ChevronDown } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

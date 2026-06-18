@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Award, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Award, CheckCircle2, XCircle, Clock } from "@/components/icons";
 import {
   Card,
   CardContent,

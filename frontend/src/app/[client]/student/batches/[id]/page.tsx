@@ -2,7 +2,7 @@
 
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, lazy, useState, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { useGetExploreBatch } from "@/hooks";
 import { StudentHeader } from "@/components/student/student-header";

@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { OtpInput } from "@/components/common/otp-input";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "@/components/icons";
 import { ErrorMessage } from "@/components/common/error-message";
 
 interface OtpStepProps {

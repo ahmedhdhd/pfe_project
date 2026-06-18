@@ -22,7 +22,7 @@ import {
   Edit,
   BarChart3,
   ExternalLink,
-} from "lucide-react";
+} from "@/components/icons";
 import { PageHeader } from "@/components/common/page-header";
 import { StatsSkeleton } from "@/components/common/loading-skeleton";
 import { useCourses, useCurrentUser } from "@/hooks";

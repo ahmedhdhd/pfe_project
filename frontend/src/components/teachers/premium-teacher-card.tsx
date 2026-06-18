@@ -22,7 +22,7 @@ import {
   Edit,
   Trash2,
   TrendingUp,
-} from "lucide-react";
+} from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 interface Teacher {

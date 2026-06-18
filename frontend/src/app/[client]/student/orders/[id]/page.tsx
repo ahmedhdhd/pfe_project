@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { ArrowLeft, BookOpen, Loader2, Receipt, UploadCloud } from "lucide-react";
+import { ArrowLeft, BookOpen, Loader2, Receipt, UploadCloud } from "@/components/icons";
 import { toast } from "sonner";
 import { StudentHeader } from "@/components/student/student-header";
 import { FileUpload } from "@/components/common/file-upload";

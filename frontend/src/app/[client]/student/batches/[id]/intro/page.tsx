@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { PanelLeftOpen } from "lucide-react";
+import { PanelLeftOpen } from "@/components/icons";
 import { useParams, useRouter } from "next/navigation";
 import type Player from "video.js/dist/types/player";
 import { Button } from "@/components/ui/button";

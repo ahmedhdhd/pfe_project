@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/common/phone-input";
-import { Phone, Loader2, CheckCircle2 } from "lucide-react";
+import { Phone, Loader2, CheckCircle2 } from "@/components/icons";
 import { ErrorMessage } from "@/components/common/error-message";
 
 interface PhoneStepProps {

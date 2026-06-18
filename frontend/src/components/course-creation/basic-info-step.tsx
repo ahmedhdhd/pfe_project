@@ -31,7 +31,7 @@ import {
   Upload,
   Image as ImageIcon,
   Calendar as CalendarIcon,
-} from "lucide-react";
+} from "@/components/icons";
 import {
   format,
   differenceInDays,

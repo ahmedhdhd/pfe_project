@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
+import { LucideIcon } from "@/components/icons";
 import { LottieAnimation } from "./lottie-animation";
 
 export interface EmptyStateCardProps {

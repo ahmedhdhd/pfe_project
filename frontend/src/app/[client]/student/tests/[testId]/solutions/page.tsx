@@ -5,7 +5,7 @@ import { StudentHeader } from "@/components/student/student-header";
 import { PageHeader } from "@/components/common/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
+import { FileText } from "@/components/icons";
 import Link from "next/link";
 import { useMemo } from "react";
 import {

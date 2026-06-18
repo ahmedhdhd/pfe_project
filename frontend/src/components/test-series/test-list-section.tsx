@@ -14,7 +14,7 @@ import {
   Edit,
   Trash2,
   ArrowRight,
-} from "lucide-react";
+} from "@/components/icons";
 import {
   Dialog,
   DialogContent,

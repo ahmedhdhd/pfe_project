@@ -21,7 +21,7 @@ import {
   BookPlus,
   UserCheck,
   ExternalLink,
-} from "lucide-react";
+} from "@/components/icons";
 import { PageHeader } from "@/components/common/page-header";
 import { StatsSkeleton } from "@/components/common/loading-skeleton";
 import { InviteUserModal } from "@/components/common/invite-user-modal";

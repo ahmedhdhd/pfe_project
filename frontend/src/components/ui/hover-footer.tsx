@@ -9,7 +9,7 @@ import {
   Linkedin,
   Youtube,
   GraduationCap,
-} from "lucide-react";
+} from "@/components/icons";
 import { SparklesCore } from "./sparkles";
 
 export const FooterBackgroundGradient = () => {

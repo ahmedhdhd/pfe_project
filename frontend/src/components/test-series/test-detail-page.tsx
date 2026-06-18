@@ -29,7 +29,7 @@ import {
   Layers as LayersIcon,
   Pencil,
   Trash,
-} from "lucide-react";
+} from "@/components/icons";
 import { EditSectionModal } from "./edit-section-modal";
 import { BulkAddQuestionsModal } from "./bulk-add-questions-modal";
 import { CsvImportQuestionsModal } from "./csv-import-questions-modal";
@@ -55,7 +55,7 @@ import {
   Edit,
   Save,
   X,
-} from "lucide-react";
+} from "@/components/icons";
 import {
   useTest,
   useDeleteTest,

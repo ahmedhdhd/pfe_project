@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useQueries } from "@tanstack/react-query";
-import { Award, Download, ExternalLink, Loader2, ShieldCheck } from "lucide-react";
+import { Award, Download, ExternalLink, Loader2, ShieldCheck } from "@/components/icons";
 import { toast } from "sonner";
 import { StudentHeader } from "@/components/student/student-header";
 import { PageHeader } from "@/components/common/page-header";

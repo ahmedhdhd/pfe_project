@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, Flag } from "lucide-react";
+import { CheckCircle2, Flag } from "@/components/icons";
 
 // Grid of question buttons showing current/answered/review states
 export function QuestionPalette({

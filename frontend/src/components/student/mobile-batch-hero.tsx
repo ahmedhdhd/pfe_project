@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Calendar, GraduationCap, Sparkles, Tag } from "lucide-react";
+import { Calendar, GraduationCap, Sparkles, Tag } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useOrgPaymentMode } from "@/lib/store/organization-config";

@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar as CalendarIcon, Radio } from "lucide-react";
+import { Calendar as CalendarIcon, Radio } from "@/components/icons";
 import { format } from "date-fns";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {

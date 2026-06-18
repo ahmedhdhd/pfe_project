@@ -3,14 +3,14 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "@/components/icons";
 import type { ClientHomepageData } from "../types";
 
 interface ClientTestimonialsSectionProps {
   homepage: ClientHomepageData;
 }
 
-import { Quote } from "lucide-react";
+import { Quote } from "@/components/icons";
 
 function TestimonialCard({
   name,

@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Lightbulb, Search } from "lucide-react";
+import { ArrowLeft, Lightbulb, Search } from "@/components/icons";
 
 const ITEM_HEIGHT = 112; // Approx. per-question card height; adjust as needed
 const OVERSCAN = 6; // Extra items rendered above/below viewport

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, Loader2 } from "lucide-react";
+import { Mail, Lock, Loader2 } from "@/components/icons";
 import { useLogin, useLogout } from "@/hooks/api";
 import { BrandingSidebar } from "@/components/onboarding/branding-sidebar";
 import { tokenManager } from "@/lib/api/client";

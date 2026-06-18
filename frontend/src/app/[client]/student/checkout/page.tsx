@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { type ChangeEvent, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, BookOpen, Loader2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, BookOpen, Loader2, ShieldCheck } from "@/components/icons";
 import { toast } from "sonner";
 import { StudentHeader } from "@/components/student/student-header";
 import { Button } from "@/components/ui/button";

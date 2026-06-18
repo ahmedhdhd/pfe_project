@@ -19,7 +19,7 @@ import {
   User,
   Star,
   BookOpen,
-} from "lucide-react";
+} from "@/components/icons";
 import { decodeHtmlEntities } from "@/lib/utils";
 
 interface Teacher {

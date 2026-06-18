@@ -13,7 +13,7 @@ import {
   XCircle,
   Radio,
   Video,
-} from "lucide-react";
+} from "@/components/icons";
 import { format, formatDistanceToNow, isPast, isFuture } from "date-fns";
 import { type Schedule, type ScheduleStatus } from "@/lib/types/schedule";
 import { cn } from "@/lib/utils";

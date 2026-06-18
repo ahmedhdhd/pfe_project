@@ -19,7 +19,7 @@ import {
   PlayCircle,
   ChevronRight,
   ShoppingCart,
-} from "lucide-react";
+} from "@/components/icons";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

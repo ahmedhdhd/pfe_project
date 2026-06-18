@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Loader2, Trash2, Wrench } from "lucide-react";
+import { Loader2, Trash2, Wrench } from "@/components/icons";
 import {
   Table,
   TableBody,

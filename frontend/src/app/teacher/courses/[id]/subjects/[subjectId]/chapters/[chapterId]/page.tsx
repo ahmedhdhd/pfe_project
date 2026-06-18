@@ -35,7 +35,7 @@ import {
   Eye,
   Copy,
   Check,
-} from "lucide-react";
+} from "@/components/icons";
 import { useGetChapter, useGetTopicsByChapter, useDeleteTopic } from "@/hooks";
 import { CreateTopicModal } from "@/components/common/create-topic-modal";
 import { EditTopicModal } from "@/components/common/edit-topic-modal";

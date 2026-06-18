@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, XCircle } from "lucide-react";
+import { FileText, XCircle } from "@/components/icons";
 import Link from "next/link";
 
 interface SolutionsEmptyStateProps {

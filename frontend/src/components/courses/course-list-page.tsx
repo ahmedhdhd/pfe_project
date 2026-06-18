@@ -25,7 +25,7 @@ import {
   Users,
   Calendar,
   Globe,
-} from "lucide-react";
+} from "@/components/icons";
 import { useGetAllBatches, useDeleteBatch } from "@/hooks";
 import { CreateBatchModal } from "@/components/common/create-batch-modal";
 import { EditBatchModal } from "@/components/common/edit-batch-modal";

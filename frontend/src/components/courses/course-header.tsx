@@ -10,7 +10,7 @@ import {
   BookOpen,
   Calendar,
   Globe,
-} from "lucide-react";
+} from "@/components/icons";
 import { Batch } from "./types";
 
 interface CourseHeaderProps {

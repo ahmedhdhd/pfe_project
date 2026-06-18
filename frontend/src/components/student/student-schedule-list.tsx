@@ -5,7 +5,7 @@ import { StudentScheduleCard } from "./student-schedule-card";
 import { EmptyStateCard } from "@/components/common/empty-state-card";
 import { LoadingSpinner } from "@/components/common/loading-spinner";
 import { ContentGrid } from "@/components/common/content-grid";
-import { Calendar } from "lucide-react";
+import { Calendar } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 export interface StudentScheduleListProps {

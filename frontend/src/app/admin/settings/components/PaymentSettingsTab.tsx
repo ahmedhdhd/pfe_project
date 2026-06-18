@@ -20,7 +20,7 @@ import {
   CreditCard,
   Crown,
   Check,
-} from "lucide-react";
+} from "@/components/icons";
 import { CreateOrganizationConfigData } from "@/lib/types/api";
 
 interface PaymentSettingsTabProps {

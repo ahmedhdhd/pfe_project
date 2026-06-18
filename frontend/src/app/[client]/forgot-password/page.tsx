@@ -5,13 +5,13 @@ import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { useStudentForgotPassword } from "@/hooks/api";
 import { ClientProvider, useClient } from "@/components/client/client-provider";
-import { Loader2 } from "lucide-react";
+import { Loader2 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { Mail, ArrowLeft } from "lucide-react";
+import { Mail, ArrowLeft } from "@/components/icons";
 
 function ClientForgotPasswordContent() {
   const params = useParams();

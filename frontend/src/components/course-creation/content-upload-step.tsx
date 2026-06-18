@@ -32,7 +32,7 @@ import {
   FileText,
   Play,
   Clock,
-} from "lucide-react";
+} from "@/components/icons";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface Content {

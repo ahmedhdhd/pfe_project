@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { UserPlus, Mail, User, Shield, Users } from "lucide-react";
+import { UserPlus, Mail, User, Shield, Users } from "@/components/icons";
 
 interface InviteUserModalProps {
   isOpen: boolean;

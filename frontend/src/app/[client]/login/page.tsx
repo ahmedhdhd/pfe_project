@@ -5,13 +5,13 @@ import { useEffect, useState, Suspense } from "react";
 import { motion } from "framer-motion";
 import { ClientProvider, useClient } from "@/components/client/client-provider";
 import { useStudentLogin } from "@/hooks/api";
-import { Loader2 } from "lucide-react";
+import { Loader2 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { Mail, Lock, ArrowLeft } from "lucide-react";
+import { Mail, Lock, ArrowLeft } from "@/components/icons";
 import { cookieStorage } from "@/lib/utils/storage";
 import { useRouter } from "next/navigation";
 

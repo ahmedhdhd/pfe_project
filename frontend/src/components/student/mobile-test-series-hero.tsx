@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FileText, Clock, Sparkles, CheckCircle2 } from "lucide-react";
+import { FileText, Clock, Sparkles, CheckCircle2 } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ClientTestSeriesListItem } from "@/hooks/test-series-client";

@@ -9,8 +9,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, Mail, Phone, MapPin, Camera } from "lucide-react";
-import { Loader2 } from "lucide-react";
+import { User, Mail, Phone, MapPin, Camera } from "@/components/icons";
+import { Loader2 } from "@/components/icons";
 import { ProfileFormData } from "../types";
 import { Profile } from "@/hooks/api";
 

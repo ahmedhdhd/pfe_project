@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { BookOpen, ShoppingCart, Trash2 } from "lucide-react";
+import { BookOpen, ShoppingCart, Trash2 } from "@/components/icons";
 import { StudentHeader } from "@/components/student/student-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

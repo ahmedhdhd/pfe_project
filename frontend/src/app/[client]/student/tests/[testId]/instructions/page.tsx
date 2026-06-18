@@ -13,7 +13,7 @@ import {
   AlertTriangle,
   ArrowRight,
   X,
-} from "lucide-react";
+} from "@/components/icons";
 import Link from "next/link";
 import { useStartAttempt } from "@/hooks/test-attempts-client";
 import { useState } from "react";

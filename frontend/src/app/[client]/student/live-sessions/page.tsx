@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Radio, Video } from "lucide-react";
+import { Calendar, Radio, Video } from "@/components/icons";
 import { PremiumTabsTrigger } from "@/components/common/premium-tabs-trigger";
 import { ScheduleCalendar } from "@/components/common/schedule-calendar";
 import { SectionHeader } from "@/components/common/section-header";

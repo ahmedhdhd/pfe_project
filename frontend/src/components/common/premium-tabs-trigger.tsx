@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { LucideIcon } from "lucide-react";
+import { LucideIcon } from "@/components/icons";
 import { TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 

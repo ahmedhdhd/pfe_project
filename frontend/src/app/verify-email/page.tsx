@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle } from "@/components/icons";
 import { useVerifyEmail } from "@/hooks";
 import { useOnboardingStore } from "@/lib/store/onboarding";
 import { useLoadingState } from "@/hooks/common";

@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, Palette, Sparkles, Type, X } from "lucide-react";
+import { Loader2, Palette, Sparkles, Type, X } from "@/components/icons";
 import { CreateOrganizationConfigData } from "@/lib/types/api";
 import { FileUpload } from "@/components/common/file-upload";
 import { THEME_OPTIONS } from "@/lib/constants";

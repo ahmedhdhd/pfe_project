@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Building2, BookOpen, Users, DollarSign, Loader2 } from "lucide-react";
+import { Building2, BookOpen, Users, DollarSign, Loader2 } from "@/components/icons";
 import { usePlatformStats } from "@/hooks/platform";
 
 export default function PlatformDashboardPage() {

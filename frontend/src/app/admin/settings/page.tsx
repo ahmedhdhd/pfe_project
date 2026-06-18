@@ -23,7 +23,7 @@ import {
   AlertCircle,
   Settings2,
   Bot,
-} from "lucide-react";
+} from "@/components/icons";
 import { toast } from "sonner";
 import {
   AlertDialog,

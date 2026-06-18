@@ -11,7 +11,7 @@ import {
   Image as ImageIcon,
   FileText,
   Video,
-} from "lucide-react";
+} from "@/components/icons";
 import Image from "next/image";
 import { useClientDirectUpload, useDirectUpload } from "@/hooks";
 

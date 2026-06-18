@@ -14,7 +14,7 @@ import {
   Save,
   Sparkles,
   Trash2,
-} from "lucide-react";
+} from "@/components/icons";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/common/page-header";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";

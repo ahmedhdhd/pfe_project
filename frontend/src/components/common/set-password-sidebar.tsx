@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle, Shield } from "lucide-react";
+import { CheckCircle, Shield } from "@/components/icons";
 import Image from "next/image";
 
 interface SetPasswordSidebarProps {

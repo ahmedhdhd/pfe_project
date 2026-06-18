@@ -8,7 +8,7 @@ import {
   MessageSquare,
   NotebookPen,
   Star,
-} from "lucide-react";
+} from "@/components/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCreateBatchReview } from "@/hooks";
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";

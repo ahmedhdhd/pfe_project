@@ -4,7 +4,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { TestEngine } from "@/components/test-engine/test-engine";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
+import { FileText } from "@/components/icons";
 import Link from "next/link";
 
 export default function TestAttemptPage() {

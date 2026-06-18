@@ -9,7 +9,7 @@ import {
   Search,
   ShieldCheck,
   Users,
-} from "lucide-react";
+} from "@/components/icons";
 import { useGetAllBatches, useGetAllUsers } from "@/hooks";
 import { PageHeader } from "@/components/common/page-header";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";

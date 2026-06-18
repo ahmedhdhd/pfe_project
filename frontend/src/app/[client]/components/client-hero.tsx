@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "@/components/icons";
 import type { ClientHomepageData } from "../types";
 import { BannerCarousel } from "./banner-carousel";
 import { TypewriterText } from "./typewriter-text";

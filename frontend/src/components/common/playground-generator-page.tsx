@@ -10,7 +10,7 @@ import {
   Loader2,
   RotateCcw,
   Sparkles,
-} from "lucide-react";
+} from "@/components/icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

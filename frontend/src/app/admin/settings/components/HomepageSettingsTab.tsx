@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Plus, X } from "lucide-react";
+import { Plus, X } from "@/components/icons";
 import { CreateOrganizationConfigData } from "@/lib/types/api";
 import { FileUpload } from "@/components/common/file-upload";
 

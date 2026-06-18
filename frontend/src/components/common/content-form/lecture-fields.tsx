@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { FileUpload } from "@/components/common/file-upload";
 import { DetailedHLSUpload } from "@/components/common/detailed-hls-upload";
-import { Video } from "lucide-react";
+import { Video } from "@/components/icons";
 import { ContentFormData, VideoType } from "./types";
 
 interface LectureFieldsProps {

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight } from "@/components/icons";
 import Link from "next/link";
 import { ReactNode } from "react";
 

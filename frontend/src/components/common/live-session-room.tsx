@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { ArrowLeft, Calendar, Clock, Radio, Video, PencilRuler } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Radio, Video, PencilRuler } from "@/components/icons";
 import { LiveKitRoom, VideoConference } from "@livekit/components-react";
 import {
   useGetClientSchedule,
@@ -26,6 +26,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LiveSessionWhiteboard } from "@/components/common/live-session-whiteboard";
 import { cn } from "@/lib/utils";
 import { formatScheduleAiSummaryDisplay } from "@/lib/schedule-summary";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   Table,
   TableBody,
@@ -436,14 +438,19 @@ export function LiveSessionRoom({
                 </p>
               ) : summaryDisplay.text ? (
                 <>
-                  <p
+                  <div
                     className={cn(
-                      "whitespace-pre-line text-sm leading-relaxed",
+                      "prose prose-sm max-w-none break-words text-sm leading-relaxed",
+                      "prose-headings:mb-2 prose-headings:mt-4 prose-headings:font-semibold",
+                      "prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1",
+                      "prose-strong:font-semibold",
                       summaryDisplay.isError && "text-destructive"
                     )}
                   >
-                    {summaryDisplay.text}
-                  </p>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {summaryDisplay.text}
+                    </ReactMarkdown>
+                  </div>
                   {aiSummary?.summaryGeneratedAt ? (
                     <p className="text-xs text-muted-foreground">
                       Generated on{" "}

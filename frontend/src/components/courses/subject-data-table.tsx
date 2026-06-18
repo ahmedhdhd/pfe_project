@@ -28,7 +28,7 @@ import {
   Trash2,
   Copy,
   Check,
-} from "lucide-react";
+} from "@/components/icons";
 
 interface Subject {
   id: string;

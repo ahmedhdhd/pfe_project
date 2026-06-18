@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckCircle2, Clock3, Loader2, XCircle } from "lucide-react";
+import { CheckCircle2, Clock3, Loader2, XCircle } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   Card,

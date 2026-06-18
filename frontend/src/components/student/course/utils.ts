@@ -6,7 +6,7 @@ import {
   BookOpen,
   Clipboard,
   LucideIcon,
-} from "lucide-react";
+} from "@/components/icons";
 
 export type VideoMimeType =
   | "video/mp4"

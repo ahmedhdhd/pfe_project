@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "@/components/icons";
 import { useSetPassword, useCreateOrganizationConfig, useLogin } from "@/hooks";
 import { useOnboardingStore } from "@/lib/store/onboarding";
 import { useEnhancedFormValidation, useLoadingState } from "@/hooks/common";

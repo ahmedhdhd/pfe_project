@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { AiChatMessage } from "@/lib/types/api";
 import { cn } from "@/lib/utils";
-import { User, Sparkles } from "lucide-react";
+import { User, Sparkles } from "@/components/icons";
 
 interface AiMessageBubbleProps {
   message: AiChatMessage;

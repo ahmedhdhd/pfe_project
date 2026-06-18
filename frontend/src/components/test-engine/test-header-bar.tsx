@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Clock, Flag, Send, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, Clock, Flag, Send, CheckCircle2 } from "@/components/icons";
 import { motion } from "framer-motion";
 
 // Displays timer, question position, violations, and actions

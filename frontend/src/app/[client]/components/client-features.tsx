@@ -11,7 +11,7 @@ import {
   Briefcase,
   BarChart3,
   Users,
-} from "lucide-react";
+} from "@/components/icons";
 import type { ClientHomepageData, ClientHomepageFeature } from "../types";
 import type { Client } from "@/lib/types/client";
 import React from "react";

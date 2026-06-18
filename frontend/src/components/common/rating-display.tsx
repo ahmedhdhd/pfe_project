@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Star, Users } from "lucide-react";
+import { Star, Users } from "@/components/icons";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface RatingDisplayProps {

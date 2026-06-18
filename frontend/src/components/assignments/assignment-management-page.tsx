@@ -12,7 +12,7 @@ import {
   Plus,
   Search,
   Trash2,
-} from "lucide-react";
+} from "@/components/icons";
 import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/common/confirmation-dialog";
 import { PageHeader } from "@/components/common/page-header";

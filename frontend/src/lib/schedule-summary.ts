@@ -28,12 +28,11 @@ export function formatScheduleAiSummaryDisplay(
 
   const marker = "=== AI SUMMARY ===";
   const markerIndex = raw.indexOf(marker);
-  if (markerIndex >= 0) {
-    return {
-      text: raw.slice(markerIndex + marker.length).trim(),
-      isError: false,
-    };
-  }
+  const text = (markerIndex >= 0 ? raw.slice(markerIndex + marker.length) : raw)
+    .trim()
+    .replace(/^```(?:markdown)?\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
 
-  return { text: raw.trim(), isError: false };
+  return { text, isError: false };
 }

@@ -44,7 +44,7 @@ import {
   Eye,
   Copy,
   Check,
-} from "lucide-react";
+} from "@/components/icons";
 import {
   useGetSubject,
   useDeleteSubject,

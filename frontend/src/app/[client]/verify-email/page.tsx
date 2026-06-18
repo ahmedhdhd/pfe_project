@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense, useRef } from "react";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle, AlertCircle, Loader2 } from "@/components/icons";
 import { useStudentVerifyEmail } from "@/hooks/api";
 import { useStudentAuthStore } from "@/lib/store/student-auth";
 import { useEnhancedFormValidation, useLoadingState } from "@/hooks/common";

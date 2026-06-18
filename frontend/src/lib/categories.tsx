@@ -14,7 +14,7 @@ import {
   PenTool,
   Scale,
   Tag,
-} from "lucide-react";
+} from "@/components/icons";
 
 export type CategoryIconName =
   | "BookOpen"

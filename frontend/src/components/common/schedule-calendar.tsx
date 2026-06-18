@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, isToday, startOfMonth, startOfWeek, subMonths } from "date-fns";
-import { CalendarDays, ChevronLeft, ChevronRight, Clock, Radio } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Clock, Radio } from "@/components/icons";
 import type { Schedule, ScheduleStatus } from "@/lib/types/schedule";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

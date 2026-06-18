@@ -11,9 +11,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, ArrowLeft } from "lucide-react";
+import { Shield, ArrowLeft } from "@/components/icons";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2 } from "@/components/icons";
 
 interface RouteGuardProps {
   children: ReactNode;

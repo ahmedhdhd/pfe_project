@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { FileUpload } from "@/components/common/file-upload";
 import { DetailedHLSUpload } from "@/components/common/detailed-hls-upload";
-import { X, Plus } from "lucide-react";
+import { X, Plus } from "@/components/icons";
 import Image from "next/image";
 import { useGetCategories, useUpdateBatch } from "@/hooks";
 import { useOrgPaymentMode } from "@/lib/store/organization-config";

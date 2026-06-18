@@ -19,7 +19,7 @@ import {
   XCircle,
   Lightbulb,
   Image as ImageIcon,
-} from "lucide-react";
+} from "@/components/icons";
 import { Question, QuestionType } from "@/hooks/test-series";
 import { EditQuestionModal } from "./edit-question-modal";
 

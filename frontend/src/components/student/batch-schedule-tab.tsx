@@ -8,7 +8,7 @@ import { useGetClientSchedulesByBatch } from "@/hooks";
 import { type Schedule, type ScheduleStatus } from "@/lib/types/schedule";
 import { StudentScheduleList } from "./student-schedule-list";
 import { SectionHeader } from "@/components/common/section-header";
-import { Calendar, Radio, Video } from "lucide-react";
+import { Calendar, Radio, Video } from "@/components/icons";
 
 /**
  * Batch schedule tab component for students

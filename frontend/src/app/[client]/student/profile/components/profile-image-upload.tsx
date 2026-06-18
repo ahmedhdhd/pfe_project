@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera, Loader2 } from "@/components/icons";
 import { IMAGE_VALIDATION } from "../constants";
 import { toast } from "sonner";
 

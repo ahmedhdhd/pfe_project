@@ -23,7 +23,7 @@ import {
   Minus,
   Calendar,
   Timer,
-} from "lucide-react";
+} from "@/components/icons";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";

@@ -3,7 +3,7 @@
 import { ReactNode } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { GraduationCap, Phone, Shield } from "lucide-react";
+import { GraduationCap, Phone, Shield } from "@/components/icons";
 import {
   Card,
   CardContent,
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "@/components/icons";
 
 interface AuthLayoutProps {
   client: {

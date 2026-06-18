@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "@/components/icons";
 import Link from "next/link";
 import { ErrorMessage } from "@/components/common/error-message";
 import { PasswordStrengthIndicator } from "@/components/common/password-strength-indicator";

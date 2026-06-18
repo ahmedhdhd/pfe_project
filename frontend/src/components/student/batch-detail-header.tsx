@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, Calendar, Globe, GraduationCap, Tag } from "lucide-react";
+import { ArrowLeft, Calendar, Globe, GraduationCap, Tag } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 

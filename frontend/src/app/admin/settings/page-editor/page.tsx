@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Monitor, Smartphone, Save, ExternalLink } from "lucide-react";
+import { Loader2, Monitor, Smartphone, Save, ExternalLink } from "@/components/icons";
 import { useOrganizationConfigStore } from "@/lib/store/organization-config";
 import {
   useOrganizationConfigAdmin,

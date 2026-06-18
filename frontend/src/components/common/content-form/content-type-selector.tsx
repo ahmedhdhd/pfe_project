@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, BookOpen, Link2, Braces } from "lucide-react";
+import { FileText, BookOpen, Link2, Braces } from "@/components/icons";
 import { ContentType } from "./types";
 
 interface ContentTypeSelectorProps {

@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { PanelLeftOpen } from "lucide-react";
+import { PanelLeftOpen } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type Player from "video.js/dist/types/player";

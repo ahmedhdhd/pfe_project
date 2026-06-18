@@ -19,7 +19,7 @@ import {
   Award,
   Play,
   CheckCircle2,
-} from "lucide-react";
+} from "@/components/icons";
 import Link from "next/link";
 
 export default function TestPreviewPage() {

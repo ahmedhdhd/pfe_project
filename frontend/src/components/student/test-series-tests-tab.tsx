@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Clock, FileText } from "lucide-react";
+import { Clock, FileText } from "@/components/icons";
 import { TestCard } from "@/components/common/test-card";
 import { ClientTestInSeries } from "@/hooks/test-series-client";
 

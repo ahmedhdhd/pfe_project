@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useGetContentsByTopic } from "@/hooks";
-import { FileText, Video } from "lucide-react";
+import { FileText, Video } from "@/components/icons";
 import { ContentFilterTabs } from "@/components/common/content-filter-tabs";
 import { EmptyStateCard } from "@/components/common/empty-state-card";
 import { LoadingSpinner } from "@/components/common/loading-spinner";

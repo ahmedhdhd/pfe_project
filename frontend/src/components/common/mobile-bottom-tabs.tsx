@@ -12,7 +12,7 @@ import {
   ClipboardList,
   Library,
   Megaphone,
-} from "lucide-react";
+} from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { STUDENT_NAVIGATION_ITEMS } from "@/lib/constants";
 

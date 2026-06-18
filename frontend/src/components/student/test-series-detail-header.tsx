@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, FileText, Clock, Sparkles, Award } from "lucide-react";
+import { ArrowLeft, FileText, Clock, Sparkles, Award } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ClientTestSeriesListItem } from "@/hooks/test-series-client";

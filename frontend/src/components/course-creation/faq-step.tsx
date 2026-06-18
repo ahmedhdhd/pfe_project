@@ -20,7 +20,7 @@ import {
   Trash2,
   Edit3,
   HelpCircle,
-} from "lucide-react";
+} from "@/components/icons";
 
 interface FAQ {
   id: string;

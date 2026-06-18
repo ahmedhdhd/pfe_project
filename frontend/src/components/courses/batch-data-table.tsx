@@ -41,7 +41,7 @@ import {
   BookOpen,
   Power,
   PowerOff,
-} from "lucide-react";
+} from "@/components/icons";
 import { useOrganizationConfigAdmin } from "@/hooks/api";
 import { formatCurrency } from "@/lib/utils/format";
 import { formatCategoryLabel } from "@/lib/categories";

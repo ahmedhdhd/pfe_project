@@ -3,7 +3,7 @@
 import { ReactNode } from "react";
 import { MobileBottomTabs } from "@/components/common/mobile-bottom-tabs";
 import { useRequireAuth } from "@/hooks";
-import { Loader2 } from "lucide-react";
+import { Loader2 } from "@/components/icons";
 import { usePathname } from "next/navigation";
 
 interface StudentLayoutProps {

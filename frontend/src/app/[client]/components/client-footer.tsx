@@ -3,7 +3,7 @@
 import type { ComponentType } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Facebook, Twitter, Linkedin, Instagram, Youtube } from "lucide-react";
+import { Facebook, Twitter, Linkedin, Instagram, Youtube } from "@/components/icons";
 import type { ClientHomepageData } from "../types";
 import type { Client } from "@/lib/types/client";
 

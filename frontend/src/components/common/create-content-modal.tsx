@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useCreateContent } from "@/hooks";
-import { Video, FileText, BookOpen, Braces, Link2 } from "lucide-react";
+import { Video, FileText, BookOpen, Braces, Link2 } from "@/components/icons";
 import { FileUpload } from "@/components/common/file-upload";
 import { DetailedHLSUpload } from "@/components/common/detailed-hls-upload";
 import { ContentType, VideoType } from "@/components/common/content-form";

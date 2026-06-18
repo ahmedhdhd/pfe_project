@@ -1,6 +1,6 @@
 "use client";
 
-import { User, Settings, Moon, Sun } from "lucide-react";
+import { User, Settings, Moon, Sun } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus } from "lucide-react";
+import { Plus } from "@/components/icons";
 import { ScheduleList } from "@/components/common/schedule-list";
 import { CreateScheduleModal } from "@/components/common/create-schedule-modal";
 import { EditScheduleModal } from "@/components/common/edit-schedule-modal";

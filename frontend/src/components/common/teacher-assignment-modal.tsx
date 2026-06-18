@@ -22,7 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, Plus, X, Star, Users, Check } from "lucide-react";
+import { Search, Plus, X, Star, Users, Check } from "@/components/icons";
 import {
   useGetAllTeachers,
   useGetTeachersByBatch,

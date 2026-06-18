@@ -1,6 +1,6 @@
 "use client";
 
-import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
+import { IconArrowLeft, IconArrowRight } from "@/components/icons";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 

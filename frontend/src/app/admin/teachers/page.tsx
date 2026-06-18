@@ -31,7 +31,7 @@ import {
   BookOpen,
   GraduationCap,
   Star,
-} from "lucide-react";
+} from "@/components/icons";
 import { useGetAllTeachers, useDeleteTeacher, useCurrentUser } from "@/hooks";
 import { EditTeacherModal } from "@/components/common/edit-teacher-modal";
 import { InviteUserModal } from "@/components/common/invite-user-modal";

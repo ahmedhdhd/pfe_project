@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { UserPlus, BookOpen, GraduationCap } from "lucide-react";
+import { UserPlus, BookOpen, GraduationCap } from "@/components/icons";
 import type React from "react";
 
 // The main props for the HowItWorks component

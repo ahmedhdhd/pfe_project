@@ -8,7 +8,7 @@ import {
   ClipboardCheck,
   RotateCcw,
   XCircle,
-} from "lucide-react";
+} from "@/components/icons";
 import { QuestionRenderer } from "@/components/test-engine/question-renderer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

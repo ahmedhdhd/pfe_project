@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2 } from "@/components/icons";
 import { decodeHtmlEntities } from "@/lib/utils";
 import { Teacher } from "./types";
 

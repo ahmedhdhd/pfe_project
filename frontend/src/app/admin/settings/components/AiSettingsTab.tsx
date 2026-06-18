@@ -21,7 +21,7 @@ import {
   XCircle,
   Sparkles,
   Zap,
-} from "lucide-react";
+} from "@/components/icons";
 import apiClient from "@/lib/api/client";
 import type { ApiResponse, CreateOrganizationConfigData } from "@/lib/types/api";
 

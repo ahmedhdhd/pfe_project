@@ -31,7 +31,7 @@ import {
   AlignCenter,
   AlignRight,
   AlignJustify,
-} from "lucide-react";
+} from "@/components/icons";
 
 interface RichTextEditorProps {
   content?: string;

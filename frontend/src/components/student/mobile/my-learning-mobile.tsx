@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useQueries } from "@tanstack/react-query";
-import { BookOpen, Search } from "lucide-react";
+import { BookOpen, Search } from "@/components/icons";
 import { useGetMyBatches } from "@/hooks";
 import apiClient from "@/lib/api/client";
 import type { BatchProgressResponse } from "@/lib/types/api";

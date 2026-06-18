@@ -14,7 +14,7 @@ import {
   Video,
   X,
   ClipboardList,
-} from "lucide-react";
+} from "@/components/icons";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

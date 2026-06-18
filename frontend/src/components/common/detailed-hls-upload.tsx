@@ -18,7 +18,7 @@ import {
   Play,
   ChevronDown,
   ChevronUp,
-} from "lucide-react";
+} from "@/components/icons";
 import {
   useMultipartUpload,
   useUploadProgressDisplay,

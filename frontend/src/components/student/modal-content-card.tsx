@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Video, FileText, Download } from "lucide-react";
+import { Video, FileText, Download } from "@/components/icons";
 import { type Content } from "./content-card";
 
 // Re-export Content type for convenience

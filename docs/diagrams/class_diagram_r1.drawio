@@ -1,499 +1,373 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.5.2 Chrome/142.0.7444.265 Electron/39.6.1 Safari/537.36" version="29.5.2">
   <diagram name="Class Diagram — Release 1" id="class_r1">
-    <mxGraphModel dx="1569" dy="957" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2000" pageHeight="1400" math="0" shadow="0">
+    <mxGraphModel dx="1744" dy="1458" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2000" pageHeight="1400" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="2" parent="1" style="text;html=1;fontSize=17;fontStyle=1;align=center;fillColor=none;strokeColor=none;" value="Diagramme de Classes — Release 1 (Foundation &amp; Core Management)" vertex="1">
-          <mxGeometry height="40" width="1800" x="100" y="10" as="geometry" />
+        <mxCell id="e1" parent="1" style="swimlane;startSize=40;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#333333;fontSize=15;fontStyle=1;" value="«enumeration»&#xa;UserRole" vertex="1">
+          <mxGeometry height="110" width="150" x="1680" y="380" as="geometry" />
         </mxCell>
-        <mxCell id="e1" parent="1" style="swimlane;startSize=40;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#333333;fontSize=11;fontStyle=1;" value="«enumeration»&lt;br/&gt;&lt;b&gt;UserRole&lt;/b&gt;" vertex="1">
-          <mxGeometry height="110" width="150" x="-100" y="440" as="geometry" />
-        </mxCell>
-        <mxCell id="e1a" parent="e1" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="ADMIN" vertex="1">
+        <mxCell id="e1a" parent="e1" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="ADMIN" vertex="1">
           <mxGeometry height="20" width="150" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="e1b" parent="e1" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="TEACHER" vertex="1">
+        <mxCell id="e1b" parent="e1" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="TEACHER" vertex="1">
           <mxGeometry height="20" width="150" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="e1c" parent="e1" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="STUDENT" vertex="1">
+        <mxCell id="e1c" parent="e1" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="STUDENT" vertex="1">
           <mxGeometry height="20" width="150" y="80" as="geometry" />
         </mxCell>
-        <mxCell id="e2" parent="1" style="swimlane;startSize=40;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" value="«enumeration»&lt;br/&gt;&lt;b&gt;BatchStatus&lt;/b&gt;" vertex="1">
-          <mxGeometry height="130" width="150" x="1150" y="50" as="geometry" />
+        <mxCell id="e2" parent="1" style="swimlane;startSize=40;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=15;fontStyle=1;" value="«enumeration»&#xa;BatchStatus" vertex="1">
+          <mxGeometry height="130" width="150" x="1670" y="230" as="geometry" />
         </mxCell>
-        <mxCell id="e2a" parent="e2" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="DRAFT" vertex="1">
+        <mxCell id="e2a" parent="e2" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="DRAFT" vertex="1">
           <mxGeometry height="20" width="150" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="e2b" parent="e2" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="SUBMITTED" vertex="1">
+        <mxCell id="e2b" parent="e2" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="SUBMITTED" vertex="1">
           <mxGeometry height="20" width="150" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="e2c" parent="e2" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="PUBLISHED" vertex="1">
+        <mxCell id="e2c" parent="e2" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="PUBLISHED" vertex="1">
           <mxGeometry height="20" width="150" y="80" as="geometry" />
         </mxCell>
-        <mxCell id="e2d" parent="e2" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="ARCHIVED" vertex="1">
+        <mxCell id="e2d" parent="e2" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="ARCHIVED" vertex="1">
           <mxGeometry height="20" width="150" y="100" as="geometry" />
         </mxCell>
-        <mxCell id="e3" parent="1" style="swimlane;startSize=40;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" value="«enumeration»&lt;br/&gt;&lt;b&gt;ContentType&lt;/b&gt;" vertex="1">
-          <mxGeometry height="150" width="150" x="1740" y="680" as="geometry" />
+        <mxCell id="e3" parent="1" style="swimlane;startSize=40;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=15;fontStyle=1;" value="«enumeration»&#xa;ContentType" vertex="1">
+          <mxGeometry height="150" width="150" x="1710" y="520" as="geometry" />
         </mxCell>
-        <mxCell id="e3a" parent="e3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="Lecture" vertex="1">
+        <mxCell id="e3a" parent="e3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="Lecture" vertex="1">
           <mxGeometry height="20" width="150" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="e3b" parent="e3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="PDF" vertex="1">
+        <mxCell id="e3b" parent="e3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="PDF" vertex="1">
           <mxGeometry height="20" width="150" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="e3c" parent="e3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="MARKDOWN" vertex="1">
+        <mxCell id="e3c" parent="e3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="MARKDOWN" vertex="1">
           <mxGeometry height="20" width="150" y="80" as="geometry" />
         </mxCell>
-        <mxCell id="e3d" parent="e3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="URL" vertex="1">
+        <mxCell id="e3d" parent="e3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="URL" vertex="1">
           <mxGeometry height="20" width="150" y="100" as="geometry" />
         </mxCell>
-        <mxCell id="e3e" parent="e3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="PLAYGROUND" vertex="1">
+        <mxCell id="e3e" parent="e3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="PLAYGROUND" vertex="1">
           <mxGeometry height="20" width="150" y="120" as="geometry" />
         </mxCell>
-        <mxCell id="c1" parent="1" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=12;fontStyle=1;" value="&lt;b&gt;Organization&lt;/b&gt;" vertex="1">
-          <mxGeometry height="230" width="220" x="230" y="-30" as="geometry" />
+        <mxCell id="c1" parent="1" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=15;fontStyle=1;" value="Organization" vertex="1">
+          <mxGeometry height="230" width="220" x="320" y="100" as="geometry" />
         </mxCell>
-        <mxCell id="c1sep" parent="c1" style="line;strokeColor=#6c8ebf;" value="" vertex="1">
+        <mxCell id="c1sep" parent="c1" style="line;strokeColor=#6c8ebf;fontSize=15;" value="" vertex="1">
           <mxGeometry height="10" width="220" y="30" as="geometry" />
         </mxCell>
-        <mxCell id="c1a" parent="c1" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
+        <mxCell id="c1a" parent="c1" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
           <mxGeometry height="18" width="220" y="45" as="geometry" />
         </mxCell>
-        <mxCell id="c1b" parent="c1" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
+        <mxCell id="c1b" parent="c1" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
           <mxGeometry height="18" width="220" y="63" as="geometry" />
         </mxCell>
-        <mxCell id="c1c" parent="c1" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ slug : String  {unique}" vertex="1">
+        <mxCell id="c1c" parent="c1" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ slug : String  {unique}" vertex="1">
           <mxGeometry height="18" width="220" y="81" as="geometry" />
         </mxCell>
-        <mxCell id="c1d" parent="c1" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ subdomain : String  {unique}" vertex="1">
+        <mxCell id="c1d" parent="c1" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ subdomain : String  {unique}" vertex="1">
           <mxGeometry height="18" width="220" y="99" as="geometry" />
         </mxCell>
-        <mxCell id="c1e" parent="c1" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ domain : String?" vertex="1">
+        <mxCell id="c1e" parent="c1" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ domain : String?" vertex="1">
           <mxGeometry height="18" width="220" y="117" as="geometry" />
         </mxCell>
-        <mxCell id="c1f" parent="c1" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ isActive : Boolean" vertex="1">
+        <mxCell id="c1f" parent="c1" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ isActive : Boolean" vertex="1">
           <mxGeometry height="18" width="220" y="135" as="geometry" />
         </mxCell>
-        <mxCell id="c1g" parent="c1" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
+        <mxCell id="c1g" parent="c1" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
           <mxGeometry height="18" width="220" y="153" as="geometry" />
         </mxCell>
-        <mxCell id="c1h" parent="c1" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ updatedAt : DateTime" vertex="1">
+        <mxCell id="c1h" parent="c1" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ updatedAt : DateTime" vertex="1">
           <mxGeometry height="18" width="220" y="171" as="geometry" />
         </mxCell>
-        <mxCell id="c2" parent="1" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" value="&lt;b&gt;OrganizationConfig&lt;/b&gt;" vertex="1">
-          <mxGeometry height="270" width="220" x="770" y="-260" as="geometry" />
+        <mxCell id="c2" parent="1" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=15;fontStyle=1;" value="OrganizationConfig" vertex="1">
+          <mxGeometry height="270" width="220" x="760" y="-60" as="geometry" />
         </mxCell>
-        <mxCell id="c2sep" parent="c2" style="line;strokeColor=#6c8ebf;" value="" vertex="1">
+        <mxCell id="c2sep" parent="c2" style="line;strokeColor=#6c8ebf;fontSize=15;" value="" vertex="1">
           <mxGeometry height="10" width="220" y="30" as="geometry" />
         </mxCell>
-        <mxCell id="c2a" parent="c2" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
+        <mxCell id="c2a" parent="c2" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
           <mxGeometry height="18" width="220" y="45" as="geometry" />
         </mxCell>
-        <mxCell id="c2b" parent="c2" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ organizationId : String  {FK}" vertex="1">
+        <mxCell id="c2b" parent="c2" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ organizationId : String  {FK}" vertex="1">
           <mxGeometry height="18" width="220" y="63" as="geometry" />
         </mxCell>
-        <mxCell id="c2c" parent="c2" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
+        <mxCell id="c2c" parent="c2" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
           <mxGeometry height="18" width="220" y="81" as="geometry" />
         </mxCell>
-        <mxCell id="c2d" parent="c2" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ slug : String" vertex="1">
+        <mxCell id="c2d" parent="c2" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ slug : String" vertex="1">
           <mxGeometry height="18" width="220" y="99" as="geometry" />
         </mxCell>
-        <mxCell id="c2e" parent="c2" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ contactEmail : String?" vertex="1">
+        <mxCell id="c2e" parent="c2" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ contactEmail : String?" vertex="1">
           <mxGeometry height="18" width="220" y="117" as="geometry" />
         </mxCell>
-        <mxCell id="c2f" parent="c2" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ logoUrl : String?" vertex="1">
+        <mxCell id="c2f" parent="c2" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ logoUrl : String?" vertex="1">
           <mxGeometry height="18" width="220" y="135" as="geometry" />
         </mxCell>
-        <mxCell id="c2g" parent="c2" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ themeColor : String?" vertex="1">
+        <mxCell id="c2g" parent="c2" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ themeColor : String?" vertex="1">
           <mxGeometry height="18" width="220" y="153" as="geometry" />
         </mxCell>
-        <mxCell id="c2h" parent="c2" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ paymentGateway : String?" vertex="1">
+        <mxCell id="c2h" parent="c2" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ paymentGateway : String?" vertex="1">
           <mxGeometry height="18" width="220" y="171" as="geometry" />
         </mxCell>
-        <mxCell id="c2i" parent="c2" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ openRouterApiKey : String?" vertex="1">
+        <mxCell id="c2i" parent="c2" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ openRouterApiKey : String?" vertex="1">
           <mxGeometry height="18" width="220" y="189" as="geometry" />
         </mxCell>
-        <mxCell id="c2j" parent="c2" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ maintenanceMode : Boolean" vertex="1">
+        <mxCell id="c2j" parent="c2" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ maintenanceMode : Boolean" vertex="1">
           <mxGeometry height="18" width="220" y="207" as="geometry" />
         </mxCell>
-        <mxCell id="c2k" parent="c2" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ plan : String?" vertex="1">
+        <mxCell id="c2k" parent="c2" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ plan : String?" vertex="1">
           <mxGeometry height="18" width="220" y="225" as="geometry" />
         </mxCell>
-        <mxCell id="c3" parent="1" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" value="&lt;b&gt;User&lt;/b&gt;" vertex="1">
-          <mxGeometry height="300" width="220" x="200" y="380" as="geometry" />
+        <mxCell id="c3" parent="1" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=15;fontStyle=1;" value="User" vertex="1">
+          <mxGeometry height="300" width="220" x="340" y="500" as="geometry" />
         </mxCell>
-        <mxCell id="c3sep" parent="c3" style="line;strokeColor=#82b366;" value="" vertex="1">
+        <mxCell id="c3sep" parent="c3" style="line;strokeColor=#82b366;fontSize=15;" value="" vertex="1">
           <mxGeometry height="10" width="220" y="30" as="geometry" />
         </mxCell>
-        <mxCell id="c3a" parent="c3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
+        <mxCell id="c3a" parent="c3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
           <mxGeometry height="18" width="220" y="45" as="geometry" />
         </mxCell>
-        <mxCell id="c3b" parent="c3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ organizationId : String  {FK}" vertex="1">
+        <mxCell id="c3b" parent="c3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ organizationId : String  {FK}" vertex="1">
           <mxGeometry height="18" width="220" y="63" as="geometry" />
         </mxCell>
-        <mxCell id="c3c" parent="c3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ email : String?" vertex="1">
+        <mxCell id="c3c" parent="c3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ email : String?" vertex="1">
           <mxGeometry height="18" width="220" y="81" as="geometry" />
         </mxCell>
-        <mxCell id="c3d" parent="c3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ username : String" vertex="1">
+        <mxCell id="c3d" parent="c3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ username : String" vertex="1">
           <mxGeometry height="18" width="220" y="99" as="geometry" />
         </mxCell>
-        <mxCell id="c3e" parent="c3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ passwordHash : String?" vertex="1">
+        <mxCell id="c3e" parent="c3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ passwordHash : String?" vertex="1">
           <mxGeometry height="18" width="220" y="117" as="geometry" />
         </mxCell>
-        <mxCell id="c3f" parent="c3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;fontStyle=1;" value="+ role : UserRole" vertex="1">
+        <mxCell id="c3f" parent="c3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;fontStyle=1;" value="+ role : UserRole" vertex="1">
           <mxGeometry height="18" width="220" y="135" as="geometry" />
         </mxCell>
-        <mxCell id="c3g" parent="c3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ isVerified : Boolean" vertex="1">
+        <mxCell id="c3g" parent="c3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ isVerified : Boolean" vertex="1">
           <mxGeometry height="18" width="220" y="153" as="geometry" />
         </mxCell>
-        <mxCell id="c3h" parent="c3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ profileImg : String?" vertex="1">
+        <mxCell id="c3h" parent="c3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ profileImg : String?" vertex="1">
           <mxGeometry height="18" width="220" y="171" as="geometry" />
         </mxCell>
-        <mxCell id="c3i" parent="c3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ phoneNumber : String?" vertex="1">
+        <mxCell id="c3i" parent="c3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ phoneNumber : String?" vertex="1">
           <mxGeometry height="18" width="220" y="189" as="geometry" />
         </mxCell>
-        <mxCell id="c3j" parent="c3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
+        <mxCell id="c3j" parent="c3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
           <mxGeometry height="18" width="220" y="207" as="geometry" />
         </mxCell>
-        <mxCell id="c3k" parent="c3" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ updatedAt : DateTime" vertex="1">
+        <mxCell id="c3k" parent="c3" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ updatedAt : DateTime" vertex="1">
           <mxGeometry height="18" width="220" y="225" as="geometry" />
         </mxCell>
-        <mxCell id="c4" parent="1" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" value="&lt;b&gt;EmailToken&lt;/b&gt;" vertex="1">
-          <mxGeometry height="200" width="160" x="-90" y="60" as="geometry" />
+        <mxCell id="c7" parent="1" style="swimlane;startSize=30;fillColor=#f8cecc;strokeColor=#b85450;fontSize=15;fontStyle=1;" value="Course" vertex="1">
+          <mxGeometry height="320" width="230" x="900" y="220" as="geometry" />
         </mxCell>
-        <mxCell id="c4sep" parent="c4" style="line;strokeColor=#82b366;" value="" vertex="1">
-          <mxGeometry height="10" width="160" y="30" as="geometry" />
-        </mxCell>
-        <mxCell id="c4a" parent="c4" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
-          <mxGeometry height="18" width="160" y="45" as="geometry" />
-        </mxCell>
-        <mxCell id="c4b" parent="c4" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ userId : String  {FK}" vertex="1">
-          <mxGeometry height="18" width="160" y="63" as="geometry" />
-        </mxCell>
-        <mxCell id="c4c" parent="c4" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ token : String  {unique}" vertex="1">
-          <mxGeometry height="18" width="160" y="81" as="geometry" />
-        </mxCell>
-        <mxCell id="c4d" parent="c4" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ type : String" vertex="1">
-          <mxGeometry height="18" width="160" y="99" as="geometry" />
-        </mxCell>
-        <mxCell id="c4e" parent="c4" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ expiresAt : DateTime" vertex="1">
-          <mxGeometry height="18" width="160" y="117" as="geometry" />
-        </mxCell>
-        <mxCell id="c4f" parent="c4" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ usedAt : DateTime?" vertex="1">
-          <mxGeometry height="18" width="160" y="135" as="geometry" />
-        </mxCell>
-        <mxCell id="c4g" parent="c4" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
-          <mxGeometry height="18" width="160" y="153" as="geometry" />
-        </mxCell>
-        <mxCell id="c5" parent="1" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" value="&lt;b&gt;RefreshToken&lt;/b&gt;" vertex="1">
-          <mxGeometry height="200" width="160" x="580" y="710" as="geometry" />
-        </mxCell>
-        <mxCell id="c5sep" parent="c5" style="line;strokeColor=#82b366;" value="" vertex="1">
-          <mxGeometry height="10" width="160" y="30" as="geometry" />
-        </mxCell>
-        <mxCell id="c5a" parent="c5" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
-          <mxGeometry height="18" width="160" y="45" as="geometry" />
-        </mxCell>
-        <mxCell id="c5b" parent="c5" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ userId : String  {FK}" vertex="1">
-          <mxGeometry height="18" width="160" y="63" as="geometry" />
-        </mxCell>
-        <mxCell id="c5c" parent="c5" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ token : String  {unique}" vertex="1">
-          <mxGeometry height="18" width="160" y="81" as="geometry" />
-        </mxCell>
-        <mxCell id="c5d" parent="c5" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ expiresAt : DateTime" vertex="1">
-          <mxGeometry height="18" width="160" y="99" as="geometry" />
-        </mxCell>
-        <mxCell id="c5e" parent="c5" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ revokedAt : DateTime?" vertex="1">
-          <mxGeometry height="18" width="160" y="117" as="geometry" />
-        </mxCell>
-        <mxCell id="c5f" parent="c5" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
-          <mxGeometry height="18" width="160" y="135" as="geometry" />
-        </mxCell>
-        <mxCell id="c6" parent="1" style="swimlane;startSize=30;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=1;" value="&lt;b&gt;Teacher&lt;/b&gt;" vertex="1">
-          <mxGeometry height="200" width="200" x="480" y="430" as="geometry" />
-        </mxCell>
-        <mxCell id="c6sep" parent="c6" style="line;strokeColor=#d79b00;" value="" vertex="1">
-          <mxGeometry height="10" width="200" y="30" as="geometry" />
-        </mxCell>
-        <mxCell id="c6a" parent="c6" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
-          <mxGeometry height="18" width="200" y="45" as="geometry" />
-        </mxCell>
-        <mxCell id="c6b" parent="c6" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ organizationId : String  {FK}" vertex="1">
-          <mxGeometry height="18" width="200" y="63" as="geometry" />
-        </mxCell>
-        <mxCell id="c6c" parent="c6" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ userId : String?  {FK, unique}" vertex="1">
-          <mxGeometry height="18" width="200" y="81" as="geometry" />
-        </mxCell>
-        <mxCell id="c6d" parent="c6" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
-          <mxGeometry height="18" width="200" y="99" as="geometry" />
-        </mxCell>
-        <mxCell id="c6e" parent="c6" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ highlightsJson : Json?" vertex="1">
-          <mxGeometry height="18" width="200" y="117" as="geometry" />
-        </mxCell>
-        <mxCell id="c6f" parent="c6" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
-          <mxGeometry height="18" width="200" y="135" as="geometry" />
-        </mxCell>
-        <mxCell id="c7" parent="1" style="swimlane;startSize=30;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;" value="&lt;b&gt;Batch&lt;/b&gt;  «Course»" vertex="1">
-          <mxGeometry height="320" width="230" x="900" y="200" as="geometry" />
-        </mxCell>
-        <mxCell id="c7sep" parent="c7" style="line;strokeColor=#b85450;" value="" vertex="1">
+        <mxCell id="c7sep" parent="c7" style="line;strokeColor=#b85450;fontSize=15;" value="" vertex="1">
           <mxGeometry height="10" width="230" y="30" as="geometry" />
         </mxCell>
-        <mxCell id="c7a" parent="c7" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
+        <mxCell id="c7a" parent="c7" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
           <mxGeometry height="18" width="230" y="45" as="geometry" />
         </mxCell>
-        <mxCell id="c7b" parent="c7" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ organizationId : String  {FK}" vertex="1">
+        <mxCell id="c7b" parent="c7" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ organizationId : String  {FK}" vertex="1">
           <mxGeometry height="18" width="230" y="63" as="geometry" />
         </mxCell>
-        <mxCell id="c7c" parent="c7" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ createdByUserId : String?  {FK}" vertex="1">
+        <mxCell id="c7c" parent="c7" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ createdByUserId : String?  {FK}" vertex="1">
           <mxGeometry height="18" width="230" y="81" as="geometry" />
         </mxCell>
-        <mxCell id="c7d" parent="c7" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ categoryId : String?  {FK}" vertex="1">
+        <mxCell id="c7d" parent="c7" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ categoryId : String?  {FK}" vertex="1">
           <mxGeometry height="18" width="230" y="99" as="geometry" />
         </mxCell>
-        <mxCell id="c7e" parent="c7" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
+        <mxCell id="c7e" parent="c7" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
           <mxGeometry height="18" width="230" y="117" as="geometry" />
         </mxCell>
-        <mxCell id="c7f" parent="c7" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ description : String?" vertex="1">
+        <mxCell id="c7f" parent="c7" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ description : String?" vertex="1">
           <mxGeometry height="18" width="230" y="135" as="geometry" />
         </mxCell>
-        <mxCell id="c7g" parent="c7" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ level : BatchLevel" vertex="1">
+        <mxCell id="c7g" parent="c7" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ level : BatchLevel" vertex="1">
           <mxGeometry height="18" width="230" y="153" as="geometry" />
         </mxCell>
-        <mxCell id="c7h" parent="c7" style="text;html=1;fontSize=10;align=left;spacingLeft=8;fontStyle=1;" value="+ status : BatchStatus" vertex="1">
+        <mxCell id="c7h" parent="c7" style="text;html=1;fontSize=15;align=left;spacingLeft=8;fontStyle=1;" value="+ status : BatchStatus" vertex="1">
           <mxGeometry height="18" width="230" y="171" as="geometry" />
         </mxCell>
-        <mxCell id="c7i" parent="c7" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ price : Float?" vertex="1">
+        <mxCell id="c7i" parent="c7" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ price : Float?" vertex="1">
           <mxGeometry height="18" width="230" y="189" as="geometry" />
         </mxCell>
-        <mxCell id="c7j" parent="c7" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ imageUrl : String?" vertex="1">
+        <mxCell id="c7j" parent="c7" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ imageUrl : String?" vertex="1">
           <mxGeometry height="18" width="230" y="207" as="geometry" />
         </mxCell>
-        <mxCell id="c7k" parent="c7" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ language : String?" vertex="1">
+        <mxCell id="c7k" parent="c7" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ language : String?" vertex="1">
           <mxGeometry height="18" width="230" y="225" as="geometry" />
         </mxCell>
-        <mxCell id="c7l" parent="c7" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
+        <mxCell id="c7l" parent="c7" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
           <mxGeometry height="18" width="230" y="243" as="geometry" />
         </mxCell>
-        <mxCell id="c7m" parent="c7" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ updatedAt : DateTime" vertex="1">
+        <mxCell id="c7m" parent="c7" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ updatedAt : DateTime" vertex="1">
           <mxGeometry height="18" width="230" y="261" as="geometry" />
         </mxCell>
-        <mxCell id="c8" parent="1" style="swimlane;startSize=30;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;" value="&lt;b&gt;Category&lt;/b&gt;" vertex="1">
-          <mxGeometry height="160" width="190" x="840" y="590" as="geometry" />
+        <mxCell id="c8" parent="1" style="swimlane;startSize=30;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=15;fontStyle=1;" value="Category" vertex="1">
+          <mxGeometry height="160" width="200" x="900" y="660" as="geometry" />
         </mxCell>
-        <mxCell id="c8sep" parent="c8" style="line;strokeColor=#9673a6;" value="" vertex="1">
+        <mxCell id="c8sep" parent="c8" style="line;strokeColor=#9673a6;fontSize=15;" value="" vertex="1">
           <mxGeometry height="10" width="190" y="30" as="geometry" />
         </mxCell>
-        <mxCell id="c8a" parent="c8" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
+        <mxCell id="c8a" parent="c8" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
           <mxGeometry height="18" width="190" y="45" as="geometry" />
         </mxCell>
-        <mxCell id="c8b" parent="c8" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ organizationId : String  {FK}" vertex="1">
+        <mxCell id="c8b" parent="c8" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ organizationId : String  {FK}" vertex="1">
           <mxGeometry height="18" width="190" y="63" as="geometry" />
         </mxCell>
-        <mxCell id="c8c" parent="c8" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
+        <mxCell id="c8c" parent="c8" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
           <mxGeometry height="18" width="190" y="81" as="geometry" />
         </mxCell>
-        <mxCell id="c8d" parent="c8" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ description : String?" vertex="1">
+        <mxCell id="c8d" parent="c8" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ description : String?" vertex="1">
           <mxGeometry height="18" width="190" y="99" as="geometry" />
         </mxCell>
-        <mxCell id="c8e" parent="c8" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
+        <mxCell id="c8e" parent="c8" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
           <mxGeometry height="18" width="190" y="117" as="geometry" />
         </mxCell>
-        <mxCell id="c9" parent="1" style="swimlane;startSize=30;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" value="&lt;b&gt;Subject&lt;/b&gt;" vertex="1">
-          <mxGeometry height="180" width="190" x="1230" y="190" as="geometry" />
+        <mxCell id="c10" parent="1" style="swimlane;startSize=30;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=15;fontStyle=1;" value="Chapter" vertex="1">
+          <mxGeometry height="180" width="190" x="1430" y="210" as="geometry" />
         </mxCell>
-        <mxCell id="c9sep" parent="c9" style="line;strokeColor=#d6b656;" value="" vertex="1">
+        <mxCell id="c10sep" parent="c10" style="line;strokeColor=#d6b656;fontSize=15;" value="" vertex="1">
           <mxGeometry height="10" width="190" y="30" as="geometry" />
         </mxCell>
-        <mxCell id="c9a" parent="c9" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
+        <mxCell id="c10a" parent="c10" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
           <mxGeometry height="18" width="190" y="45" as="geometry" />
         </mxCell>
-        <mxCell id="c9b" parent="c9" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ batchId : String  {FK}" vertex="1">
+        <mxCell id="c10b" parent="c10" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ subjectId : String  {FK}" vertex="1">
           <mxGeometry height="18" width="190" y="63" as="geometry" />
         </mxCell>
-        <mxCell id="c9c" parent="c9" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
+        <mxCell id="c10c" parent="c10" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
           <mxGeometry height="18" width="190" y="81" as="geometry" />
         </mxCell>
-        <mxCell id="c9d" parent="c9" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ description : String?" vertex="1">
+        <mxCell id="c10d" parent="c10" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ description : String?" vertex="1">
           <mxGeometry height="18" width="190" y="99" as="geometry" />
         </mxCell>
-        <mxCell id="c9e" parent="c9" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ order : Int" vertex="1">
+        <mxCell id="c10e" parent="c10" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ order : Int" vertex="1">
           <mxGeometry height="18" width="190" y="117" as="geometry" />
         </mxCell>
-        <mxCell id="c9f" parent="c9" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
+        <mxCell id="c10f" parent="c10" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
           <mxGeometry height="18" width="190" y="135" as="geometry" />
         </mxCell>
-        <mxCell id="c10" parent="1" style="swimlane;startSize=30;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" value="&lt;b&gt;Chapter&lt;/b&gt;" vertex="1">
-          <mxGeometry height="180" width="190" x="1520" y="190" as="geometry" />
+        <mxCell id="c11" parent="1" style="swimlane;startSize=30;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=15;fontStyle=1;" value="Topic" vertex="1">
+          <mxGeometry height="180" width="190" x="1480" y="440" as="geometry" />
         </mxCell>
-        <mxCell id="c10sep" parent="c10" style="line;strokeColor=#d6b656;" value="" vertex="1">
+        <mxCell id="c11sep" parent="c11" style="line;strokeColor=#d6b656;fontSize=15;" value="" vertex="1">
           <mxGeometry height="10" width="190" y="30" as="geometry" />
         </mxCell>
-        <mxCell id="c10a" parent="c10" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
+        <mxCell id="c11a" parent="c11" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
           <mxGeometry height="18" width="190" y="45" as="geometry" />
         </mxCell>
-        <mxCell id="c10b" parent="c10" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ subjectId : String  {FK}" vertex="1">
+        <mxCell id="c11b" parent="c11" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ chapterId : String  {FK}" vertex="1">
           <mxGeometry height="18" width="190" y="63" as="geometry" />
         </mxCell>
-        <mxCell id="c10c" parent="c10" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
+        <mxCell id="c11c" parent="c11" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
           <mxGeometry height="18" width="190" y="81" as="geometry" />
         </mxCell>
-        <mxCell id="c10d" parent="c10" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ description : String?" vertex="1">
+        <mxCell id="c11d" parent="c11" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ description : String?" vertex="1">
           <mxGeometry height="18" width="190" y="99" as="geometry" />
         </mxCell>
-        <mxCell id="c10e" parent="c10" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ order : Int" vertex="1">
+        <mxCell id="c11e" parent="c11" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ order : Int" vertex="1">
           <mxGeometry height="18" width="190" y="117" as="geometry" />
         </mxCell>
-        <mxCell id="c10f" parent="c10" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
+        <mxCell id="c11f" parent="c11" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
           <mxGeometry height="18" width="190" y="135" as="geometry" />
         </mxCell>
-        <mxCell id="c11" parent="1" style="swimlane;startSize=30;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" value="&lt;b&gt;Topic&lt;/b&gt;" vertex="1">
-          <mxGeometry height="180" width="190" x="1420" y="450" as="geometry" />
+        <mxCell id="c12" parent="1" style="swimlane;startSize=30;fillColor=#f8cecc;strokeColor=#b85450;fontSize=15;fontStyle=1;" value="Content" vertex="1">
+          <mxGeometry height="280" width="230" x="1190" y="450" as="geometry" />
         </mxCell>
-        <mxCell id="c11sep" parent="c11" style="line;strokeColor=#d6b656;" value="" vertex="1">
-          <mxGeometry height="10" width="190" y="30" as="geometry" />
-        </mxCell>
-        <mxCell id="c11a" parent="c11" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
-          <mxGeometry height="18" width="190" y="45" as="geometry" />
-        </mxCell>
-        <mxCell id="c11b" parent="c11" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ chapterId : String  {FK}" vertex="1">
-          <mxGeometry height="18" width="190" y="63" as="geometry" />
-        </mxCell>
-        <mxCell id="c11c" parent="c11" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
-          <mxGeometry height="18" width="190" y="81" as="geometry" />
-        </mxCell>
-        <mxCell id="c11d" parent="c11" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ description : String?" vertex="1">
-          <mxGeometry height="18" width="190" y="99" as="geometry" />
-        </mxCell>
-        <mxCell id="c11e" parent="c11" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ order : Int" vertex="1">
-          <mxGeometry height="18" width="190" y="117" as="geometry" />
-        </mxCell>
-        <mxCell id="c11f" parent="c11" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
-          <mxGeometry height="18" width="190" y="135" as="geometry" />
-        </mxCell>
-        <mxCell id="c12" parent="1" style="swimlane;startSize=30;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;" value="&lt;b&gt;Content&lt;/b&gt;" vertex="1">
-          <mxGeometry height="280" width="230" x="1420" y="700" as="geometry" />
-        </mxCell>
-        <mxCell id="c12sep" parent="c12" style="line;strokeColor=#b85450;" value="" vertex="1">
+        <mxCell id="c12sep" parent="c12" style="line;strokeColor=#b85450;fontSize=15;" value="" vertex="1">
           <mxGeometry height="10" width="230" y="30" as="geometry" />
         </mxCell>
-        <mxCell id="c12a" parent="c12" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
+        <mxCell id="c12a" parent="c12" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
           <mxGeometry height="18" width="230" y="45" as="geometry" />
         </mxCell>
-        <mxCell id="c12b" parent="c12" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ topicId : String  {FK}" vertex="1">
+        <mxCell id="c12b" parent="c12" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ topicId : String  {FK}" vertex="1">
           <mxGeometry height="18" width="230" y="63" as="geometry" />
         </mxCell>
-        <mxCell id="c12c" parent="c12" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ title : String" vertex="1">
+        <mxCell id="c12c" parent="c12" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ title : String" vertex="1">
           <mxGeometry height="18" width="230" y="81" as="geometry" />
         </mxCell>
-        <mxCell id="c12d" parent="c12" style="text;html=1;fontSize=10;align=left;spacingLeft=8;fontStyle=1;" value="+ type : ContentType" vertex="1">
+        <mxCell id="c12d" parent="c12" style="text;html=1;fontSize=15;align=left;spacingLeft=8;fontStyle=1;" value="+ type : ContentType" vertex="1">
           <mxGeometry height="18" width="230" y="99" as="geometry" />
         </mxCell>
-        <mxCell id="c12e" parent="c12" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ videoUrl : String?" vertex="1">
+        <mxCell id="c12e" parent="c12" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ videoUrl : String?" vertex="1">
           <mxGeometry height="18" width="230" y="117" as="geometry" />
         </mxCell>
-        <mxCell id="c12f" parent="c12" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ pdfUrl : String?" vertex="1">
+        <mxCell id="c12f" parent="c12" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ pdfUrl : String?" vertex="1">
           <mxGeometry height="18" width="230" y="135" as="geometry" />
         </mxCell>
-        <mxCell id="c12g" parent="c12" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ markdownBody : String?" vertex="1">
+        <mxCell id="c12g" parent="c12" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ markdownBody : String?" vertex="1">
           <mxGeometry height="18" width="230" y="153" as="geometry" />
         </mxCell>
-        <mxCell id="c12h" parent="c12" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ externalUrl : String?" vertex="1">
+        <mxCell id="c12h" parent="c12" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ externalUrl : String?" vertex="1">
           <mxGeometry height="18" width="230" y="171" as="geometry" />
         </mxCell>
-        <mxCell id="c12i" parent="c12" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ videoDuration : Int?" vertex="1">
+        <mxCell id="c12i" parent="c12" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ videoDuration : Int?" vertex="1">
           <mxGeometry height="18" width="230" y="189" as="geometry" />
         </mxCell>
-        <mxCell id="c12j" parent="c12" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ videoThumbnail : String?" vertex="1">
+        <mxCell id="c12j" parent="c12" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ videoThumbnail : String?" vertex="1">
           <mxGeometry height="18" width="230" y="207" as="geometry" />
         </mxCell>
-        <mxCell id="c12k" parent="c12" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ order : Int" vertex="1">
+        <mxCell id="c12k" parent="c12" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ order : Int" vertex="1">
           <mxGeometry height="18" width="230" y="225" as="geometry" />
         </mxCell>
-        <mxCell id="c12l" parent="c12" style="text;html=1;fontSize=10;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
+        <mxCell id="c12l" parent="c12" style="text;html=1;fontSize=15;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
           <mxGeometry height="18" width="230" y="243" as="geometry" />
         </mxCell>
-        <mxCell id="r1" edge="1" parent="1" source="c1" style="endArrow=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c2" value="1">
+        <mxCell id="r1" edge="1" parent="1" source="c1" style="endArrow=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=15;" target="c2" value="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="r1lbl" connectable="0" parent="r1" style="resizable=0;html=1;align=left;verticalAlign=bottom;fontSize=10;" value="1" vertex="1">
+        <mxCell id="r1lbl" connectable="0" parent="r1" style="resizable=0;html=1;align=left;verticalAlign=bottom;fontSize=15;" value="1" vertex="1">
           <mxGeometry relative="1" x="-0.9" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r2" edge="1" parent="1" source="c1" style="endArrow=none;html=1;" target="c3" value="1">
+        <mxCell id="r2" edge="1" parent="1" source="c1" style="endArrow=none;html=1;fontSize=15;" target="c3" value="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="r2lbl" connectable="0" parent="r2" style="resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=10;" value="*" vertex="1">
+        <mxCell id="r2lbl" connectable="0" parent="r2" style="resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=15;" value="*" vertex="1">
           <mxGeometry relative="1" x="0.9" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r3" edge="1" parent="1" source="c3" style="endArrow=none;html=1;" target="c4" value="">
+        <mxCell id="r6" edge="1" parent="1" source="c1" style="endArrow=none;html=1;fontSize=15;" target="c7" value="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="r4" edge="1" parent="1" source="c3" style="endArrow=none;html=1;" target="c5" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="r5" edge="1" parent="1" source="c3" style="endArrow=none;html=1;" target="c6" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="r6" edge="1" parent="1" source="c1" style="endArrow=none;html=1;" target="c7" value="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="r6lbl" connectable="0" parent="r6" style="resizable=0;html=1;fontSize=10;" value="*" vertex="1">
+        <mxCell id="r6lbl" connectable="0" parent="r6" style="resizable=0;html=1;fontSize=15;" value="*" vertex="1">
           <mxGeometry relative="1" x="0.9" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r7" edge="1" parent="1" source="c1" style="endArrow=none;html=1;" target="c8" value="">
+        <mxCell id="r7" edge="1" parent="1" source="c1" style="endArrow=none;html=1;fontSize=15;" target="c8" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="r8" edge="1" parent="1" source="c8" style="endArrow=none;html=1;" target="c7" value="0..1">
+        <mxCell id="r8" edge="1" parent="1" source="c8" style="endArrow=none;html=1;fontSize=15;" target="c7" value="&lt;font&gt;0..1&lt;/font&gt;">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="r9" edge="1" parent="1" source="e2" style="dashed=1;endArrow=none;html=1;" target="c7" value="">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="r11" edge="1" parent="1" source="c7g" style="endArrow=none;html=1;fontSize=15;exitX=1;exitY=0;exitDx=0;exitDy=0;" target="c10" value="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1400" y="308" as="sourcePoint" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="r10" edge="1" parent="1" source="c7" style="endArrow=none;html=1;" target="c9" value="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="r10lbl" connectable="0" parent="r10" style="resizable=0;html=1;fontSize=10;" value="*" vertex="1">
+        <mxCell id="r11lbl" connectable="0" parent="r11" style="resizable=0;html=1;fontSize=15;" value="*" vertex="1">
           <mxGeometry relative="1" x="0.9" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r11" edge="1" parent="1" source="c9" style="endArrow=none;html=1;" target="c10" value="1">
+        <mxCell id="r12" edge="1" parent="1" source="c10" style="endArrow=none;html=1;fontSize=15;" target="c11" value="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="r11lbl" connectable="0" parent="r11" style="resizable=0;html=1;fontSize=10;" value="*" vertex="1">
+        <mxCell id="r12lbl" connectable="0" parent="r12" style="resizable=0;html=1;fontSize=15;" value="*" vertex="1">
           <mxGeometry relative="1" x="0.9" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="r12" edge="1" parent="1" source="c10" style="endArrow=none;html=1;" target="c11" value="1">
+        <mxCell id="r13" edge="1" parent="1" source="c11" style="endArrow=none;html=1;fontSize=15;" target="c12" value="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="r12lbl" connectable="0" parent="r12" style="resizable=0;html=1;fontSize=10;" value="*" vertex="1">
+        <mxCell id="r13lbl" connectable="0" parent="r13" style="resizable=0;html=1;fontSize=15;" value="*" vertex="1">
           <mxGeometry relative="1" x="0.9" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
-        </mxCell>
-        <mxCell id="r13" edge="1" parent="1" source="c11" style="endArrow=none;html=1;" target="c12" value="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="r13lbl" connectable="0" parent="r13" style="resizable=0;html=1;fontSize=10;" value="*" vertex="1">
-          <mxGeometry relative="1" x="0.9" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="r14" edge="1" parent="1" source="e3" style="dashed=1;endArrow=none;html=1;" target="c12" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="r15" edge="1" parent="1" source="e1" style="dashed=1;endArrow=none;html=1;" target="c3" value="">
-          <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

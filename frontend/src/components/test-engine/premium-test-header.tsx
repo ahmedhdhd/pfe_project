@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, Flag, Send, CheckCircle2, AlertCircle } from "lucide-react";
+import { Clock, Flag, Send, CheckCircle2, AlertCircle } from "@/components/icons";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 

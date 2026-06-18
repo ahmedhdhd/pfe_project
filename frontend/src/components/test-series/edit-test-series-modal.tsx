@@ -25,7 +25,7 @@ import { useUpdateTestSeries, TestSeries } from "@/hooks/test-series";
 import { useGetCategories } from "@/hooks";
 import { FileUpload } from "@/components/common/file-upload";
 import Image from "next/image";
-import { X, Plus } from "lucide-react";
+import { X, Plus } from "@/components/icons";
 import {
   CategoryOption,
   getCategoryBranch,

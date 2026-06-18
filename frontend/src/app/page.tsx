@@ -9,7 +9,7 @@ import {
   GraduationCap,
   Video,
   FileText,
-} from "lucide-react";
+} from "@/components/icons";
 import { cookieStorage } from "@/lib/utils/storage";
 import { FeatureSection } from "@/components/ui/feature-section";
 import { HowItWorks } from "@/components/ui/how-it-works";

@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Plus, Search, Shapes, X } from "lucide-react";
+import { FileText, Plus, Search, Shapes, X } from "@/components/icons";
 import { PageHeader } from "@/components/common/page-header";
 import { Input } from "@/components/ui/input";
 import {

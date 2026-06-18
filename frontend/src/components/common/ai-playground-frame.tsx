@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutTemplate } from "lucide-react";
+import { LayoutTemplate } from "@/components/icons";
 import { useGetPlaygroundById } from "@/hooks";
 
 interface AiPlaygroundFrameProps {

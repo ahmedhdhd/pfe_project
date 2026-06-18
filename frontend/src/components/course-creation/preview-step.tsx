@@ -22,7 +22,7 @@ import {
   Video,
   Clock,
   Users,
-} from "lucide-react";
+} from "@/components/icons";
 import { useOrgPaymentMode } from "@/lib/store/organization-config";
 
 interface PreviewStepProps {

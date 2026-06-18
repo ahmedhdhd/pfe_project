@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, BookOpen, Loader2 } from "lucide-react";
+import { ArrowLeft, BookOpen, Loader2 } from "@/components/icons";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/common/page-header";
 import { Badge } from "@/components/ui/badge";

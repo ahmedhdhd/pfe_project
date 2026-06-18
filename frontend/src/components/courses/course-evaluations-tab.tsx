@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageSquare, Star } from "lucide-react";
+import { MessageSquare, Star } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RatingDisplay } from "@/components/common/rating-display";

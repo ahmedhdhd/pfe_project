@@ -23,7 +23,7 @@ import {
   Edit3,
   Upload,
   Image as ImageIcon,
-} from "lucide-react";
+} from "@/components/icons";
 
 interface Subject {
   id: string;

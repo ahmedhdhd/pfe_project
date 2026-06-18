@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, LucideIcon } from "lucide-react";
+import { ArrowLeft, LucideIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { ReactNode } from "react";
 

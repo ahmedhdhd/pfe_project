@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Award } from "lucide-react";
+import { Award } from "@/components/icons";
 import {
   Card,
   CardContent,

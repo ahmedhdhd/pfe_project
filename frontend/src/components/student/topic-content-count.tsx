@@ -1,6 +1,6 @@
 "use client";
 
-import { Video, BookOpen, Link2 } from "lucide-react";
+import { Video, BookOpen, Link2 } from "@/components/icons";
 import { useGetClientContentsByTopic } from "@/hooks";
 
 export interface TopicContentCountProps {

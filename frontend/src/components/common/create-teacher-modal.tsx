@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { FileUpload } from "@/components/common/file-upload";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
-import { X, Plus } from "lucide-react";
+import { X, Plus } from "@/components/icons";
 import { useCreateTeacher } from "@/hooks";
 
 interface CreateTeacherModalProps {

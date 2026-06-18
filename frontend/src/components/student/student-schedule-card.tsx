@@ -10,7 +10,7 @@ import {
   Radio,
   CheckCircle2,
   Video,
-} from "lucide-react";
+} from "@/components/icons";
 import { format, isPast, isFuture } from "date-fns";
 import { type Schedule, type ScheduleStatus } from "@/lib/types/schedule";
 import { cn } from "@/lib/utils";

@@ -8,7 +8,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { CheckCircleIcon, StarIcon } from "lucide-react";
+import { CheckCircleIcon, StarIcon } from "@/components/icons";
 import Link from "next/link";
 import { motion, Transition } from "framer-motion";
 

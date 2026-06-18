@@ -3,7 +3,7 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, RefreshCw, Home, Bug } from "lucide-react";
+import { AlertCircle, RefreshCw, Home, Bug } from "@/components/icons";
 import { motion } from "framer-motion";
 import Link from "next/link";
 

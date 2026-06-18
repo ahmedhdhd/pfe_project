@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Lottie from "lottie-react";
-import { Home, ArrowLeft } from "lucide-react";
+import { Home, ArrowLeft } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 

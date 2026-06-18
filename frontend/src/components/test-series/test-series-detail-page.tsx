@@ -27,7 +27,7 @@ import {
   Globe,
   Calendar,
   Rocket,
-} from "lucide-react";
+} from "@/components/icons";
 import {
   useTestSeries,
   useDeleteTestSeries,

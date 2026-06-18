@@ -26,7 +26,7 @@ import {
   Plus,
   Sparkles,
   Trash2,
-} from "lucide-react";
+} from "@/components/icons";
 import { AiPlaygroundFrame } from "@/components/common/ai-playground-frame";
 import { ConfirmationDialog } from "@/components/common/confirmation-dialog";
 import { CreateChapterModal } from "@/components/common/create-chapter-modal";

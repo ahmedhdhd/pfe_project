@@ -30,7 +30,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Trash2, Users, UserPlus, Mail, Calendar, Shield } from "lucide-react";
+import { Trash2, Users, UserPlus, Mail, Calendar, Shield } from "@/components/icons";
 import { format } from "date-fns";
 import { PageHeader } from "@/components/common/page-header";
 

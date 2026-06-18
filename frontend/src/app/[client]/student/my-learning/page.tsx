@@ -13,7 +13,7 @@ import {
   PlayCircle,
   Search,
   TrendingUp,
-} from "lucide-react";
+} from "@/components/icons";
 import { MyLearningMobile } from "@/components/student/mobile/my-learning-mobile";
 import { StudentHeader } from "@/components/student/student-header";
 import { useClientMyEnrollments } from "@/hooks/test-series-client";

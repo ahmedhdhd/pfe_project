@@ -28,6 +28,7 @@ from app.services.transcription import transcribe_media_bytes
 from app.services.openrouter import chat_completion, chat_json
 from app.services.org_keys import get_org_openrouter_key
 from app.services.playground import generate_playground_html
+from app.services.summaries import build_schedule_summary_prompt
 from app.services.assignment_ai import (
     evaluate_assignment_submission_with_rag,
     generate_assignment_questions_with_rag,
@@ -256,11 +257,7 @@ async def schedule_summarize(body: ScheduleSummarizeRequest) -> dict[str, str]:
     transcript = body.transcript
     if len(transcript) > 24000:
         transcript = transcript[:24000] + "\n\n[Transcript truncated for summary generation]"
-    prompt = (
-        f"This is a transcript of a live class titled {body.title}. Summarize: "
-        "main topics explained, questions students asked, and key takeaways.\n\n"
-        f"Transcript:\n{transcript}"
-    )
+    prompt = build_schedule_summary_prompt(body.title, transcript)
     try:
         summary = await chat_completion(
             api_key=api_key,

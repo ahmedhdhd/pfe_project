@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, Receipt } from "lucide-react";
+import { Loader2, Receipt } from "@/components/icons";
 import { useOrderHistory } from "@/hooks/api";
 import { useIsMobile } from "@/hooks";
 import { PAGINATION_DEFAULTS } from "@/lib/constants";

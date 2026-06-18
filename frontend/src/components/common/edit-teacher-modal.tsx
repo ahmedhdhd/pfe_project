@@ -22,7 +22,7 @@ import {
   Underline,
   List,
   ListOrdered,
-} from "lucide-react";
+} from "@/components/icons";
 import Image from "next/image";
 import { useUpdateTeacher } from "@/hooks";
 

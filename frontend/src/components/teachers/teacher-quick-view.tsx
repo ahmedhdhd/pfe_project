@@ -19,7 +19,7 @@ import {
   Award,
   Mail,
   Edit,
-} from "lucide-react";
+} from "@/components/icons";
 import { Separator } from "@/components/ui/separator";
 
 interface Teacher {

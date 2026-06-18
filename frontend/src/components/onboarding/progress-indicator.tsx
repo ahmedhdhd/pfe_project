@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle } from "@/components/icons";
 
 interface ProgressIndicatorProps {
   currentStep: number;

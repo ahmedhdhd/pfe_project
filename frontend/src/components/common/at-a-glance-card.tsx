@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
+import { LucideIcon } from "@/components/icons";
 
 interface AtAGlanceItem {
   icon: LucideIcon;

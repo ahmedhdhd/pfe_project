@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
-import { ExternalLink, FileText } from "lucide-react";
+import { ExternalLink, FileText } from "@/components/icons";
 import type Player from "video.js/dist/types/player";
 import dynamic from "next/dynamic";
 import ReactMarkdown from "react-markdown";

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus } from "@/components/icons";
 import { toast } from "sonner";
 import { CreateScheduleModal } from "@/components/common/create-schedule-modal";
 import { EditScheduleModal } from "@/components/common/edit-schedule-modal";

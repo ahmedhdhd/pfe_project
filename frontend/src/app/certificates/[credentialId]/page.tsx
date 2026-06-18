@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Award, CalendarDays, ShieldCheck } from "lucide-react";
+import { Award, CalendarDays, ShieldCheck } from "@/components/icons";
 
 interface CertificatePageProps {
   params: Promise<{

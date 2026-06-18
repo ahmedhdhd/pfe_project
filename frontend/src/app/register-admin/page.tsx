@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, CheckCircle, ArrowRight } from "lucide-react";
+import { ArrowLeft, CheckCircle, ArrowRight } from "@/components/icons";
 import Link from "next/link";
 import { useRegisterAdmin } from "@/hooks";
 import { useOnboardingStore } from "@/lib/store/onboarding";

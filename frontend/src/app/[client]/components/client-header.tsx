@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Moon, Sun, Sparkles } from "lucide-react";
+import { ArrowRight, Moon, Sun, Sparkles } from "@/components/icons";
 import Link from "next/link";
 import Image from "next/image";
 import type { Client } from "@/lib/types/client";

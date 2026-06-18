@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2, XCircle, User, Lightbulb, FileText } from "lucide-react";
+import { CheckCircle2, XCircle, User, Lightbulb, FileText } from "@/components/icons";
 import type { SolutionAnswer } from "./types";
 
 interface QuestionSolutionCardProps {
