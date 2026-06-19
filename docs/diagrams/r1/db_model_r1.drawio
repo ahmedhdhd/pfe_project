@@ -1,0 +1,500 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.5.2 Chrome/142.0.7444.265 Electron/39.6.1 Safari/537.36" version="29.5.2">
+  <diagram name="Database Model — Release 1" id="db_model_r1">
+    <mxGraphModel dx="2190" dy="1026" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2400" pageHeight="1600" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="e_userrole" parent="1" style="swimlane;startSize=35;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=3;" value="«enumeration»&#xa;UserRole" vertex="1">
+          <mxGeometry height="110" width="160" x="1290" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ur1" parent="e_userrole" style="text;html=1;fontSize=12;align=left;spacingLeft=10;" value="ADMIN" vertex="1">
+          <mxGeometry height="20" width="160" y="38" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ur2" parent="e_userrole" style="text;html=1;fontSize=12;align=left;spacingLeft=10;" value="TEACHER" vertex="1">
+          <mxGeometry height="20" width="160" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ur3" parent="e_userrole" style="text;html=1;fontSize=12;align=left;spacingLeft=10;" value="STUDENT" vertex="1">
+          <mxGeometry height="20" width="160" y="78" as="geometry" />
+        </mxCell>
+        <mxCell id="e_batchstatus" parent="1" style="swimlane;startSize=35;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=3;" value="«enumeration»&#xa;BatchStatus" vertex="1">
+          <mxGeometry height="130" width="160" x="1290" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="e_bs1" parent="e_batchstatus" style="text;html=1;fontSize=12;align=left;spacingLeft=10;" value="DRAFT" vertex="1">
+          <mxGeometry height="20" width="160" y="38" as="geometry" />
+        </mxCell>
+        <mxCell id="e_bs2" parent="e_batchstatus" style="text;html=1;fontSize=12;align=left;spacingLeft=10;" value="SUBMITTED" vertex="1">
+          <mxGeometry height="20" width="160" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="e_bs3" parent="e_batchstatus" style="text;html=1;fontSize=12;align=left;spacingLeft=10;" value="PUBLISHED" vertex="1">
+          <mxGeometry height="20" width="160" y="78" as="geometry" />
+        </mxCell>
+        <mxCell id="e_bs4" parent="e_batchstatus" style="text;html=1;fontSize=12;align=left;spacingLeft=10;" value="ARCHIVED" vertex="1">
+          <mxGeometry height="20" width="160" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="e_contenttype" parent="1" style="swimlane;startSize=35;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=3;" value="«enumeration»&#xa;ContentType" vertex="1">
+          <mxGeometry height="150" width="160" x="1290" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ct1" parent="e_contenttype" style="text;html=1;fontSize=12;align=left;spacingLeft=10;" value="LECTURE" vertex="1">
+          <mxGeometry height="20" width="160" y="38" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ct2" parent="e_contenttype" style="text;html=1;fontSize=12;align=left;spacingLeft=10;" value="PDF" vertex="1">
+          <mxGeometry height="20" width="160" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ct3" parent="e_contenttype" style="text;html=1;fontSize=12;align=left;spacingLeft=10;" value="MARKDOWN" vertex="1">
+          <mxGeometry height="20" width="160" y="78" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ct4" parent="e_contenttype" style="text;html=1;fontSize=12;align=left;spacingLeft=10;" value="URL" vertex="1">
+          <mxGeometry height="20" width="160" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ct5" parent="e_contenttype" style="text;html=1;fontSize=12;align=left;spacingLeft=10;" value="PLAYGROUND" vertex="1">
+          <mxGeometry height="20" width="160" y="118" as="geometry" />
+        </mxCell>
+        <mxCell id="org" parent="1" style="swimlane;startSize=35;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" value="Organization" vertex="1">
+          <mxGeometry height="230" width="230" x="140" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="org_sep" parent="org" style="line;strokeColor=#6c8ebf;" value="" vertex="1">
+          <mxGeometry height="8" width="230" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="org_1" parent="org" style="text;html=1;fontSize=12;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1">
+          <mxGeometry height="18" width="230" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="org_2" parent="org" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
+          <mxGeometry height="18" width="230" y="63" as="geometry" />
+        </mxCell>
+        <mxCell id="org_3" parent="org" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ slug : String  @unique" vertex="1">
+          <mxGeometry height="18" width="230" y="81" as="geometry" />
+        </mxCell>
+        <mxCell id="org_4" parent="org" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ subdomain : String  @unique" vertex="1">
+          <mxGeometry height="18" width="230" y="99" as="geometry" />
+        </mxCell>
+        <mxCell id="org_5" parent="org" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ domain : String?" vertex="1">
+          <mxGeometry height="18" width="230" y="117" as="geometry" />
+        </mxCell>
+        <mxCell id="org_6" parent="org" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ isActive : Boolean  @default(true)" vertex="1">
+          <mxGeometry height="18" width="230" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="org_7" parent="org" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
+          <mxGeometry height="18" width="230" y="153" as="geometry" />
+        </mxCell>
+        <mxCell id="org_8" parent="org" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ updatedAt : DateTime" vertex="1">
+          <mxGeometry height="18" width="230" y="171" as="geometry" />
+        </mxCell>
+        <mxCell id="orgcfg" parent="1" style="swimlane;startSize=35;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" value="OrganizationConfig" vertex="1">
+          <mxGeometry height="270" width="240" x="420" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="orgcfg_sep" parent="orgcfg" style="line;strokeColor=#6c8ebf;" value="" vertex="1">
+          <mxGeometry height="8" width="240" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="orgcfg_1" parent="orgcfg" style="text;html=1;fontSize=12;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1">
+          <mxGeometry height="18" width="240" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="orgcfg_2" parent="orgcfg" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="🔗 organizationId : String {FK}" vertex="1">
+          <mxGeometry height="18" width="240" y="63" as="geometry" />
+        </mxCell>
+        <mxCell id="orgcfg_3" parent="orgcfg" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
+          <mxGeometry height="18" width="240" y="81" as="geometry" />
+        </mxCell>
+        <mxCell id="orgcfg_4" parent="orgcfg" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ slug : String" vertex="1">
+          <mxGeometry height="18" width="240" y="99" as="geometry" />
+        </mxCell>
+        <mxCell id="orgcfg_5" parent="orgcfg" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ contactEmail : String?" vertex="1">
+          <mxGeometry height="18" width="240" y="117" as="geometry" />
+        </mxCell>
+        <mxCell id="orgcfg_6" parent="orgcfg" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ logoUrl : String?" vertex="1">
+          <mxGeometry height="18" width="240" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="orgcfg_7" parent="orgcfg" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ themeColor : String?" vertex="1">
+          <mxGeometry height="18" width="240" y="153" as="geometry" />
+        </mxCell>
+        <mxCell id="orgcfg_8" parent="orgcfg" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ paymentGateway : String?" vertex="1">
+          <mxGeometry height="18" width="240" y="171" as="geometry" />
+        </mxCell>
+        <mxCell id="orgcfg_9" parent="orgcfg" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ openRouterApiKey : String?" vertex="1">
+          <mxGeometry height="18" width="240" y="189" as="geometry" />
+        </mxCell>
+        <mxCell id="orgcfg_10" parent="orgcfg" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ maintenanceMode : Boolean" vertex="1">
+          <mxGeometry height="18" width="240" y="207" as="geometry" />
+        </mxCell>
+        <mxCell id="orgcfg_11" parent="orgcfg" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ plan : String?" vertex="1">
+          <mxGeometry height="18" width="240" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="usr" parent="1" style="swimlane;startSize=35;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;" value="User" vertex="1">
+          <mxGeometry height="285" width="240" x="100" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="usr_sep" parent="usr" style="line;strokeColor=#82b366;" value="" vertex="1">
+          <mxGeometry height="8" width="240" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="usr_1" parent="usr" style="text;html=1;fontSize=12;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1">
+          <mxGeometry height="18" width="240" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="usr_2" parent="usr" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="🔗 organizationId : String {FK}" vertex="1">
+          <mxGeometry height="18" width="240" y="63" as="geometry" />
+        </mxCell>
+        <mxCell id="usr_3" parent="usr" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ email : String?  @unique" vertex="1">
+          <mxGeometry height="18" width="240" y="81" as="geometry" />
+        </mxCell>
+        <mxCell id="usr_4" parent="usr" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ username : String" vertex="1">
+          <mxGeometry height="18" width="240" y="99" as="geometry" />
+        </mxCell>
+        <mxCell id="usr_5" parent="usr" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ passwordHash : String?" vertex="1">
+          <mxGeometry height="18" width="240" y="117" as="geometry" />
+        </mxCell>
+        <mxCell id="usr_6" parent="usr" style="text;html=1;fontSize=12;align=left;spacingLeft=8;fontStyle=1;" value="+ role : UserRole" vertex="1">
+          <mxGeometry height="18" width="240" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="usr_7" parent="usr" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ isVerified : Boolean  @default(false)" vertex="1">
+          <mxGeometry height="18" width="240" y="153" as="geometry" />
+        </mxCell>
+        <mxCell id="usr_8" parent="usr" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ profileImg : String?" vertex="1">
+          <mxGeometry height="18" width="240" y="171" as="geometry" />
+        </mxCell>
+        <mxCell id="usr_9" parent="usr" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ phoneNumber : String?" vertex="1">
+          <mxGeometry height="18" width="240" y="189" as="geometry" />
+        </mxCell>
+        <mxCell id="usr_10" parent="usr" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ createdAt : DateTime  @default(now())" vertex="1">
+          <mxGeometry height="18" width="240" y="207" as="geometry" />
+        </mxCell>
+        <mxCell id="usr_11" parent="usr" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ updatedAt : DateTime  @updatedAt" vertex="1">
+          <mxGeometry height="18" width="240" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="etoken" parent="1" style="swimlane;startSize=35;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;" value="EmailToken" vertex="1">
+          <mxGeometry height="195" width="230" x="430" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="etoken_sep" parent="etoken" style="line;strokeColor=#82b366;" value="" vertex="1">
+          <mxGeometry height="8" width="230" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="etoken_1" parent="etoken" style="text;html=1;fontSize=12;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1">
+          <mxGeometry height="18" width="230" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="etoken_2" parent="etoken" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="🔗 userId : String {FK}" vertex="1">
+          <mxGeometry height="18" width="230" y="63" as="geometry" />
+        </mxCell>
+        <mxCell id="etoken_3" parent="etoken" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ token : String  @unique" vertex="1">
+          <mxGeometry height="18" width="230" y="81" as="geometry" />
+        </mxCell>
+        <mxCell id="etoken_4" parent="etoken" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ type : String" vertex="1">
+          <mxGeometry height="18" width="230" y="99" as="geometry" />
+        </mxCell>
+        <mxCell id="etoken_5" parent="etoken" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ expiresAt : DateTime" vertex="1">
+          <mxGeometry height="18" width="230" y="117" as="geometry" />
+        </mxCell>
+        <mxCell id="etoken_6" parent="etoken" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ usedAt : DateTime?" vertex="1">
+          <mxGeometry height="18" width="230" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="etoken_7" parent="etoken" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
+          <mxGeometry height="18" width="230" y="153" as="geometry" />
+        </mxCell>
+        <mxCell id="rtoken" parent="1" style="swimlane;startSize=35;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;" value="RefreshToken" vertex="1">
+          <mxGeometry height="160" width="230" x="470" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="rtoken_sep" parent="rtoken" style="line;strokeColor=#82b366;" value="" vertex="1">
+          <mxGeometry height="8" width="230" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="rtoken_1" parent="rtoken" style="text;html=1;fontSize=12;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1">
+          <mxGeometry height="18" width="230" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="rtoken_2" parent="rtoken" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="🔗 userId : String {FK}" vertex="1">
+          <mxGeometry height="18" width="230" y="63" as="geometry" />
+        </mxCell>
+        <mxCell id="rtoken_3" parent="rtoken" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ token : String  @unique" vertex="1">
+          <mxGeometry height="18" width="230" y="81" as="geometry" />
+        </mxCell>
+        <mxCell id="rtoken_4" parent="rtoken" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ expiresAt : DateTime" vertex="1">
+          <mxGeometry height="18" width="230" y="99" as="geometry" />
+        </mxCell>
+        <mxCell id="rtoken_5" parent="rtoken" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
+          <mxGeometry height="18" width="230" y="117" as="geometry" />
+        </mxCell>
+        <mxCell id="cat" parent="1" style="swimlane;startSize=35;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;fontStyle=1;" value="Category" vertex="1">
+          <mxGeometry height="160" width="210" x="710" y="94" as="geometry" />
+        </mxCell>
+        <mxCell id="cat_sep" parent="cat" style="line;strokeColor=#b85450;" value="" vertex="1">
+          <mxGeometry height="8" width="210" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="cat_1" parent="cat" style="text;html=1;fontSize=12;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1">
+          <mxGeometry height="18" width="210" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="cat_2" parent="cat" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="🔗 organizationId : String {FK}" vertex="1">
+          <mxGeometry height="18" width="210" y="63" as="geometry" />
+        </mxCell>
+        <mxCell id="cat_3" parent="cat" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
+          <mxGeometry height="18" width="210" y="81" as="geometry" />
+        </mxCell>
+        <mxCell id="cat_4" parent="cat" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ description : String?" vertex="1">
+          <mxGeometry height="18" width="210" y="99" as="geometry" />
+        </mxCell>
+        <mxCell id="cat_5" parent="cat" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
+          <mxGeometry height="18" width="210" y="117" as="geometry" />
+        </mxCell>
+        <mxCell id="course" parent="1" style="swimlane;startSize=35;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;fontStyle=1;" value="Course" vertex="1">
+          <mxGeometry height="303" width="245" x="1000" y="93.5" as="geometry" />
+        </mxCell>
+        <mxCell id="course_sep" parent="course" style="line;strokeColor=#b85450;" value="" vertex="1">
+          <mxGeometry height="8" width="245" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="course_1" parent="course" style="text;html=1;fontSize=12;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1">
+          <mxGeometry height="18" width="245" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="course_2" parent="course" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="🔗 organizationId : String {FK}" vertex="1">
+          <mxGeometry height="18" width="245" y="63" as="geometry" />
+        </mxCell>
+        <mxCell id="course_3" parent="course" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="🔗 createdByUserId : String? {FK}" vertex="1">
+          <mxGeometry height="18" width="245" y="81" as="geometry" />
+        </mxCell>
+        <mxCell id="course_4" parent="course" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="🔗 categoryId : String? {FK}" vertex="1">
+          <mxGeometry height="18" width="245" y="99" as="geometry" />
+        </mxCell>
+        <mxCell id="course_5" parent="course" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
+          <mxGeometry height="18" width="245" y="117" as="geometry" />
+        </mxCell>
+        <mxCell id="course_6" parent="course" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ description : String?" vertex="1">
+          <mxGeometry height="18" width="245" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="course_7" parent="course" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ level : BatchLevel" vertex="1">
+          <mxGeometry height="18" width="245" y="153" as="geometry" />
+        </mxCell>
+        <mxCell id="course_8" parent="course" style="text;html=1;fontSize=12;align=left;spacingLeft=8;fontStyle=1;" value="+ status : BatchStatus" vertex="1">
+          <mxGeometry height="18" width="245" y="171" as="geometry" />
+        </mxCell>
+        <mxCell id="course_9" parent="course" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ price : Float?" vertex="1">
+          <mxGeometry height="18" width="245" y="189" as="geometry" />
+        </mxCell>
+        <mxCell id="course_10" parent="course" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ imageUrl : String?" vertex="1">
+          <mxGeometry height="18" width="245" y="207" as="geometry" />
+        </mxCell>
+        <mxCell id="course_11" parent="course" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ language : String?" vertex="1">
+          <mxGeometry height="18" width="245" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="course_12" parent="course" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
+          <mxGeometry height="18" width="245" y="243" as="geometry" />
+        </mxCell>
+        <mxCell id="course_13" parent="course" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ updatedAt : DateTime" vertex="1">
+          <mxGeometry height="18" width="245" y="261" as="geometry" />
+        </mxCell>
+        <mxCell id="chap" parent="1" style="swimlane;startSize=35;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;fontStyle=1;" value="Chapter" vertex="1">
+          <mxGeometry height="178" width="210" x="1010" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="chap_sep" parent="chap" style="line;strokeColor=#b85450;" value="" vertex="1">
+          <mxGeometry height="8" width="210" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="chap_1" parent="chap" style="text;html=1;fontSize=12;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1">
+          <mxGeometry height="18" width="210" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="chap_2" parent="chap" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="🔗 courseId : String {FK}" vertex="1">
+          <mxGeometry height="18" width="210" y="63" as="geometry" />
+        </mxCell>
+        <mxCell id="chap_3" parent="chap" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
+          <mxGeometry height="18" width="210" y="81" as="geometry" />
+        </mxCell>
+        <mxCell id="chap_4" parent="chap" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ description : String?" vertex="1">
+          <mxGeometry height="18" width="210" y="99" as="geometry" />
+        </mxCell>
+        <mxCell id="chap_5" parent="chap" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ order : Int" vertex="1">
+          <mxGeometry height="18" width="210" y="117" as="geometry" />
+        </mxCell>
+        <mxCell id="chap_6" parent="chap" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
+          <mxGeometry height="18" width="210" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="topic" parent="1" style="swimlane;startSize=35;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;fontStyle=1;" value="Topic" vertex="1">
+          <mxGeometry height="178" width="210" x="1000" y="711" as="geometry" />
+        </mxCell>
+        <mxCell id="topic_sep" parent="topic" style="line;strokeColor=#b85450;" value="" vertex="1">
+          <mxGeometry height="8" width="210" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="topic_1" parent="topic" style="text;html=1;fontSize=12;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1">
+          <mxGeometry height="18" width="210" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="topic_2" parent="topic" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="🔗 chapterId : String {FK}" vertex="1">
+          <mxGeometry height="18" width="210" y="63" as="geometry" />
+        </mxCell>
+        <mxCell id="topic_3" parent="topic" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ name : String" vertex="1">
+          <mxGeometry height="18" width="210" y="81" as="geometry" />
+        </mxCell>
+        <mxCell id="topic_4" parent="topic" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ description : String?" vertex="1">
+          <mxGeometry height="18" width="210" y="99" as="geometry" />
+        </mxCell>
+        <mxCell id="topic_5" parent="topic" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ order : Int" vertex="1">
+          <mxGeometry height="18" width="210" y="117" as="geometry" />
+        </mxCell>
+        <mxCell id="topic_6" parent="topic" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
+          <mxGeometry height="18" width="210" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="content" parent="1" style="swimlane;startSize=35;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;fontStyle=1;" value="Content" vertex="1">
+          <mxGeometry height="285" width="230" x="730" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="content_sep" parent="content" style="line;strokeColor=#b85450;" value="" vertex="1">
+          <mxGeometry height="8" width="230" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="content_1" parent="content" style="text;html=1;fontSize=12;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1">
+          <mxGeometry height="18" width="230" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="content_2" parent="content" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="🔗 topicId : String {FK}" vertex="1">
+          <mxGeometry height="18" width="230" y="63" as="geometry" />
+        </mxCell>
+        <mxCell id="content_3" parent="content" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ title : String" vertex="1">
+          <mxGeometry height="18" width="230" y="81" as="geometry" />
+        </mxCell>
+        <mxCell id="content_4" parent="content" style="text;html=1;fontSize=12;align=left;spacingLeft=8;fontStyle=1;" value="+ type : ContentType" vertex="1">
+          <mxGeometry height="18" width="230" y="99" as="geometry" />
+        </mxCell>
+        <mxCell id="content_5" parent="content" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ videoUrl : String?" vertex="1">
+          <mxGeometry height="18" width="230" y="117" as="geometry" />
+        </mxCell>
+        <mxCell id="content_6" parent="content" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ pdfUrl : String?" vertex="1">
+          <mxGeometry height="18" width="230" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="content_7" parent="content" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ markdownBody : String?" vertex="1">
+          <mxGeometry height="18" width="230" y="153" as="geometry" />
+        </mxCell>
+        <mxCell id="content_8" parent="content" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ externalUrl : String?" vertex="1">
+          <mxGeometry height="18" width="230" y="171" as="geometry" />
+        </mxCell>
+        <mxCell id="content_9" parent="content" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ videoDuration : Int?" vertex="1">
+          <mxGeometry height="18" width="230" y="189" as="geometry" />
+        </mxCell>
+        <mxCell id="content_10" parent="content" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ videoThumbnail : String?" vertex="1">
+          <mxGeometry height="18" width="230" y="207" as="geometry" />
+        </mxCell>
+        <mxCell id="content_11" parent="content" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ order : Int  @default(0)" vertex="1">
+          <mxGeometry height="18" width="230" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="content_12" parent="content" style="text;html=1;fontSize=12;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1">
+          <mxGeometry height="18" width="230" y="243" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_org_cfg" edge="1" parent="1" source="org" style="endArrow=open;endFill=0;html=1;fontSize=12;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="orgcfg" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_org_cfg_lbl1" connectable="0" parent="rel_org_cfg" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_org_cfg_lbl2" connectable="0" parent="rel_org_cfg" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_org_usr" edge="1" parent="1" source="org" style="endArrow=open;endFill=0;html=1;fontSize=12;" target="usr" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_org_usr_l1" connectable="0" parent="rel_org_usr" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_org_usr_l2" connectable="0" parent="rel_org_usr" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_usr_etoken" edge="1" parent="1" source="usr" style="endArrow=open;endFill=0;html=1;fontSize=12;" target="etoken" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_usr_et_l1" connectable="0" parent="rel_usr_etoken" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_usr_et_l2" connectable="0" parent="rel_usr_etoken" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_usr_rtoken" edge="1" parent="1" source="usr" style="endArrow=open;endFill=0;html=1;fontSize=12;" target="rtoken" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_usr_rt_l1" connectable="0" parent="rel_usr_rtoken" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_usr_rt_l2" connectable="0" parent="rel_usr_rtoken" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_org_cat" edge="1" parent="1" source="org" style="endArrow=open;endFill=0;html=1;fontSize=12;" target="cat" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_org_cat_l1" connectable="0" parent="rel_org_cat" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_org_cat_l2" connectable="0" parent="rel_org_cat" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_cat_course" edge="1" parent="1" source="cat" style="endArrow=open;endFill=0;html=1;fontSize=12;" target="course" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_cat_crs_l1" connectable="0" parent="rel_cat_course" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="0..1" vertex="1">
+          <mxGeometry relative="1" x="-0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_cat_crs_l2" connectable="0" parent="rel_cat_course" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_course_chap" edge="1" parent="1" source="course" style="endArrow=open;endFill=0;html=1;fontSize=12;" target="chap" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_crs_chap_l1" connectable="0" parent="rel_course_chap" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_crs_chap_l2" connectable="0" parent="rel_course_chap" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_chap_topic" edge="1" parent="1" source="chap" style="endArrow=open;endFill=0;html=1;fontSize=12;" target="topic" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_chap_topic_l1" connectable="0" parent="rel_chap_topic" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_chap_topic_l2" connectable="0" parent="rel_chap_topic" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_topic_content" edge="1" parent="1" source="topic" style="endArrow=open;endFill=0;html=1;fontSize=12;" target="content" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_topic_cnt_l1" connectable="0" parent="rel_topic_content" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_topic_cnt_l2" connectable="0" parent="rel_topic_content" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_usr_course" edge="1" parent="1" source="usr" style="endArrow=open;endFill=0;html=1;fontSize=12;dashed=1;" target="course" value="creates">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="340" y="480" />
+              <mxPoint x="970" y="480" />
+              <mxPoint x="970" y="200" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_usr_crs_l1" connectable="0" parent="rel_usr_course" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="0..1" vertex="1">
+          <mxGeometry relative="1" x="0.85" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

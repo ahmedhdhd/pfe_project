@@ -28,6 +28,7 @@ const INTRO_CONTENT_ID = "course-introduction";
 export default function CourseIntroductionPlayerPage() {
   const params = useParams();
   const router = useRouter();
+  const clientSlug = params.client as string | undefined;
   const batchId = params.id as string;
 
   const [playerInstance, setPlayerInstance] = useState<Player | null>(null);
@@ -38,7 +39,7 @@ export default function CourseIntroductionPlayerPage() {
   const currentContentRef = useRef<HTMLAnchorElement | null>(null);
 
   const { data: hierarchyResponse } = useGetClientCourseHierarchy(batchId);
-  const { data: batchResponse } = useGetExploreBatch(batchId);
+  const { data: batchResponse } = useGetExploreBatch(batchId, clientSlug);
 
   const hierarchy =
     (hierarchyResponse?.data as CourseHierarchySubject[] | undefined) || [];

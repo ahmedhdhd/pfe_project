@@ -1,0 +1,250 @@
+<mxfile host="Electron" version="29.5.2">
+  <diagram name="Database Model — Release 3" id="db_model_r3">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2600" pageHeight="1800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=20;fontStyle=1;align=center;strokeColor=none;fillColor=none;" value="Modèle de Base de Données — Release 3 (+ IA, Live Sessions, Embeddings)" vertex="1">
+          <mxGeometry height="50" width="2400" x="100" y="10" as="geometry" />
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="leg1" parent="1" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="Auth / User (R1)" vertex="1"><mxGeometry height="24" width="120" x="100" y="68" as="geometry" /></mxCell>
+        <mxCell id="leg2" parent="1" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Course (R1)" vertex="1"><mxGeometry height="24" width="100" x="230" y="68" as="geometry" /></mxCell>
+        <mxCell id="leg3" parent="1" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" value="Assignment (R2)" vertex="1"><mxGeometry height="24" width="120" x="340" y="68" as="geometry" /></mxCell>
+        <mxCell id="leg4" parent="1" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" value="Live Session (NEW)" vertex="1"><mxGeometry height="24" width="140" x="470" y="68" as="geometry" /></mxCell>
+        <mxCell id="leg5" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="AI / Chat (NEW)" vertex="1"><mxGeometry height="24" width="120" x="620" y="68" as="geometry" /></mxCell>
+        <mxCell id="leg6" parent="1" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="Enumerations" vertex="1"><mxGeometry height="24" width="110" x="750" y="68" as="geometry" /></mxCell>
+
+        <!-- ==================== R1/R2 INHERITED (simplified) ==================== -->
+        <mxCell id="r1_lbl" parent="1" style="text;html=1;fontSize=13;fontStyle=1;strokeColor=none;fillColor=#f5f5f5;rounded=1;" value="▶ Entités héritées de R1 / R2" vertex="1">
+          <mxGeometry height="28" width="240" x="100" y="108" as="geometry" />
+        </mxCell>
+
+        <mxCell id="usr" parent="1" style="swimlane;startSize=35;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" value="User" vertex="1">
+          <mxGeometry height="142" width="210" x="100" y="148" as="geometry" />
+        </mxCell>
+        <mxCell id="usr_sep" parent="usr" style="line;strokeColor=#82b366;" value="" vertex="1"><mxGeometry height="8" width="210" y="35" as="geometry" /></mxCell>
+        <mxCell id="usr_1" parent="usr" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)" vertex="1"><mxGeometry height="18" width="210" y="45" as="geometry" /></mxCell>
+        <mxCell id="usr_2" parent="usr" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="🔗 organizationId : String {FK}" vertex="1"><mxGeometry height="18" width="210" y="63" as="geometry" /></mxCell>
+        <mxCell id="usr_3" parent="usr" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ email : String?  @unique" vertex="1"><mxGeometry height="18" width="210" y="81" as="geometry" /></mxCell>
+        <mxCell id="usr_4" parent="usr" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ username : String" vertex="1"><mxGeometry height="18" width="210" y="99" as="geometry" /></mxCell>
+        <mxCell id="usr_5" parent="usr" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="+ role : UserRole" vertex="1"><mxGeometry height="18" width="210" y="117" as="geometry" /></mxCell>
+
+        <mxCell id="course" parent="1" style="swimlane;startSize=35;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;" value="Course" vertex="1">
+          <mxGeometry height="142" width="210" x="370" y="148" as="geometry" />
+        </mxCell>
+        <mxCell id="course_sep" parent="course" style="line;strokeColor=#b85450;" value="" vertex="1"><mxGeometry height="8" width="210" y="35" as="geometry" /></mxCell>
+        <mxCell id="course_1" parent="course" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)" vertex="1"><mxGeometry height="18" width="210" y="45" as="geometry" /></mxCell>
+        <mxCell id="course_2" parent="course" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="🔗 organizationId : String {FK}" vertex="1"><mxGeometry height="18" width="210" y="63" as="geometry" /></mxCell>
+        <mxCell id="course_3" parent="course" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ name : String" vertex="1"><mxGeometry height="18" width="210" y="81" as="geometry" /></mxCell>
+        <mxCell id="course_4" parent="course" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="+ status : BatchStatus" vertex="1"><mxGeometry height="18" width="210" y="99" as="geometry" /></mxCell>
+        <mxCell id="course_5" parent="course" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1"><mxGeometry height="18" width="210" y="117" as="geometry" /></mxCell>
+
+        <mxCell id="submission" parent="1" style="swimlane;startSize=35;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=1;" value="Submission" vertex="1">
+          <mxGeometry height="142" width="210" x="640" y="148" as="geometry" />
+        </mxCell>
+        <mxCell id="sub_sep" parent="submission" style="line;strokeColor=#d79b00;" value="" vertex="1"><mxGeometry height="8" width="210" y="35" as="geometry" /></mxCell>
+        <mxCell id="sub_1" parent="submission" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)" vertex="1"><mxGeometry height="18" width="210" y="45" as="geometry" /></mxCell>
+        <mxCell id="sub_2" parent="submission" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="🔗 assignmentId : String {FK}" vertex="1"><mxGeometry height="18" width="210" y="63" as="geometry" /></mxCell>
+        <mxCell id="sub_3" parent="submission" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="🔗 userId : String {FK}" vertex="1"><mxGeometry height="18" width="210" y="81" as="geometry" /></mxCell>
+        <mxCell id="sub_4" parent="submission" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="+ status : SubmissionStatus" vertex="1"><mxGeometry height="18" width="210" y="99" as="geometry" /></mxCell>
+        <mxCell id="sub_5" parent="submission" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ score : Float?" vertex="1"><mxGeometry height="18" width="210" y="117" as="geometry" /></mxCell>
+
+        <!-- ==================== NEW R3 ENTITIES ==================== -->
+        <mxCell id="r3_lbl" parent="1" style="text;html=1;fontSize=13;fontStyle=1;strokeColor=none;fillColor=#e1d5e7;rounded=1;" value="▶ Nouvelles entités — Release 3" vertex="1">
+          <mxGeometry height="28" width="270" x="100" y="348" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== LiveSession ==================== -->
+        <mxCell id="livesess" parent="1" style="swimlane;startSize=35;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;" value="LiveSession" vertex="1">
+          <mxGeometry height="303" width="240" x="100" y="388" as="geometry" />
+        </mxCell>
+        <mxCell id="ls_sep" parent="livesess" style="line;strokeColor=#9673a6;" value="" vertex="1"><mxGeometry height="8" width="240" y="35" as="geometry" /></mxCell>
+        <mxCell id="ls_1" parent="livesess" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1"><mxGeometry height="18" width="240" y="45" as="geometry" /></mxCell>
+        <mxCell id="ls_2" parent="livesess" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="🔗 courseId : String {FK}" vertex="1"><mxGeometry height="18" width="240" y="63" as="geometry" /></mxCell>
+        <mxCell id="ls_3" parent="livesess" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="🔗 hostUserId : String {FK}" vertex="1"><mxGeometry height="18" width="240" y="81" as="geometry" /></mxCell>
+        <mxCell id="ls_4" parent="livesess" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ title : String" vertex="1"><mxGeometry height="18" width="240" y="99" as="geometry" /></mxCell>
+        <mxCell id="ls_5" parent="livesess" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ description : String?" vertex="1"><mxGeometry height="18" width="240" y="117" as="geometry" /></mxCell>
+        <mxCell id="ls_6" parent="livesess" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="+ status : LiveSessionStatus" vertex="1"><mxGeometry height="18" width="240" y="135" as="geometry" /></mxCell>
+        <mxCell id="ls_7" parent="livesess" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ scheduledAt : DateTime" vertex="1"><mxGeometry height="18" width="240" y="153" as="geometry" /></mxCell>
+        <mxCell id="ls_8" parent="livesess" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ startedAt : DateTime?" vertex="1"><mxGeometry height="18" width="240" y="171" as="geometry" /></mxCell>
+        <mxCell id="ls_9" parent="livesess" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ endedAt : DateTime?" vertex="1"><mxGeometry height="18" width="240" y="189" as="geometry" /></mxCell>
+        <mxCell id="ls_10" parent="livesess" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ transcript : String?  @db.Text" vertex="1"><mxGeometry height="18" width="240" y="207" as="geometry" /></mxCell>
+        <mxCell id="ls_11" parent="livesess" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ summary : String?  @db.Text" vertex="1"><mxGeometry height="18" width="240" y="225" as="geometry" /></mxCell>
+        <mxCell id="ls_12" parent="livesess" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="+ summaryStatus : SummaryStatus" vertex="1"><mxGeometry height="18" width="240" y="243" as="geometry" /></mxCell>
+        <mxCell id="ls_13" parent="livesess" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1"><mxGeometry height="18" width="240" y="261" as="geometry" /></mxCell>
+
+        <!-- ==================== LiveSessionParticipant ==================== -->
+        <mxCell id="lspart" parent="1" style="swimlane;startSize=35;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;" value="LiveSessionParticipant" vertex="1">
+          <mxGeometry height="195" width="250" x="400" y="388" as="geometry" />
+        </mxCell>
+        <mxCell id="lsp_sep" parent="lspart" style="line;strokeColor=#9673a6;" value="" vertex="1"><mxGeometry height="8" width="250" y="35" as="geometry" /></mxCell>
+        <mxCell id="lsp_1" parent="lspart" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1"><mxGeometry height="18" width="250" y="45" as="geometry" /></mxCell>
+        <mxCell id="lsp_2" parent="lspart" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="🔗 liveSessionId : String {FK}" vertex="1"><mxGeometry height="18" width="250" y="63" as="geometry" /></mxCell>
+        <mxCell id="lsp_3" parent="lspart" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="🔗 userId : String {FK}" vertex="1"><mxGeometry height="18" width="250" y="81" as="geometry" /></mxCell>
+        <mxCell id="lsp_4" parent="lspart" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ joinedAt : DateTime  @default(now())" vertex="1"><mxGeometry height="18" width="250" y="99" as="geometry" /></mxCell>
+        <mxCell id="lsp_5" parent="lspart" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ leftAt : DateTime?" vertex="1"><mxGeometry height="18" width="250" y="117" as="geometry" /></mxCell>
+        <mxCell id="lsp_6" parent="lspart" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="+ role : ParticipantRole" vertex="1"><mxGeometry height="18" width="250" y="135" as="geometry" /></mxCell>
+        <mxCell id="lsp_note" parent="lspart" style="text;html=1;fontSize=10;align=left;spacingLeft=8;fontColor=#9673a6;" value="@@unique([liveSessionId, userId])" vertex="1"><mxGeometry height="18" width="250" y="153" as="geometry" /></mxCell>
+
+        <!-- ==================== AIChatConversation ==================== -->
+        <mxCell id="aiconv" parent="1" style="swimlane;startSize=35;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" value="AIChatConversation" vertex="1">
+          <mxGeometry height="213" width="230" x="710" y="388" as="geometry" />
+        </mxCell>
+        <mxCell id="aic_sep" parent="aiconv" style="line;strokeColor=#6c8ebf;" value="" vertex="1"><mxGeometry height="8" width="230" y="35" as="geometry" /></mxCell>
+        <mxCell id="aic_1" parent="aiconv" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1"><mxGeometry height="18" width="230" y="45" as="geometry" /></mxCell>
+        <mxCell id="aic_2" parent="aiconv" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="🔗 userId : String {FK}" vertex="1"><mxGeometry height="18" width="230" y="63" as="geometry" /></mxCell>
+        <mxCell id="aic_3" parent="aiconv" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="🔗 courseId : String? {FK}" vertex="1"><mxGeometry height="18" width="230" y="81" as="geometry" /></mxCell>
+        <mxCell id="aic_4" parent="aiconv" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ title : String?" vertex="1"><mxGeometry height="18" width="230" y="99" as="geometry" /></mxCell>
+        <mxCell id="aic_5" parent="aiconv" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ model : String  @default('mistral')" vertex="1"><mxGeometry height="18" width="230" y="117" as="geometry" /></mxCell>
+        <mxCell id="aic_6" parent="aiconv" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ createdAt : DateTime" vertex="1"><mxGeometry height="18" width="230" y="135" as="geometry" /></mxCell>
+        <mxCell id="aic_7" parent="aiconv" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ updatedAt : DateTime  @updatedAt" vertex="1"><mxGeometry height="18" width="230" y="153" as="geometry" /></mxCell>
+        <mxCell id="aic_8" parent="aiconv" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ isArchived : Boolean  @default(false)" vertex="1"><mxGeometry height="18" width="230" y="171" as="geometry" /></mxCell>
+
+        <!-- ==================== AIChatMessage ==================== -->
+        <mxCell id="aimsg" parent="1" style="swimlane;startSize=35;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" value="AIChatMessage" vertex="1">
+          <mxGeometry height="213" width="230" x="1000" y="388" as="geometry" />
+        </mxCell>
+        <mxCell id="aim_sep" parent="aimsg" style="line;strokeColor=#6c8ebf;" value="" vertex="1"><mxGeometry height="8" width="230" y="35" as="geometry" /></mxCell>
+        <mxCell id="aim_1" parent="aimsg" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1"><mxGeometry height="18" width="230" y="45" as="geometry" /></mxCell>
+        <mxCell id="aim_2" parent="aimsg" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="🔗 conversationId : String {FK}" vertex="1"><mxGeometry height="18" width="230" y="63" as="geometry" /></mxCell>
+        <mxCell id="aim_3" parent="aimsg" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="+ role : MessageRole" vertex="1"><mxGeometry height="18" width="230" y="81" as="geometry" /></mxCell>
+        <mxCell id="aim_4" parent="aimsg" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ content : String  @db.Text" vertex="1"><mxGeometry height="18" width="230" y="99" as="geometry" /></mxCell>
+        <mxCell id="aim_5" parent="aimsg" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ tokensUsed : Int?" vertex="1"><mxGeometry height="18" width="230" y="117" as="geometry" /></mxCell>
+        <mxCell id="aim_6" parent="aimsg" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ metadata : Json?" vertex="1"><mxGeometry height="18" width="230" y="135" as="geometry" /></mxCell>
+        <mxCell id="aim_7" parent="aimsg" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ createdAt : DateTime  @default(now())" vertex="1"><mxGeometry height="18" width="230" y="153" as="geometry" /></mxCell>
+        <mxCell id="aim_8" parent="aimsg" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ order : Int  @default(0)" vertex="1"><mxGeometry height="18" width="230" y="171" as="geometry" /></mxCell>
+
+        <!-- ==================== AIFeedback ==================== -->
+        <mxCell id="aifb" parent="1" style="swimlane;startSize=35;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" value="AIFeedback" vertex="1">
+          <mxGeometry height="231" width="230" x="1290" y="388" as="geometry" />
+        </mxCell>
+        <mxCell id="aifb_sep" parent="aifb" style="line;strokeColor=#6c8ebf;" value="" vertex="1"><mxGeometry height="8" width="230" y="35" as="geometry" /></mxCell>
+        <mxCell id="aifb_1" parent="aifb" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1"><mxGeometry height="18" width="230" y="45" as="geometry" /></mxCell>
+        <mxCell id="aifb_2" parent="aifb" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="🔗 submissionId : String {FK}" vertex="1"><mxGeometry height="18" width="230" y="63" as="geometry" /></mxCell>
+        <mxCell id="aifb_3" parent="aifb" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ overallFeedback : String  @db.Text" vertex="1"><mxGeometry height="18" width="230" y="81" as="geometry" /></mxCell>
+        <mxCell id="aifb_4" parent="aifb" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ suggestedScore : Float?" vertex="1"><mxGeometry height="18" width="230" y="99" as="geometry" /></mxCell>
+        <mxCell id="aifb_5" parent="aifb" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ strengths : Json?" vertex="1"><mxGeometry height="18" width="230" y="117" as="geometry" /></mxCell>
+        <mxCell id="aifb_6" parent="aifb" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ weaknesses : Json?" vertex="1"><mxGeometry height="18" width="230" y="135" as="geometry" /></mxCell>
+        <mxCell id="aifb_7" parent="aifb" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ model : String" vertex="1"><mxGeometry height="18" width="230" y="153" as="geometry" /></mxCell>
+        <mxCell id="aifb_8" parent="aifb" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ tokensUsed : Int?" vertex="1"><mxGeometry height="18" width="230" y="171" as="geometry" /></mxCell>
+        <mxCell id="aifb_9" parent="aifb" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ createdAt : DateTime  @default(now())" vertex="1"><mxGeometry height="18" width="230" y="189" as="geometry" /></mxCell>
+
+        <!-- ==================== VectorEmbedding ==================== -->
+        <mxCell id="vec" parent="1" style="swimlane;startSize=35;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" value="VectorEmbedding" vertex="1">
+          <mxGeometry height="231" width="240" x="1580" y="388" as="geometry" />
+        </mxCell>
+        <mxCell id="vec_sep" parent="vec" style="line;strokeColor=#6c8ebf;" value="" vertex="1"><mxGeometry height="8" width="240" y="35" as="geometry" /></mxCell>
+        <mxCell id="vec_1" parent="vec" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="🔑 id : String (PK)  @id" vertex="1"><mxGeometry height="18" width="240" y="45" as="geometry" /></mxCell>
+        <mxCell id="vec_2" parent="vec" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="🔗 courseId : String {FK}" vertex="1"><mxGeometry height="18" width="240" y="63" as="geometry" /></mxCell>
+        <mxCell id="vec_3" parent="vec" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="🔗 contentId : String? {FK}" vertex="1"><mxGeometry height="18" width="240" y="81" as="geometry" /></mxCell>
+        <mxCell id="vec_4" parent="vec" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ chunkText : String  @db.Text" vertex="1"><mxGeometry height="18" width="240" y="99" as="geometry" /></mxCell>
+        <mxCell id="vec_5" parent="vec" style="text;html=1;fontSize=11;align=left;spacingLeft=8;fontStyle=1;" value="+ embedding : Vector(1536) @pgvector" vertex="1"><mxGeometry height="18" width="240" y="117" as="geometry" /></mxCell>
+        <mxCell id="vec_6" parent="vec" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ chunkIndex : Int  @default(0)" vertex="1"><mxGeometry height="18" width="240" y="135" as="geometry" /></mxCell>
+        <mxCell id="vec_7" parent="vec" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ sourceType : String" vertex="1"><mxGeometry height="18" width="240" y="153" as="geometry" /></mxCell>
+        <mxCell id="vec_8" parent="vec" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ metadata : Json?" vertex="1"><mxGeometry height="18" width="240" y="171" as="geometry" /></mxCell>
+        <mxCell id="vec_9" parent="vec" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="+ createdAt : DateTime  @default(now())" vertex="1"><mxGeometry height="18" width="240" y="189" as="geometry" /></mxCell>
+
+        <!-- ==================== ENUMERATIONS ==================== -->
+        <mxCell id="e_lsstatus" parent="1" style="swimlane;startSize=35;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=3;" value="«enumeration»&#xa;LiveSessionStatus" vertex="1">
+          <mxGeometry height="130" width="180" x="100" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="els_sep" parent="e_lsstatus" style="line;strokeColor=#d6b656;" value="" vertex="1"><mxGeometry height="8" width="180" y="35" as="geometry" /></mxCell>
+        <mxCell id="els_1" parent="e_lsstatus" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="SCHEDULED" vertex="1"><mxGeometry height="18" width="180" y="45" as="geometry" /></mxCell>
+        <mxCell id="els_2" parent="e_lsstatus" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="LIVE" vertex="1"><mxGeometry height="18" width="180" y="63" as="geometry" /></mxCell>
+        <mxCell id="els_3" parent="e_lsstatus" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="COMPLETED" vertex="1"><mxGeometry height="18" width="180" y="81" as="geometry" /></mxCell>
+        <mxCell id="els_4" parent="e_lsstatus" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="CANCELLED" vertex="1"><mxGeometry height="18" width="180" y="99" as="geometry" /></mxCell>
+
+        <mxCell id="e_sumstatus" parent="1" style="swimlane;startSize=35;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=3;" value="«enumeration»&#xa;SummaryStatus" vertex="1">
+          <mxGeometry height="110" width="180" x="320" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="ess_sep" parent="e_sumstatus" style="line;strokeColor=#d6b656;" value="" vertex="1"><mxGeometry height="8" width="180" y="35" as="geometry" /></mxCell>
+        <mxCell id="ess_1" parent="e_sumstatus" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="PENDING" vertex="1"><mxGeometry height="18" width="180" y="45" as="geometry" /></mxCell>
+        <mxCell id="ess_2" parent="e_sumstatus" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="GENERATING" vertex="1"><mxGeometry height="18" width="180" y="63" as="geometry" /></mxCell>
+        <mxCell id="ess_3" parent="e_sumstatus" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="READY" vertex="1"><mxGeometry height="18" width="180" y="81" as="geometry" /></mxCell>
+
+        <mxCell id="e_partrole" parent="1" style="swimlane;startSize=35;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=3;" value="«enumeration»&#xa;ParticipantRole" vertex="1">
+          <mxGeometry height="110" width="180" x="540" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="epr_sep" parent="e_partrole" style="line;strokeColor=#d6b656;" value="" vertex="1"><mxGeometry height="8" width="180" y="35" as="geometry" /></mxCell>
+        <mxCell id="epr_1" parent="e_partrole" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="HOST" vertex="1"><mxGeometry height="18" width="180" y="45" as="geometry" /></mxCell>
+        <mxCell id="epr_2" parent="e_partrole" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="PARTICIPANT" vertex="1"><mxGeometry height="18" width="180" y="63" as="geometry" /></mxCell>
+        <mxCell id="epr_3" parent="e_partrole" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="MODERATOR" vertex="1"><mxGeometry height="18" width="180" y="81" as="geometry" /></mxCell>
+
+        <mxCell id="e_msgrole" parent="1" style="swimlane;startSize=35;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=3;" value="«enumeration»&#xa;MessageRole" vertex="1">
+          <mxGeometry height="110" width="180" x="760" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="emr_sep" parent="e_msgrole" style="line;strokeColor=#d6b656;" value="" vertex="1"><mxGeometry height="8" width="180" y="35" as="geometry" /></mxCell>
+        <mxCell id="emr_1" parent="e_msgrole" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="USER" vertex="1"><mxGeometry height="18" width="180" y="45" as="geometry" /></mxCell>
+        <mxCell id="emr_2" parent="e_msgrole" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="ASSISTANT" vertex="1"><mxGeometry height="18" width="180" y="63" as="geometry" /></mxCell>
+        <mxCell id="emr_3" parent="e_msgrole" style="text;html=1;fontSize=11;align=left;spacingLeft=8;" value="SYSTEM" vertex="1"><mxGeometry height="18" width="180" y="81" as="geometry" /></mxCell>
+
+        <!-- ==================== RELATIONSHIPS ==================== -->
+        <!-- Course → LiveSession (1:*) -->
+        <mxCell id="rel_crs_ls" edge="1" parent="1" source="course" target="livesess" style="endArrow=open;endFill=0;html=1;fontSize=12;" value="">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="395" y="328" /><mxPoint x="220" y="328" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="r_cls_l1" connectable="0" parent="rel_crs_ls" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1"><mxGeometry relative="1" x="-0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+        <mxCell id="r_cls_l2" connectable="0" parent="rel_crs_ls" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="*" vertex="1"><mxGeometry relative="1" x="0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+
+        <!-- User → LiveSession (host 1:*) -->
+        <mxCell id="rel_usr_ls" edge="1" parent="1" source="usr" target="livesess" style="endArrow=open;endFill=0;html=1;fontSize=12;dashed=1;" value="hosts">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="155" y="330" /></Array></mxGeometry>
+        </mxCell>
+
+        <!-- LiveSession → LiveSessionParticipant (1:*) -->
+        <mxCell id="rel_ls_lsp" edge="1" parent="1" source="livesess" target="lspart" style="endArrow=open;endFill=0;html=1;fontSize=12;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r_llp_l1" connectable="0" parent="rel_ls_lsp" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1"><mxGeometry relative="1" x="-0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+        <mxCell id="r_llp_l2" connectable="0" parent="rel_ls_lsp" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="*" vertex="1"><mxGeometry relative="1" x="0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+
+        <!-- User → LiveSessionParticipant (1:*) -->
+        <mxCell id="rel_usr_lsp" edge="1" parent="1" source="usr" target="lspart" style="endArrow=open;endFill=0;html=1;fontSize=12;dashed=1;" value="">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="310" y="490" /><mxPoint x="360" y="490" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="r_ulp_l1" connectable="0" parent="rel_usr_lsp" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1"><mxGeometry relative="1" x="-0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+        <mxCell id="r_ulp_l2" connectable="0" parent="rel_usr_lsp" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="*" vertex="1"><mxGeometry relative="1" x="0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+
+        <!-- User → AIChatConversation (1:*) -->
+        <mxCell id="rel_usr_aic" edge="1" parent="1" source="usr" target="aiconv" style="endArrow=open;endFill=0;html=1;fontSize=12;" value="">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="205" y="330" /><mxPoint x="825" y="330" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="r_uac_l1" connectable="0" parent="rel_usr_aic" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1"><mxGeometry relative="1" x="-0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+        <mxCell id="r_uac_l2" connectable="0" parent="rel_usr_aic" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="*" vertex="1"><mxGeometry relative="1" x="0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+
+        <!-- AIChatConversation → AIChatMessage (1:*) -->
+        <mxCell id="rel_aic_aim" edge="1" parent="1" source="aiconv" target="aimsg" style="endArrow=open;endFill=0;html=1;fontSize=12;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r_am_l1" connectable="0" parent="rel_aic_aim" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1"><mxGeometry relative="1" x="-0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+        <mxCell id="r_am_l2" connectable="0" parent="rel_aic_aim" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="*" vertex="1"><mxGeometry relative="1" x="0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+
+        <!-- Submission → AIFeedback (1:1) -->
+        <mxCell id="rel_sub_aifb" edge="1" parent="1" source="submission" target="aifb" style="endArrow=open;endFill=0;html=1;fontSize=12;" value="">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="850" y="230" /><mxPoint x="1405" y="230" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="r_sa_l1" connectable="0" parent="rel_sub_aifb" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1"><mxGeometry relative="1" x="-0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+        <mxCell id="r_sa_l2" connectable="0" parent="rel_sub_aifb" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="0..1" vertex="1"><mxGeometry relative="1" x="0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+
+        <!-- Course → VectorEmbedding (1:*) -->
+        <mxCell id="rel_crs_vec" edge="1" parent="1" source="course" target="vec" style="endArrow=open;endFill=0;html=1;fontSize=12;" value="">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="580" y="310" /><mxPoint x="1700" y="310" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="r_cv_l1" connectable="0" parent="rel_crs_vec" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="1" vertex="1"><mxGeometry relative="1" x="-0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+        <mxCell id="r_cv_l2" connectable="0" parent="rel_crs_vec" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="*" vertex="1"><mxGeometry relative="1" x="0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+
+        <!-- Course → AIChatConversation (0..1 : *) -->
+        <mxCell id="rel_crs_aic" edge="1" parent="1" source="course" target="aiconv" style="endArrow=open;endFill=0;html=1;fontSize=12;dashed=1;" value="">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="580" y="340" /><mxPoint x="710" y="340" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="r_cac_l1" connectable="0" parent="rel_crs_aic" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="0..1" vertex="1"><mxGeometry relative="1" x="-0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+        <mxCell id="r_cac_l2" connectable="0" parent="rel_crs_aic" style="resizable=0;html=1;fontSize=12;fontStyle=1;" value="*" vertex="1"><mxGeometry relative="1" x="0.85" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

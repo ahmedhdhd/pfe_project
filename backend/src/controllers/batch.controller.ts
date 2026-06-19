@@ -825,16 +825,21 @@ export const listPublicBatches = async (req: Request, res: Response, next: NextF
       minRatingCountRaw !== '' && Number.isFinite(Number(minRatingCountRaw))
         ? Math.max(0, Math.floor(Number(minRatingCountRaw)))
         : null;
-    // Extract org from subdomain param or query
-    const subdomain = req.query.subdomain as string;
-    let orgWhere = {};
-    if (subdomain) {
-      const org = await prisma.organization.findUnique({ where: { subdomain } });
-      if (org) orgWhere = { organizationId: org.id };
+    const subdomain =
+      typeof req.query.subdomain === 'string' ? req.query.subdomain.trim() : '';
+    if (!subdomain) {
+      sendError(res, 'subdomain is required', 400);
+      return;
+    }
+
+    const org = await prisma.organization.findUnique({ where: { subdomain } });
+    if (!org) {
+      sendError(res, 'Organization not found', 404);
+      return;
     }
 
     const where: Prisma.BatchWhereInput = {
-      ...orgWhere,
+      organizationId: org.id,
       status: 'ACTIVE',
       ...(language ? { language: { equals: language, mode: 'insensitive' } } : {}),
       ...(categoryId
@@ -917,8 +922,21 @@ export const getPublicBatch = async (req: Request, res: Response, next: NextFunc
       }
     }
 
-    const batch = await prisma.batch.findUnique({
-      where: { id: req.params.id },
+    const subdomain =
+      typeof req.query.subdomain === 'string' ? req.query.subdomain.trim() : '';
+    if (!subdomain) {
+      sendError(res, 'subdomain is required', 400);
+      return;
+    }
+
+    const org = await prisma.organization.findUnique({ where: { subdomain } });
+    if (!org) {
+      sendError(res, 'Organization not found', 404);
+      return;
+    }
+
+    const batch = await prisma.batch.findFirst({
+      where: { id: req.params.id, organizationId: org.id },
       include: {
         category: {
           include: {

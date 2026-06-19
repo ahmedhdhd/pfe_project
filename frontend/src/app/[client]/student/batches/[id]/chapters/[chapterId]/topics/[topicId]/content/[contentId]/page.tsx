@@ -35,6 +35,7 @@ import "@/app/[client]/student/batches/[id]/subjects/[subjectId]/chapters/[chapt
 export default function ChapterContentPlayerPage() {
   const params = useParams();
   const router = useRouter();
+  const clientSlug = params.client as string | undefined;
   const batchId = params.id as string;
   const chapterId = params.chapterId as string;
   const topicId = params.topicId as string;
@@ -65,7 +66,7 @@ export default function ChapterContentPlayerPage() {
   const { data: contentsResponse } = useGetClientContentsByTopic(topicId);
   const { data: chapterResponse } = useGetClientChapter(chapterId);
   const { data: hierarchyResponse } = useGetClientCourseHierarchy(batchId);
-  const { data: batchResponse } = useGetExploreBatch(batchId);
+  const { data: batchResponse } = useGetExploreBatch(batchId, clientSlug);
 
   const topic = topicResponse?.data || topicResponse;
   const contents: Content[] = contentsResponse?.data || [];

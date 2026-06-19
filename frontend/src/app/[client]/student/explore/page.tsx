@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, lazy, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 import {
   BookOpen,
   Filter,
@@ -46,6 +47,8 @@ interface Batch {
 }
 
 export default function ExplorePage() {
+  const params = useParams();
+  const clientSlug = params.client as string | undefined;
   const [query, setQuery] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [minRating, setMinRating] = useState<number | null>(null);
@@ -73,7 +76,7 @@ export default function ExplorePage() {
     price: priceFilter === "all" ? undefined : priceFilter,
     minRating: minRating ?? undefined,
     minRatingCount: minRatingCount ?? undefined,
-  });
+  }, clientSlug);
 
   const batches: Batch[] = Array.isArray(batchesResponse?.data)
     ? batchesResponse.data

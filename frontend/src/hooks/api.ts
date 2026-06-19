@@ -2316,14 +2316,15 @@ export const useGetExploreBatches = (
     price?: "free" | "paid";
     minRating?: number;
     minRatingCount?: number;
-  }
+  },
+  subdomain?: string
 ) => {
   return useQuery({
-    queryKey: ["explore", "batches", page, limit, filters],
+    queryKey: ["explore", "batches", subdomain || "", page, limit, filters],
     queryFn: () =>
       apiClient
         .get("/api/batches", {
-          params: { page, limit, ...(filters || {}) },
+          params: { page, limit, subdomain, ...(filters || {}) },
         })
         .then((res) => {
           const payload = res.data as {
@@ -2369,10 +2370,13 @@ export const useGetMyBatches = (page = 1, limit = 10) => {
 };
 
 // Get single batch details for students/clients
-export const useGetExploreBatch = (id: string) => {
+export const useGetExploreBatch = (id: string, subdomain?: string) => {
   return useQuery({
-    queryKey: ["explore", "batch", id],
-    queryFn: () => apiClient.get(`/api/batches/${id}`).then((res) => res.data),
+    queryKey: ["explore", "batch", subdomain || "", id],
+    queryFn: () =>
+      apiClient
+        .get(`/api/batches/${id}`, { params: { subdomain } })
+        .then((res) => res.data),
     enabled: !!id,
   });
 };

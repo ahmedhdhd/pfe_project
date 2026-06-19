@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
+    "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "analyze": "ANALYZE=true next build",
     "start": "next start",
@@ -16,6 +17,7 @@
     "preview": "npm run build && npm run start"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@livekit/components-react": "^2.9.20",
     "@livekit/components-styles": "^1.2.0",
     "@radix-ui/react-accordion": "^1.2.12",
@@ -38,9 +40,8 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@react-pdf-viewer/core": "^3.12.0",
     "@react-pdf-viewer/default-layout": "^3.12.0",
-    "pdfjs-dist": "3.11.174",
-    "@heroicons/react": "^2.2.0",
     "@splinetool/react-spline": "^4.1.0",
+    "@splinetool/runtime": "^1.12.97",
     "@tanstack/react-query": "^5.90.5",
     "@tanstack/react-table": "^8.21.3",
     "@tiptap/extension-blockquote": "^3.8.0",
@@ -80,6 +81,7 @@
     "motion": "^12.23.24",
     "next": "15.5.7",
     "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "3.11.174",
     "react": "19.1.0",
     "react-day-picker": "^9.11.1",
     "react-dom": "19.1.0",

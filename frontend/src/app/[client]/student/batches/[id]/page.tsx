@@ -24,6 +24,7 @@ export default function BatchDetailPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const clientSlug = params.client as string | undefined;
   const id = params.id as string;
   const currency = useOrgCurrency();
   const paymentMode = useOrgPaymentMode();
@@ -40,7 +41,7 @@ export default function BatchDetailPage() {
     }
   }, [tabFromUrl]);
 
-  const { data, isLoading, error } = useGetExploreBatch(id);
+  const { data, isLoading, error } = useGetExploreBatch(id, clientSlug);
 
   if (isLoading) {
     return (

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { type ChangeEvent, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, BookOpen, Loader2, ShieldCheck } from "@/components/icons";
 import { toast } from "sonner";
 import { StudentHeader } from "@/components/student/student-header";
@@ -36,8 +36,10 @@ type CheckoutItem = {
 };
 
 export default function StudentCheckoutPage() {
+  const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const clientSlug = params.client as string | undefined;
   const courseId = searchParams.get("courseId");
   const cartItems = useStudentCourseCartItems();
   const removeItems = useStudentCourseCartStore((state) => state.removeItems);
@@ -46,7 +48,7 @@ export default function StudentCheckoutPage() {
   const checkoutMutation = useCreateCourseOrderCheckout();
   const user = tokenManager.getUser();
   const { data: singleCourseResponse, isLoading: isSingleCourseLoading } =
-    useGetExploreBatch(courseId || "");
+    useGetExploreBatch(courseId || "", clientSlug);
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("gateway");
   const [billing, setBilling] = useState({
