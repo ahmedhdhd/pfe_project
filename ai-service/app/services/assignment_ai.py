@@ -93,7 +93,7 @@ def build_assignment_generation_prompt(
 ) -> str:
     rag_section = _format_rag_section(
         retrieved_chunks,
-        heading="RETRIEVED COURSE CONTENT (sole source of truth for question generation):",
+        heading="RETRIEVED COURSE CONTENT (use as primary context, but use general knowledge if needed):",
     )
     scope = course_name or "the course"
     if topic_name:
@@ -102,11 +102,10 @@ def build_assignment_generation_prompt(
     return f"""You are an expert instructional designer creating LMS assignment questions.
 
 CRITICAL RULES:
-- Generate questions ONLY from the retrieved course content below.
-- Do NOT use general knowledge, external facts, or assumptions beyond the retrieved text.
-- If the retrieved content is thin, stay within what is explicitly stated; do not invent topics.
-- Each question must be answerable using the retrieved course material.
-- Reference concepts, terminology, and examples that appear in the retrieved chunks.
+- Use the retrieved course content below as your primary context.
+- You MAY use general knowledge to fill in gaps if the retrieved context is insufficient or missing.
+- Ensure questions are accurate and relevant to the assignment topic.
+- Reference concepts and terminology appropriately.
 
 Assignment scope: {scope}
 Assignment title: {assignment_title}
@@ -173,11 +172,10 @@ Objective correctness hint: {item.get("isCorrect")}
     return f"""You are an educational tutor evaluating an assignment submission for "{assignment_title}".
 
 CRITICAL RULES:
-- Ground every explanation in the relevant lesson content provided for each question.
-- Explain WHY an answer is correct, partially correct, or incorrect using the course material.
+- Base explanations on the relevant lesson content provided for each question where possible.
+- If retrieved content is missing or insufficient, use your general knowledge to evaluate and explain the answer.
+- Explain WHY an answer is correct, partially correct, or incorrect.
 - Cite lesson/topic names from the retrieved content when helpful.
-- Do NOT invent course facts not present in the retrieved chunks.
-- If retrieved content is missing for a question, say what is missing and evaluate using the answer key only.
 - Be concise, supportive, and actionable.
 
 Course scope: {scope}

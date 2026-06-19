@@ -66,6 +66,7 @@ interface EditableFields {
   primaryColor: string;
   secondaryColor: string;
   fontFamily: string;
+  customCSS: string;
 }
 
 const normalizeFeature = (feature?: {
@@ -119,6 +120,7 @@ export default function PageEditorPage() {
     primaryColor: config?.theme?.primaryColor || "#2563eb",
     secondaryColor: config?.theme?.secondaryColor || "#f97316",
     fontFamily: config?.theme?.fontFamily || "Inter, sans-serif",
+    customCSS: config?.customCSS || "",
   });
   const [bannerUrls, setBannerUrls] = useState<string[]>(
     config?.bannerUrls || []
@@ -158,6 +160,7 @@ export default function PageEditorPage() {
       primaryColor: config.theme?.primaryColor || "#2563eb",
       secondaryColor: config.theme?.secondaryColor || "#f97316",
       fontFamily: config.theme?.fontFamily || "Inter, sans-serif",
+      customCSS: config.customCSS || "",
     });
     setBannerUrls(config.bannerUrls || []);
     setFeatures((config.features || []).map((feature) => normalizeFeature(feature)));
@@ -276,6 +279,8 @@ export default function PageEditorPage() {
           generated.theme.secondaryColor || fields.secondaryColor || "#f97316",
         fontFamily:
           generated.theme.fontFamily || fields.fontFamily || "Inter, sans-serif",
+        customCSS:
+          generated.approvedCustomCss || generated.customCss || fields.customCSS,
       };
 
       setFields((prev) => ({
@@ -283,6 +288,7 @@ export default function PageEditorPage() {
         primaryColor: nextTheme.primaryColor || prev.primaryColor,
         secondaryColor: nextTheme.secondaryColor || prev.secondaryColor,
         fontFamily: nextTheme.fontFamily || prev.fontFamily,
+        customCSS: nextTheme.customCSS,
       }));
       sendPreviewPatch(nextTheme);
       setAiThemeSummary(generated.summary || generated.themeName || "AI theme applied");
@@ -393,6 +399,7 @@ export default function PageEditorPage() {
           secondaryColor: fields.secondaryColor,
           fontFamily: fields.fontFamily,
         },
+        customCSS: fields.customCSS,
       });
       toast.success("Page saved successfully");
       try {
@@ -500,8 +507,11 @@ export default function PageEditorPage() {
                 value={aiThemePrompt}
                 onChange={(e) => setAiThemePrompt(e.target.value)}
                 rows={4}
-                placeholder="Example: a premium, modern learning platform for exam prep with deep blue accents, soft gradients, and a clean readable font."
+                placeholder="Example: A modern medical exam prep LMS for Arabic and French students. Clean white surfaces, confident blue accents, soft gradients, premium dashboard feeling, high readability, and polished CTA buttons."
               />
+              <p className="text-sm text-muted-foreground">
+                The generated result will fill your theme colors and the custom CSS already used on your org LMS website.
+              </p>
               <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"

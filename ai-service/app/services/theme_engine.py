@@ -14,7 +14,6 @@ OKLCH_COLOR_RE = re.compile(
 )
 CSS_NUMBER_RE = re.compile(r"^(-?\d+(?:\.\d+)?)([a-z%]*)$", re.I)
 FORBIDDEN_CSS_PATTERNS = [
-    re.compile(r"@import", re.I),
     re.compile(r"@apply", re.I),
     re.compile(r"@theme", re.I),
     re.compile(r"@layer", re.I),
@@ -156,6 +155,7 @@ LOCKED_THEME_VARS = {
     "--shadow-lg",
     "--shadow-xl",
     "--shadow-2xl",
+    "--spacing",
 }
 KNOWN_OPTIONAL_VARS = {"--font-size-base"}
 LINE_HEIGHT_VAR_RE = re.compile(r"^--(?:.*-)?line-height(?:-.*)?$", re.I)
@@ -605,10 +605,10 @@ def _sanitize_css(
         scaffold_dark_match.group(0),
     )
 
-    normalized = f"{root_block}\n\n{dark_block}".strip()
+    normalized = f"@import \"tailwindcss\";\n\n{root_block}\n\n{dark_block}".strip()
     missing_vars = [token for token in REQUIRED_THEME_VARS if token not in normalized]
     if missing_vars:
-        normalized = scaffold.strip()
+        normalized = f"@import \"tailwindcss\";\n\n{scaffold.strip()}"
 
     return normalized
 
