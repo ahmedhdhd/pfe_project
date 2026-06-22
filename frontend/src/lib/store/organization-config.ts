@@ -94,10 +94,10 @@ export const useOrgCurrency = () => {
   return "TND";
 };
 
-export const useOrgPaymentMode = (): 'free' | 'per_course' | 'subscription' => {
+export const useOrgPaymentMode = (): 'free' | 'per_course' => {
   const config = useOrganizationConfigStore((state) => state.config);
   const mode = (config as any)?.paymentMode;
-  if (mode === 'free' || mode === 'per_course' || mode === 'subscription') {
+  if (mode === 'free' || mode === 'per_course') {
     return mode;
   }
   return 'per_course';

@@ -4,14 +4,14 @@ This repo now uses one simple Azure flow:
 
 - build Docker images from `backend/Dockerfile`, `frontend/Dockerfile`, and `ai-service/Dockerfile`
 - push them to Azure Container Registry
-- update Azure Container Apps with the new image tags
+- update Azure Web Apps with the new image tags
 - run Prisma migrations once in the GitHub Actions workflow before the backend image is updated
 
 ## What you need
 
 - Azure subscription
 - Azure Container Registry
-- 3 Azure Container Apps:
+- 3 Azure Web Apps for Containers:
   - backend API
   - frontend web app
   - AI service
@@ -57,7 +57,7 @@ The old PowerShell setup/deploy scripts are no longer used:
 3. Build and push the backend image to ACR
 4. Build and push the frontend image to ACR
 5. Build and push the AI image to ACR
-6. Update the Azure Container Apps to the new images
+6. Update the Azure Web Apps to the new images
 
 ## Notes
 

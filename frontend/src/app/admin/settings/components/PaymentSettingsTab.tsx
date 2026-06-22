@@ -1,7 +1,6 @@
 "use client";
 
 import { Dispatch, SetStateAction } from "react";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -10,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShieldAlert, Gift, CreditCard, Crown, Check } from "@/components/icons";
+import { ShieldAlert, Gift, CreditCard, Check } from "@/components/icons";
 import { CreateOrganizationConfigData } from "@/lib/types/api";
 
 interface PaymentSettingsTabProps {
@@ -39,16 +38,6 @@ const PAYMENT_MODES = [
     border: "border-blue-300 dark:border-blue-700",
     ring: "ring-blue-500/30",
   },
-  {
-    id: "subscription" as const,
-    label: "Subscription",
-    description: "Students pay once to unlock access to all courses and test series.",
-    icon: Crown,
-    color: "text-amber-600 dark:text-amber-400",
-    bg: "bg-amber-50 dark:bg-amber-950/30",
-    border: "border-amber-300 dark:border-amber-700",
-    ring: "ring-amber-500/30",
-  },
 ];
 
 export function PaymentSettingsTab({
@@ -56,8 +45,7 @@ export function PaymentSettingsTab({
   setFormData,
 }: PaymentSettingsTabProps) {
   const currentMode = formData.paymentMode || "per_course";
-  const needsPaidGateway =
-    currentMode === "per_course" || currentMode === "subscription";
+  const needsPaidGateway = currentMode === "per_course";
 
   return (
     <div className="space-y-6">
@@ -69,7 +57,7 @@ export function PaymentSettingsTab({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             {PAYMENT_MODES.map((mode) => {
               const isSelected = currentMode === mode.id;
               const Icon = mode.icon;
@@ -125,107 +113,6 @@ export function PaymentSettingsTab({
           </div>
         </CardContent>
       </Card>
-
-      {currentMode === "subscription" && (
-        <Card className="rounded-xl border-amber-200 dark:border-amber-900 bg-amber-50/30 dark:bg-amber-950/10">
-          <CardHeader className="pb-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/40">
-                <Crown className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div>
-                <CardTitle className="text-lg">Subscription Settings</CardTitle>
-                <CardDescription className="mt-0.5">
-                  Configure the subscription billing type and pricing.
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">
-                Billing Type <span className="text-destructive">*</span>
-              </Label>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  {
-                    id: "onetime" as const,
-                    label: "One-time",
-                    desc: "Pay once, access forever",
-                    icon: "💎",
-                  },
-                  {
-                    id: "monthly" as const,
-                    label: "Monthly",
-                    desc: "Renew every 30 days",
-                    icon: "🔄",
-                  },
-                ].map((opt) => {
-                  const isSelected =
-                    (formData.subscriptionType || "onetime") === opt.id;
-                  return (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          subscriptionType: opt.id,
-                        }))
-                      }
-                      className={`relative flex items-center gap-3 rounded-xl border-2 p-3.5 text-left transition-all duration-200 ${
-                        isSelected
-                          ? "border-amber-400 dark:border-amber-600 bg-amber-100/50 dark:bg-amber-950/30 shadow-sm ring-2 ring-amber-400/20"
-                          : "border-border/60 hover:border-border"
-                      }`}
-                    >
-                      {isSelected && (
-                        <div className="absolute right-2 top-2">
-                          <div className="flex h-4 w-4 items-center justify-center rounded-full bg-amber-500">
-                            <Check className="h-2.5 w-2.5 text-white" />
-                          </div>
-                        </div>
-                      )}
-                      <span className="text-xl">{opt.icon}</span>
-                      <div>
-                        <p className="text-sm font-semibold">{opt.label}</p>
-                        <p className="text-xs text-muted-foreground">{opt.desc}</p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="subscriptionPrice" className="text-sm font-medium">
-                Subscription Price ({formData.currency || "TND"}){" "}
-                <span className="text-destructive">*</span>
-              </Label>
-              <input
-                id="subscriptionPrice"
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.subscriptionPrice || ""}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    subscriptionPrice: parseFloat(e.target.value) || 0,
-                  }))
-                }
-                placeholder="e.g. 50"
-                className="w-full max-w-xs rounded-xl border border-input bg-background px-3 py-2 font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                {(formData.subscriptionType || "onetime") === "monthly"
-                  ? "Students will pay this amount every month to maintain access to all courses and test series."
-                  : "Students will pay this amount once to permanently unlock all courses and test series."}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {currentMode === "free" && (
         <Card className="rounded-xl border-emerald-200 dark:border-emerald-900 bg-emerald-50/30 dark:bg-emerald-950/10">
@@ -299,55 +186,27 @@ export function PaymentSettingsTab({
 
             <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-3">
               <p className="text-sm font-semibold text-foreground">
-                How{" "}
-                {currentMode === "subscription"
-                  ? "subscriptions work"
-                  : "per-course payments work"}
+                How per-course payments work
               </p>
               <ol className="text-sm text-muted-foreground space-y-1.5 list-none">
-                {currentMode === "subscription" ? (
-                  <>
-                    <li className="flex gap-2">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                        1
-                      </span>
-                      Student registers and is prompted to subscribe
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                        2
-                      </span>
-                      Student pays the subscription fee through Konnect
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                        3
-                      </span>
-                      After payment, all courses and test series are unlocked
-                    </li>
-                  </>
-                ) : (
-                  <>
-                    <li className="flex gap-2">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                        1
-                      </span>
-                      Student clicks Enroll and the backend initializes Konnect checkout
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                        2
-                      </span>
-                      Student is redirected to Konnect&apos;s secure checkout
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                        3
-                      </span>
-                      After payment, enrollment is activated automatically
-                    </li>
-                  </>
-                )}
+                <li className="flex gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
+                    1
+                  </span>
+                  Student clicks Enroll and the backend initializes Konnect checkout
+                </li>
+                <li className="flex gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
+                    2
+                  </span>
+                  Student is redirected to Konnect&apos;s secure checkout
+                </li>
+                <li className="flex gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
+                    3
+                  </span>
+                  After payment, enrollment is activated automatically
+                </li>
               </ol>
             </div>
           </CardContent>

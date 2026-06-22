@@ -2,7 +2,7 @@ name: Deploy to Azure with Docker
 
 on:
   push:
-    branches: [main]
+    branches: [skipaionboarding]
   workflow_dispatch:
 
 permissions:
@@ -81,28 +81,37 @@ jobs:
             --file ai-service/Dockerfile \
             ai-service
 
-      - name: Update backend container app
+      - name: Update backend Web App
         run: |
           ACR_LOGIN_SERVER=$(az acr show --name "${{ env.AZURE_ACR_NAME }}" --query loginServer -o tsv)
-          az containerapp update \
+          az webapp config container set \
             --name "${{ env.AZURE_BACKEND_APP }}" \
             --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
-            --image "${ACR_LOGIN_SERVER}/queztlearn-backend:${{ github.sha }}" \
-            --set-env-vars AI_SERVICE_URL="${{ env.AI_SERVICE_URL }}"
+            --docker-custom-image-name "${ACR_LOGIN_SERVER}/queztlearn-backend:${{ github.sha }}" \
+            --docker-registry-server-url "https://${ACR_LOGIN_SERVER}"
+          az webapp config appsettings set \
+            --name "${{ env.AZURE_BACKEND_APP }}" \
+            --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
+            --settings AI_SERVICE_URL="${{ env.AI_SERVICE_URL }}"
 
-      - name: Update frontend container app
+      - name: Update frontend Web App
         run: |
           ACR_LOGIN_SERVER=$(az acr show --name "${{ env.AZURE_ACR_NAME }}" --query loginServer -o tsv)
-          az containerapp update \
+          az webapp config container set \
             --name "${{ env.AZURE_FRONTEND_APP }}" \
             --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
-            --image "${ACR_LOGIN_SERVER}/queztlearn-frontend:${{ github.sha }}" \
-            --set-env-vars NEXT_PUBLIC_API_URL="${{ env.NEXT_PUBLIC_API_URL }}"
+            --docker-custom-image-name "${ACR_LOGIN_SERVER}/queztlearn-frontend:${{ github.sha }}" \
+            --docker-registry-server-url "https://${ACR_LOGIN_SERVER}"
+          az webapp config appsettings set \
+            --name "${{ env.AZURE_FRONTEND_APP }}" \
+            --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
+            --settings NEXT_PUBLIC_API_URL="${{ env.NEXT_PUBLIC_API_URL }}"
 
-      - name: Update AI container app
+      - name: Update AI Web App
         run: |
           ACR_LOGIN_SERVER=$(az acr show --name "${{ env.AZURE_ACR_NAME }}" --query loginServer -o tsv)
-          az containerapp update \
+          az webapp config container set \
             --name "${{ env.AZURE_AI_APP }}" \
             --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
-            --image "${ACR_LOGIN_SERVER}/queztlearn-ai:${{ github.sha }}"
+            --docker-custom-image-name "${ACR_LOGIN_SERVER}/queztlearn-ai:${{ github.sha }}" \
+            --docker-registry-server-url "https://${ACR_LOGIN_SERVER}"

@@ -160,7 +160,7 @@ export default function AdminSettingsPage() {
         heroSubtitle: config.heroSubtitle,
         motto: config.motto,
         openRouterApiKey: config.openRouterApiKey || "",
-        paymentMode: config.paymentMode || 'per_course',
+        paymentMode: config.paymentMode === 'subscription' ? 'per_course' : (config.paymentMode || 'per_course'),
         subscriptionPrice: config.subscriptionPrice || 0,
         subscriptionType: config.subscriptionType || 'onetime',
         metaTitle: config.metaTitle,
