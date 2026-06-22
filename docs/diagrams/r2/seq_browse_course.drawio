@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.5.2 Chrome/142.0.7444.265 Electron/39.6.1 Safari/537.36" version="29.5.2">
   <diagram name="Browse Course Sequence - Detailed" id="seq_browse_detailed">
-    <mxGraphModel dx="1070" dy="641" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1800" pageHeight="2800" math="0" shadow="0">
+    <mxGraphModel dx="2853" dy="1710" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1800" pageHeight="2800" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -19,13 +19,13 @@
         <mxCell id="l1" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="100" y="150" as="sourcePoint" />
-            <mxPoint x="100" y="2700" as="targetPoint" />
+            <mxPoint x="100" y="1430" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="h2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" value=":CatalogPage&lt;br&gt;(UI Component)" vertex="1">
           <mxGeometry height="55" width="140" x="230" y="85" as="geometry" />
         </mxCell>
-        <mxCell id="l2" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
+        <mxCell id="l2" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;entryX=0.533;entryY=0.566;entryDx=0;entryDy=0;entryPerimeter=0;" target="act_page" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="300" y="150" as="sourcePoint" />
             <mxPoint x="300" y="2700" as="targetPoint" />
@@ -37,7 +37,7 @@
         <mxCell id="l3" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="480" y="150" as="sourcePoint" />
-            <mxPoint x="480" y="2700" as="targetPoint" />
+            <mxPoint x="480" y="1460" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="h4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" value=":APIClient / Axios" vertex="1">
@@ -46,7 +46,7 @@
         <mxCell id="l4" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="660" y="150" as="sourcePoint" />
-            <mxPoint x="660" y="2700" as="targetPoint" />
+            <mxPoint x="660" y="1410" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="h5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=1;" value=":CatalogController" vertex="1">
@@ -55,7 +55,7 @@
         <mxCell id="l5" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="880" y="150" as="sourcePoint" />
-            <mxPoint x="880" y="2700" as="targetPoint" />
+            <mxPoint x="880" y="1390" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="h6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;" value=":AuthMiddleware" vertex="1">
@@ -64,7 +64,7 @@
         <mxCell id="l6" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1060" y="150" as="sourcePoint" />
-            <mxPoint x="1060" y="2700" as="targetPoint" />
+            <mxPoint x="1060" y="1330" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="h7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=1;" value=":CourseService" vertex="1">
@@ -73,7 +73,7 @@
         <mxCell id="l7" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1240" y="150" as="sourcePoint" />
-            <mxPoint x="1240" y="2700" as="targetPoint" />
+            <mxPoint x="1240" y="1330" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="h8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;" value="Prisma Database" vertex="1">
@@ -82,7 +82,7 @@
         <mxCell id="l8" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1420" y="150" as="sourcePoint" />
-            <mxPoint x="1420" y="2700" as="targetPoint" />
+            <mxPoint x="1420" y="1320" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="h9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" value="PaymentService&lt;br&gt;(konnect&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;)&lt;/span&gt;" vertex="1">
@@ -91,11 +91,11 @@
         <mxCell id="l9" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1600" y="150" as="sourcePoint" />
-            <mxPoint x="1600" y="2700" as="targetPoint" />
+            <mxPoint x="1600" y="1230" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="act_page" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#d5e8d4;strokeColor=#82b366;" value="" vertex="1">
-          <mxGeometry height="2360" width="10" x="295" y="175" as="geometry" />
+          <mxGeometry height="1165" width="10" x="295" y="175" as="geometry" />
         </mxCell>
         <mxCell id="act_hook1" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#d5e8d4;strokeColor=#82b366;" value="" vertex="1">
           <mxGeometry height="540" width="10" x="475" y="215" as="geometry" />
@@ -103,17 +103,11 @@
         <mxCell id="act_hook2" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#d5e8d4;strokeColor=#82b366;" value="" vertex="1">
           <mxGeometry height="380" width="10" x="475" y="905" as="geometry" />
         </mxCell>
-        <mxCell id="act_hook3" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#d5e8d4;strokeColor=#82b366;" value="" vertex="1">
-          <mxGeometry height="1060" width="10" x="475" y="1435" as="geometry" />
-        </mxCell>
         <mxCell id="act_api1" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#d5e8d4;strokeColor=#82b366;" value="" vertex="1">
           <mxGeometry height="460" width="10" x="655" y="255" as="geometry" />
         </mxCell>
         <mxCell id="act_api2" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#d5e8d4;strokeColor=#82b366;" value="" vertex="1">
           <mxGeometry height="300" width="10" x="655" y="945" as="geometry" />
-        </mxCell>
-        <mxCell id="act_api3" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#d5e8d4;strokeColor=#82b366;" value="" vertex="1">
-          <mxGeometry height="980" width="10" x="655" y="1475" as="geometry" />
         </mxCell>
         <mxCell id="act_ctrl1" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffe6cc;strokeColor=#d79b00;" value="" vertex="1">
           <mxGeometry height="380" width="10" x="875" y="295" as="geometry" />
@@ -121,23 +115,14 @@
         <mxCell id="act_ctrl2" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffe6cc;strokeColor=#d79b00;" value="" vertex="1">
           <mxGeometry height="220" width="10" x="875" y="985" as="geometry" />
         </mxCell>
-        <mxCell id="act_ctrl3" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffe6cc;strokeColor=#d79b00;" value="" vertex="1">
-          <mxGeometry height="920" width="10" x="875" y="1515" as="geometry" />
-        </mxCell>
         <mxCell id="act_auth1" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#e1d5e7;strokeColor=#9673a6;" value="" vertex="1">
           <mxGeometry height="140" width="10" x="1055" y="335" as="geometry" />
-        </mxCell>
-        <mxCell id="act_auth2" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#e1d5e7;strokeColor=#9673a6;" value="" vertex="1">
-          <mxGeometry height="60" width="10" x="1055" y="1555" as="geometry" />
         </mxCell>
         <mxCell id="act_svc1" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffe6cc;strokeColor=#d79b00;" value="" vertex="1">
           <mxGeometry height="140" width="10" x="1235" y="495" as="geometry" />
         </mxCell>
         <mxCell id="act_svc2" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffe6cc;strokeColor=#d79b00;" value="" vertex="1">
           <mxGeometry height="140" width="10" x="1235" y="1025" as="geometry" />
-        </mxCell>
-        <mxCell id="act_svc3" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffe6cc;strokeColor=#d79b00;" value="" vertex="1">
-          <mxGeometry height="760" width="10" x="1235" y="1635" as="geometry" />
         </mxCell>
         <mxCell id="act_db1" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#f8cecc;strokeColor=#b85450;" value="" vertex="1">
           <mxGeometry height="60" width="10" x="1415" y="375" as="geometry" />
@@ -147,15 +132,6 @@
         </mxCell>
         <mxCell id="act_db3" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#f8cecc;strokeColor=#b85450;" value="" vertex="1">
           <mxGeometry height="60" width="10" x="1415" y="1065" as="geometry" />
-        </mxCell>
-        <mxCell id="act_db4" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#f8cecc;strokeColor=#b85450;" value="" vertex="1">
-          <mxGeometry height="60" width="10" x="1415" y="1675" as="geometry" />
-        </mxCell>
-        <mxCell id="act_db5" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#f8cecc;strokeColor=#b85450;" value="" vertex="1">
-          <mxGeometry height="60" width="10" x="1415" y="2305" as="geometry" />
-        </mxCell>
-        <mxCell id="act_pay" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#fff2cc;strokeColor=#d6b656;" value="" vertex="1">
-          <mxGeometry height="60" width="10" x="1595" y="2025" as="geometry" />
         </mxCell>
         <mxCell id="phase1" parent="1" style="text;html=1;fontSize=12;fontStyle=3;fillColor=#f5f5f5;strokeColor=#666666;align=left;" value="Phase 1 — Parcours du catalogue de cours" vertex="1">
           <mxGeometry height="20" width="1600" x="50" y="145" as="geometry" />
@@ -329,180 +305,6 @@
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="295" y="1300" as="sourcePoint" />
             <mxPoint x="100" y="1300" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="phase3" parent="1" style="text;html=1;fontSize=12;fontStyle=3;fillColor=#f5f5f5;strokeColor=#666666;align=left;" value="Phase 3 — Inscription au cours" vertex="1">
-          <mxGeometry height="20" width="1600" x="50" y="1350" as="geometry" />
-        </mxCell>
-        <mxCell id="m29" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="29. Cliquer sur &quot;S&#39;inscrire&quot;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="100" y="1390" as="sourcePoint" />
-            <mxPoint x="295" y="1390" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="m30" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="30. enrollInCourse()">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="305" y="1430" as="sourcePoint" />
-            <mxPoint x="475" y="1430" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="m31" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="31. POST request">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="485" y="1470" as="sourcePoint" />
-            <mxPoint x="655" y="1470" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="m32" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="32. POST /api/catalog/:id/enroll">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="665" y="1510" as="sourcePoint" />
-            <mxPoint x="875" y="1510" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="m33" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="33. authenticate()">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="885" y="1550" as="sourcePoint" />
-            <mxPoint x="1055" y="1550" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="m34" edge="1" parent="1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;" value="34. next()">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1055" y="1590" as="sourcePoint" />
-            <mxPoint x="885" y="1590" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="m35" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="35. handleEnrollment()">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="885" y="1630" as="sourcePoint" />
-            <mxPoint x="1235" y="1630" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="m36" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="36. check existing enrollment">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1245" y="1670" as="sourcePoint" />
-            <mxPoint x="1415" y="1670" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="m37" edge="1" parent="1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;" value="37. null (not enrolled)">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1415" y="1710" as="sourcePoint" />
-            <mxPoint x="1245" y="1710" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="alt1" parent="1" style="swimlane;startSize=35;fillColor=#fff2cc;strokeColor=none;fontSize=14;fontStyle=1;perimeterSpacing=9;" value="[alt] Déjà inscrit ?" vertex="1">
-          <mxGeometry height="840" width="1660" x="40" y="1750" as="geometry" />
-        </mxCell>
-        <mxCell id="fail_enroll1" edge="1" parent="alt1" style="html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#b85450;fontSize=11;" value="[Oui] → 409 Conflict">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1195" y="45" as="sourcePoint" />
-            <mxPoint x="845" y="45" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="fail_enroll2" edge="1" parent="alt1" style="html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#b85450;fontSize=11;" value="409 Conflict">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="835" y="85" as="sourcePoint" />
-            <mxPoint x="625" y="85" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="fail_enroll3" edge="1" parent="alt1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="Error">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="615" y="125" as="sourcePoint" />
-            <mxPoint x="445" y="125" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="fail_enroll4" edge="1" parent="alt1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="Error">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="435" y="165" as="sourcePoint" />
-            <mxPoint x="265" y="165" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="fail_enroll5" edge="1" parent="alt1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="&quot;Vous êtes déjà inscrit à ce cours&quot;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="255" y="205" as="sourcePoint" />
-            <mxPoint x="60" y="205" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="alt1_sep1" parent="alt1" style="line;strokeWidth=2;dashed=1;dashPattern=1 2;html=1;" vertex="1">
-          <mxGeometry height="10" width="1660" y="240" as="geometry" />
-        </mxCell>
-        <mxCell id="alt1_sep1_txt" parent="alt1" style="text;html=1;fontSize=12;fontStyle=1;" value="[else if] Cours payant (prix &gt; 0) ?" vertex="1">
-          <mxGeometry height="20" width="250" x="5" y="250" as="geometry" />
-        </mxCell>
-        <mxCell id="pay1" edge="1" parent="alt1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="createCheckoutSession()">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1205" y="280" as="sourcePoint" />
-            <mxPoint x="1555" y="280" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="pay2" edge="1" parent="alt1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;" value="sessionUrl">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1555" y="320" as="sourcePoint" />
-            <mxPoint x="1205" y="320" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="pay3" edge="1" parent="alt1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;" value="sessionUrl">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1195" y="360" as="sourcePoint" />
-            <mxPoint x="845" y="360" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="pay4" edge="1" parent="alt1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;" value="200 OK { redirectUrl: sessionUrl }">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="835" y="400" as="sourcePoint" />
-            <mxPoint x="625" y="400" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="pay5" edge="1" parent="alt1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="redirectUrl">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="615" y="440" as="sourcePoint" />
-            <mxPoint x="265" y="440" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="pay6" edge="1" parent="alt1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="Rediriger vers Stripe Checkout">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="255" y="480" as="sourcePoint" />
-            <mxPoint x="60" y="480" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="alt1_sep2" parent="alt1" style="line;strokeWidth=2;dashed=1;dashPattern=1 2;html=1;" vertex="1">
-          <mxGeometry height="10" width="1660" y="520" as="geometry" />
-        </mxCell>
-        <mxCell id="alt1_sep2_txt" parent="alt1" style="text;html=1;fontSize=12;fontStyle=1;" value="[else] Cours gratuit" vertex="1">
-          <mxGeometry height="20" width="250" x="5" y="530" as="geometry" />
-        </mxCell>
-        <mxCell id="free1" edge="1" parent="alt1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="create BatchEnrollment">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1205" y="560" as="sourcePoint" />
-            <mxPoint x="1375" y="560" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="free2" edge="1" parent="alt1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;" value="OK">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1375" y="600" as="sourcePoint" />
-            <mxPoint x="1205" y="600" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="free3" edge="1" parent="alt1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;" value="Success">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1195" y="640" as="sourcePoint" />
-            <mxPoint x="845" y="640" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="free4" edge="1" parent="alt1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;" value="201 Created (Inscrit)">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="835" y="680" as="sourcePoint" />
-            <mxPoint x="625" y="680" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="free5" edge="1" parent="alt1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="onSuccess">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="615" y="720" as="sourcePoint" />
-            <mxPoint x="265" y="720" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="free6" edge="1" parent="alt1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="&quot;Inscription confirmée&quot; + Accès direct au cours">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="255" y="760" as="sourcePoint" />
-            <mxPoint x="60" y="760" as="targetPoint" />
           </mxGeometry>
         </mxCell>
       </root>

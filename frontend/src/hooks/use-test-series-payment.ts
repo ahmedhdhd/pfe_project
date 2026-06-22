@@ -28,7 +28,3 @@ export const useTestSeriesKonnectPayment = () => {
     isLoading,
   };
 };
-
-// Keep legacy export name for any files still referencing it
-/** @deprecated Use useTestSeriesKonnectPayment */
-export const useTestSeriesFlouciPayment = useTestSeriesKonnectPayment;

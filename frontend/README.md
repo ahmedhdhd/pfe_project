@@ -11,7 +11,7 @@ A modern, multi-tenant Learning Management System built with Next.js, designed f
 - **Test Series & Assessments**: Smart assessment engine with auto-grading, question banks, timed exams, and performance analytics
 - **Video Integration**: Support for live classes, recorded lectures, and on-demand video content
 - **Batch Management**: Organize students into batches with scheduling and enrollment tracking
-- **Payment Integration**: Flouci integration for batch and test series payments
+- **Payment Integration**: Konnect integration for batch and test series payments
 - **Exam Security**: Proctoring features and exam security measures
 - **Real-Time Analytics**: Comprehensive dashboards for tracking student progress and performance
 
@@ -142,7 +142,7 @@ See `VIDEO_INTEGRATION.md`, `VIDEO_PLAYER_CONFIGURATION.md`, and `VIDEO_PLAYER_U
 
 ## 💳 Payment Integration
 
-Integrated with Flouci for:
+Integrated with Konnect for:
 - Batch enrollment payments
 - Test series purchases
 - Secure payment processing

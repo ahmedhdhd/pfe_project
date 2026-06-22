@@ -12,7 +12,7 @@ npm install
 ### 2. Configure environment
 ```bash
 cp .env.example .env
-# Edit .env with your database URL, JWT secrets, AWS keys, and Flouci keys
+# Edit .env with your database URL, JWT secrets, AWS keys, and Konnect keys
 ```
 
 ### 3. Set up database
@@ -41,7 +41,7 @@ src/
 │   ├── adminAuth.controller.ts    # Admin/teacher registration, login, invite
 │   ├── studentAuth.controller.ts  # Student auth + OTP phone login
 │   ├── organization.controller.ts # Org creation + white-label config
-│   ├── batch.controller.ts        # Batch CRUD + Flouci checkout
+│   ├── batch.controller.ts        # Batch CRUD + Konnect checkout
 │   ├── content.controller.ts      # Content CRUD + video progress tracking
 │   ├── testSeries.controller.ts   # Test series, tests, sections, questions
 │   ├── attempt.controller.ts      # Test attempt lifecycle + auto-scoring
@@ -85,8 +85,8 @@ prisma/
 | `AWS_S3_BUCKET` | S3 bucket name |
 | `AWS_CLOUDFRONT_URL` | CloudFront CDN base URL |
 | `SMTP_HOST/PORT/USER/PASS/FROM` | Email config |
-| `FLOUCI_PUBLIC_KEY` | Flouci public key |
-| `FLOUCI_PRIVATE_KEY` | Flouci private key |
+| `KONNECT_API_KEY` | Shared Konnect API key for all organizations |
+| `KONNECT_WALLET_ID` | Shared Konnect wallet ID for all organizations |
 | `KONNECT_API_BASE` | Konnect API base URL (default: `https://api.sandbox.konnect.network/api/v2`) |
 
 ---
@@ -108,7 +108,7 @@ Three-step flow: `initiate` → browser uploads chunks directly to S3 → `compl
 ### Test Scoring
 Auto-scored on submit: MCQ/True-False by `isCorrect` option flag, Numerical by exact float match, Fill-Blank by case-insensitive string match. Negative marks applied for wrong answers. Rank/percentile calculated against all completed attempts for that test.
 
-### Payments (Flouci)
-1. `POST /api/batches/:id/checkout` → creates an internal order + Flouci hosted checkout link
-2. Frontend redirects the student to Flouci
-3. `POST /api/batches/verify-payment` → verifies the Flouci payment status → enrolls the user
+### Payments (Konnect)
+1. `POST /api/batches/:id/checkout` → creates an internal order + Konnect hosted checkout link
+2. Frontend redirects the student to Konnect
+3. `POST /api/batches/verify-payment` → verifies the Konnect payment status → enrolls the user

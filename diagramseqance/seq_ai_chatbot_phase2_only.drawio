@@ -1,0 +1,271 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.5.2 Chrome/142.0.7444.265 Electron/39.6.1 Safari/537.36" version="29.5.2">
+  <diagram name="AI Chatbot Sequence - Phase 2 Only" id="seq_ai_chatbot_phase2">
+    <mxGraphModel dx="1712" dy="1026" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1800" pageHeight="1800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="grp_frontend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" value="&lt;span style=&quot;font-weight: 700;&quot;&gt;Frontend&lt;/span&gt;" vertex="1">
+          <mxGeometry height="20" width="540" x="200" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="grp_backend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;" value="&lt;span style=&quot;font-weight: 700;&quot;&gt;Backend + AI Services&lt;/span&gt;" vertex="1">
+          <mxGeometry height="20" width="880" x="780" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="user" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Student" vertex="1">
+          <mxGeometry height="70" width="40" x="80" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="h2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" value="ChatbotPanel&lt;br&gt;(UI Component)" vertex="1">
+          <mxGeometry height="55" width="140" x="230" y="85" as="geometry" />
+        </mxCell>
+        <mxCell id="h3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" value="ChatHook" vertex="1">
+          <mxGeometry height="55" width="140" x="410" y="85" as="geometry" />
+        </mxCell>
+        <mxCell id="h4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" value="APIClient / Axios" vertex="1">
+          <mxGeometry height="55" width="140" x="590" y="85" as="geometry" />
+        </mxCell>
+        <mxCell id="h5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=1;" value="ChatController" vertex="1">
+          <mxGeometry height="55" width="140" x="810" y="85" as="geometry" />
+        </mxCell>
+        <mxCell id="h6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;" value="AuthMiddleware" vertex="1">
+          <mxGeometry height="55" width="140" x="990" y="85" as="geometry" />
+        </mxCell>
+        <mxCell id="h7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" value="AI service" vertex="1">
+          <mxGeometry height="55" width="140" x="1170" y="85" as="geometry" />
+        </mxCell>
+        <mxCell id="h8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;" value="pgvector DB" vertex="1">
+          <mxGeometry height="55" width="140" x="1350" y="85" as="geometry" />
+        </mxCell>
+        <mxCell id="h9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;" value="OpenRouter LLM" vertex="1">
+          <mxGeometry height="55" width="140" x="1530" y="85" as="geometry" />
+        </mxCell>
+        <mxCell id="l1" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="150" as="sourcePoint" />
+            <mxPoint x="100" y="1700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l2" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="150" as="sourcePoint" />
+            <mxPoint x="300" y="1700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l3" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="150" as="sourcePoint" />
+            <mxPoint x="480" y="1700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l4" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="660" y="150" as="sourcePoint" />
+            <mxPoint x="660" y="1700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l5" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="880" y="150" as="sourcePoint" />
+            <mxPoint x="880" y="1700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l6" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1060" y="150" as="sourcePoint" />
+            <mxPoint x="1060" y="1700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l7" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1240" y="150" as="sourcePoint" />
+            <mxPoint x="1240" y="1700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l8" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1420" y="150" as="sourcePoint" />
+            <mxPoint x="1420" y="1700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l9" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1600" y="150" as="sourcePoint" />
+            <mxPoint x="1600" y="1700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="act_page" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#d5e8d4;strokeColor=#82b366;" value="" vertex="1">
+          <mxGeometry height="1215" width="10" x="295" y="215" as="geometry" />
+        </mxCell>
+        <mxCell id="act_hook" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#d5e8d4;strokeColor=#82b366;" value="" vertex="1">
+          <mxGeometry height="1095" width="10" x="475" y="255" as="geometry" />
+        </mxCell>
+        <mxCell id="act_api" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#d5e8d4;strokeColor=#82b366;" value="" vertex="1">
+          <mxGeometry height="1065" width="10" x="655" y="295" as="geometry" />
+        </mxCell>
+        <mxCell id="act_ctrl_chat" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffe6cc;strokeColor=#d79b00;" value="" vertex="1">
+          <mxGeometry height="975" width="10" x="875" y="335" as="geometry" />
+        </mxCell>
+        <mxCell id="act_auth" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#e1d5e7;strokeColor=#9673a6;" value="" vertex="1">
+          <mxGeometry height="60" width="10" x="1055" y="375" as="geometry" />
+        </mxCell>
+        <mxCell id="act_fastapi_chat" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="" vertex="1">
+          <mxGeometry height="775" width="10" x="1235" y="495" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db2" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#f8cecc;strokeColor=#b85450;" value="" vertex="1">
+          <mxGeometry height="60" width="10" x="1415" y="815" as="geometry" />
+        </mxCell>
+        <mxCell id="act_llm" parent="1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#e1d5e7;strokeColor=#9673a6;" value="" vertex="1">
+          <mxGeometry height="100" width="10" x="1595" y="1015" as="geometry" />
+        </mxCell>
+        <mxCell id="phase2" parent="1" style="text;html=1;fontSize=12;fontStyle=3;fillColor=#f5f5f5;strokeColor=#666666;align=left;" value="Phase 2 — Student Conversation with RAG AI" vertex="1">
+          <mxGeometry height="20" width="1600" x="50" y="165" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_chat" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="1. Ask a question">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="220" as="sourcePoint" />
+            <mxPoint x="295" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m2_chat" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="2. sendMessage&lt;div&gt;(courseId, message)&lt;/div&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="260" as="sourcePoint" />
+            <mxPoint x="475" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3_chat" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="3. POST request">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="485" y="300" as="sourcePoint" />
+            <mxPoint x="655" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4_chat" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="4. POST /api/ai/chat">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="665" y="340" as="sourcePoint" />
+            <mxPoint x="875" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m5_chat" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="5. authenticate()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="885" y="380" as="sourcePoint" />
+            <mxPoint x="1055" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m6_chat" edge="1" parent="1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;" value="6. next() [JWT valid]">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1055" y="420" as="sourcePoint" />
+            <mxPoint x="885" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m7_chat" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="7. POST /internal/v1/chat&amp;nbsp;&lt;div&gt;(courseId, message, history, apiKey)&lt;/div&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="885" y="500" as="sourcePoint" />
+            <mxPoint x="1235" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="alt1" parent="1" style="swimlane;startSize=35;fillColor=#fff2cc;strokeColor=default;fontSize=14;fontStyle=1;perimeterSpacing=9;" value="[alt] RAG Search" vertex="1">
+          <mxGeometry height="320" width="1660" x="40" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="alt1_succ1" edge="1" parent="alt1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="&amp;nbsp;Compute embedding vector">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1255" y="60" />
+              <mxPoint x="1255" y="100" />
+            </Array>
+            <mxPoint x="1205" y="60" as="sourcePoint" />
+            <mxPoint x="1205" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="alt1_succ2" edge="1" parent="alt1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="SELECT top-5 chunks&lt;div&gt;by cosine similarity&lt;/div&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1205" y="140" as="sourcePoint" />
+            <mxPoint x="1375" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="alt1_succ3" edge="1" parent="alt1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;" value="Relevant content chunks">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1375" y="180" as="sourcePoint" />
+            <mxPoint x="1205" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="alt1_sep" parent="alt1" style="line;strokeWidth=2;dashed=1;dashPattern=1 2;html=1;" vertex="1">
+          <mxGeometry height="10" width="1660" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="alt1_sep_txt" parent="alt1" style="text;html=1;fontSize=12;fontStyle=1;" value="[else] No context found or off-topic query" vertex="1">
+          <mxGeometry height="20" width="350" x="5" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="alt1_fail1" edge="1" parent="alt1" style="html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#b85450;fontSize=11;" value="null (ragStatus =&amp;nbsp;&lt;div&gt;NO_CONTENT)&lt;/div&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1375" y="290" as="sourcePoint" />
+            <mxPoint x="1205" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YSmdAnzls2tPiMyDir91-1" parent="alt1" style="text;html=1;fontSize=12;fontStyle=1;" value="&lt;span style=&quot;font-size: 11px; text-align: center; background-color: rgb(255, 255, 255);&quot;&gt;[if] Course-related question&amp;nbsp;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="20" width="350" x="5" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="xcIy56caFmQk-F0rY3aj-1" parent="alt1" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#f8cecc;strokeColor=#b85450;" value="" vertex="1">
+          <mxGeometry height="60" width="10" x="1380" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="m8_chat" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="8. Build system prompt&amp;nbsp;&lt;div&gt;(chunks + history)&lt;/div&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1295" y="900" />
+              <mxPoint x="1295" y="940" />
+            </Array>
+            <mxPoint x="1245" y="900" as="sourcePoint" />
+            <mxPoint x="1245" y="940" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m9_chat" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="9. Call the LLM">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1245" y="1020" as="sourcePoint" />
+            <mxPoint x="1595" y="1020" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m10_chat" edge="1" parent="1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;" value="10. Contextual response">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1595" y="1100" as="sourcePoint" />
+            <mxPoint x="1245" y="1100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m11_chat" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="11. Attach metadata (ragChunksUsed)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1295" y="1160" />
+              <mxPoint x="1295" y="1200" />
+            </Array>
+            <mxPoint x="1245" y="1160" as="sourcePoint" />
+            <mxPoint x="1245" y="1200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m12_chat" edge="1" parent="1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;" value="12. Response + metadata">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1235" y="1260" as="sourcePoint" />
+            <mxPoint x="885" y="1260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m13_chat" edge="1" parent="1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;" value="13. 200 OK">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="875" y="1300" as="sourcePoint" />
+            <mxPoint x="665" y="1300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m14_chat" edge="1" parent="1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;" value="14. onSuccess">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="655" y="1340" as="sourcePoint" />
+            <mxPoint x="485" y="1340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m15_chat" edge="1" parent="1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;" value="15. update chat state">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="475" y="1380" as="sourcePoint" />
+            <mxPoint x="305" y="1380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m16_chat" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="16. Display contextual response">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="295" y="1420" as="sourcePoint" />
+            <mxPoint x="100" y="1420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

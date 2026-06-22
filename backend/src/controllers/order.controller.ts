@@ -4,12 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/auth';
 import { sendError, sendSuccess } from '../utils/response';
-import {
-  buildFlouciCallbackUrl,
-  createFlouciPayment,
-  resolveFlouciCredentials,
-} from '../utils/flouci';
-import { createKonnectPayment } from '../utils/konnect';
+import { createKonnectPayment, getKonnectCredentials } from '../utils/konnect';
 
 const PAYMENT_CURRENCY_FALLBACK = 'TND';
 const MANUAL_PAYMENT_PROVIDERS = ['BANK_TRANSFER', 'MANDAT_MINUTE_POSTE'] as const;
@@ -79,7 +74,7 @@ const parseOrderItems = (value: unknown): OrderItemSnapshot[] => {
         language: normalizeOptionalString(record.language) ?? null,
       } satisfies OrderItemSnapshot;
     })
-    .filter((item): item is OrderItemSnapshot => !!item);
+    .filter(Boolean) as OrderItemSnapshot[];
 };
 
 export const getOrderBatchIds = (order: {
@@ -312,13 +307,7 @@ export const createCourseOrderCheckout = async (
       where: { organizationId },
       select: {
         paymentMode: true,
-        paymentGateway: true,
         currency: true,
-        konnectApiKey: true,
-        konnectWalletId: true,
-        razorpayKeyId: true,
-        razorpayKeySecret: true,
-        logoUrl: true,
         themeJson: true,
       },
     });
@@ -433,67 +422,19 @@ export const createCourseOrderCheckout = async (
       return;
     }
 
-    const gateway = (config?.paymentGateway || 'konnect').toLowerCase();
-    if (gateway === 'flouci' && (!config?.razorpayKeyId || !config?.razorpayKeySecret)) {
-      sendError(res, 'Flouci payment is not configured for this organization', 400);
-      return;
-    }
-    if (gateway === 'konnect' && (!config?.konnectApiKey || !config?.konnectWalletId)) {
-      sendError(res, 'Konnect payment is not configured for this organization', 400);
-      return;
-    }
-
     const order = await prisma.order.create({
       data: {
         ...baseOrderData,
-        paymentProvider: gateway === 'flouci' ? 'FLOUCI' : 'KONNECT',
+        paymentProvider: 'KONNECT',
         paymentStatus: 'PENDING',
         manualReviewStatus: ManualOrderStatus.NOT_REQUIRED,
       },
     });
 
     try {
-      if (gateway === 'flouci') {
-        const { publicKey, privateKey } = resolveFlouciCredentials(config || undefined);
-        const payment = await createFlouciPayment({
-          amountMillimes: toMillimes(amount),
-          publicKey,
-          privateKey,
-          trackingId: order.id,
-          clientId: userId,
-          imageUrl: config?.logoUrl || undefined,
-          successLink: buildFlouciCallbackUrl({
-            orderId: order.id,
-            type: 'batch',
-            entityId,
-            status: 'success',
-          }),
-          failLink: buildFlouciCallbackUrl({
-            orderId: order.id,
-            type: 'batch',
-            entityId,
-            status: 'failed',
-          }),
-        });
-
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { providerOrderId: payment.paymentId },
-        });
-
-        sendSuccess(res, {
-          orderId: order.id,
-          payUrl: payment.link,
-          paymentLink: payment.link,
-          paymentId: payment.paymentId,
-          paymentRef: payment.paymentId,
-          purchasedBatchIds: items.map((item) => item.batchId),
-        });
-        return;
-      }
-
-      const payment = await createKonnectPayment(config!.konnectApiKey!, {
-        receiverWalletId: config!.konnectWalletId!,
+      const { apiKey, walletId } = getKonnectCredentials();
+      const payment = await createKonnectPayment(apiKey, {
+        receiverWalletId: walletId,
         amount: toMillimes(amount),
         token:
           currency === 'USD' || currency === 'EUR' ? (currency as 'USD' | 'EUR') : 'TND',
@@ -525,7 +466,7 @@ export const createCourseOrderCheckout = async (
         data: {
           paymentStatus: 'FAILED',
           failureReason:
-            error instanceof Error ? error.message : 'Failed to initialize payment',
+            error instanceof Error ? error.message : 'Failed to initialize Konnect payment',
         },
       });
       throw error;
@@ -546,7 +487,9 @@ export const listStudentOrders = async (
     const limit = Number(req.query.limit) || 10;
     const where = {
       userId,
-      ...(req.query.status ? { paymentStatus: String(req.query.status) } : {}),
+      ...(req.query.status
+        ? { paymentStatus: String(req.query.status).toUpperCase() as any }
+        : {}),
     };
 
     const [orders, total] = await Promise.all([
@@ -658,7 +601,9 @@ export const listAdminOrders = async (
     const limit = Number(req.query.limit) || 20;
     const where = {
       organizationId: req.user!.organizationId,
-      ...(req.query.status ? { paymentStatus: String(req.query.status) } : {}),
+      ...(req.query.status
+        ? { paymentStatus: String(req.query.status).toUpperCase() as any }
+        : {}),
     };
 
     const [orders, total] = await Promise.all([

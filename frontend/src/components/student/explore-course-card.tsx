@@ -20,7 +20,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useOrgCurrency, useOrgPaymentMode } from "@/lib/store/organization-config";
 import { formatCurrency } from "@/lib/utils/format";
-import { useTestSeriesFlouciPayment } from "@/hooks/use-test-series-payment";
+import { useTestSeriesKonnectPayment } from "@/hooks/use-test-series-payment";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -74,7 +74,7 @@ export function ExploreCourseCard({
   const {
     initializePayment: initializeTestSeriesPayment,
     isLoading: isTestSeriesLoading,
-  } = useTestSeriesFlouciPayment();
+  } = useTestSeriesKonnectPayment();
 
   const finalPrice =
     type === "test-series" && isFree

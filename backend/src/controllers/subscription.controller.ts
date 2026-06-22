@@ -3,13 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import prisma from '../utils/prisma';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../middleware/auth';
-import {
-  buildFlouciCallbackUrl,
-  createFlouciPayment,
-  resolveFlouciCredentials,
-  verifyFlouciPayment,
-} from '../utils/flouci';
-import { createKonnectPayment, verifyKonnectPayment } from '../utils/konnect';
+import { createKonnectPayment, getKonnectCredentials, verifyKonnectPayment } from '../utils/konnect';
 
 const PAYMENT_CURRENCY = 'TND';
 const toMillimes = (amount: number) => Math.round(amount * 1000);
@@ -92,16 +86,6 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
       return;
     }
 
-    const gateway = (config.paymentGateway || 'konnect').toLowerCase();
-    if (gateway === 'flouci' && (!config.razorpayKeyId || !config.razorpayKeySecret)) {
-      sendError(res, 'Flouci payment is not configured', 400);
-      return;
-    }
-    if (gateway === 'konnect' && (!config.konnectApiKey || !config.konnectWalletId)) {
-      sendError(res, 'Konnect payment is not configured', 400);
-      return;
-    }
-
     const subscriptionPrice = config.subscriptionPrice || 0;
     if (subscriptionPrice <= 0) {
       sendError(res, 'Subscription price is not configured', 400);
@@ -136,7 +120,7 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
         entityId: orgId,
         amount: subscriptionPrice,
         currency: PAYMENT_CURRENCY,
-        paymentProvider: gateway === 'flouci' ? 'FLOUCI' : 'KONNECT',
+        paymentProvider: 'KONNECT',
         receiptId: `sub_${uuidv4()}`,
         paymentStatus: 'PENDING',
       },
@@ -144,76 +128,34 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
 
     try {
       const userObj = await prisma.user.findUnique({ where: { id: userId } });
-      if (gateway === 'flouci') {
-        const { publicKey, privateKey } = resolveFlouciCredentials(config);
-        const payment = await createFlouciPayment({
-          amountMillimes,
-          publicKey,
-          privateKey,
-          trackingId: order.id,
-          clientId: userId,
-          imageUrl: config?.logoUrl || undefined,
-          successLink: buildFlouciCallbackUrl({
-            orderId: order.id,
-            type: 'subscription',
-            entityId: orgId,
-            status: 'success',
-          }),
-          failLink: buildFlouciCallbackUrl({
-            orderId: order.id,
-            type: 'subscription',
-            entityId: orgId,
-            status: 'failed',
-          }),
-        });
+      const { apiKey, walletId } = getKonnectCredentials();
+      const payment = await createKonnectPayment(apiKey, {
+        receiverWalletId: walletId,
+        amount: amountMillimes,
+        token: config.currency === 'USD' || config.currency === 'EUR' ? config.currency : 'TND',
+        orderId: order.id,
+        firstName: userObj?.username || 'Learner',
+        email: userObj?.email || undefined,
+        successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=subscription`,
+        failUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=subscription`,
+        theme: 'light',
+      });
 
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { providerOrderId: payment.paymentId },
-        });
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { providerOrderId: payment.paymentRef },
+      });
 
-        sendSuccess(res, {
-          payUrl: payment.link,
-          paymentLink: payment.link,
-          orderId: order.id,
-          paymentId: payment.paymentId,
-          paymentRef: payment.paymentId,
-          currency: PAYMENT_CURRENCY,
-          amount: amountMillimes,
-          gateway: 'flouci',
-        });
-      } else {
-        const payment = await createKonnectPayment(config.konnectApiKey, {
-          receiverWalletId: config.konnectWalletId,
-          amount: amountMillimes,
-          token: config.currency === 'USD' || config.currency === 'EUR' ? config.currency : 'TND',
-          orderId: order.id,
-          firstName: userObj?.username || 'Learner',
-          email: userObj?.email || undefined,
-          successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=subscription`,
-          failUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=subscription`,
-          theme: 'light',
-        });
-
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { providerOrderId: payment.paymentRef },
-        });
-
-        sendSuccess(res, {
-          payUrl: payment.payUrl,
-          paymentRef: payment.paymentRef,
-        });
-      }
+      sendSuccess(res, {
+        payUrl: payment.payUrl,
+        paymentRef: payment.paymentRef,
+      });
     } catch (error) {
       await prisma.order.update({
         where: { id: order.id },
         data: {
           paymentStatus: 'FAILED',
-          failureReason:
-            error instanceof Error
-              ? error.message
-              : `Failed to initialize ${gateway === 'flouci' ? 'Flouci' : 'Konnect'} payment`,
+          failureReason: error instanceof Error ? error.message : 'Failed to initialize Konnect payment',
         },
       });
       throw error;
@@ -251,38 +193,12 @@ export const subscriptionVerify = async (req: AuthRequest, res: Response, next: 
       where: { organizationId: order.organizationId },
     }) as any;
 
-    const gateway =
-      order.paymentProvider === 'FLOUCI'
-        ? 'flouci'
-        : order.paymentProvider === 'KONNECT'
-        ? 'konnect'
-        : (config?.paymentGateway || 'konnect').toLowerCase();
     let status = '';
     let providerPaymentId: string | null = null;
-
-    if (gateway === 'flouci') {
-      const { publicKey, privateKey } = resolveFlouciCredentials(config || undefined);
-      const payment = await verifyFlouciPayment({
-        paymentId: order.providerOrderId || paymentRef,
-        publicKey,
-        privateKey,
-      });
-      status =
-        payment.status === 'SUCCESS'
-          ? 'completed'
-          : payment.status === 'PENDING'
-          ? 'pending'
-          : 'failed';
-      providerPaymentId = payment.orderNumber || order.providerOrderId;
-    } else {
-      if (!config?.konnectApiKey) {
-        sendError(res, 'Konnect payment is not configured', 400);
-        return;
-      }
-      const paymentDetails = await verifyKonnectPayment(config.konnectApiKey, paymentRef);
-      status = paymentDetails.payment.status;
-      providerPaymentId = paymentDetails.payment.id;
-    }
+    const { apiKey } = getKonnectCredentials();
+    const paymentDetails = await verifyKonnectPayment(apiKey, paymentRef);
+    status = paymentDetails.payment.status;
+    providerPaymentId = paymentDetails.payment.id;
 
     if (status !== 'completed') {
       await prisma.order.update({
@@ -307,7 +223,7 @@ export const subscriptionVerify = async (req: AuthRequest, res: Response, next: 
     await prisma.order.update({
       where: { id: order.id },
       data: {
-        paymentProvider: gateway === 'flouci' ? 'FLOUCI' : 'KONNECT',
+        paymentProvider: 'KONNECT',
         paymentStatus: 'SUCCESS',
         providerPaymentId,
         failureReason: null,

@@ -1,7 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, useState } from "react";
-import { Input } from "@/components/ui/input";
+import { Dispatch, SetStateAction } from "react";
 import { Label } from "@/components/ui/label";
 import {
   Card,
@@ -10,27 +9,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Eye,
-  EyeOff,
-  ShieldAlert,
-  Gift,
-  CreditCard,
-  Crown,
-  Check,
-} from "@/components/icons";
+import { ShieldAlert, Gift, CreditCard, Crown, Check } from "@/components/icons";
 import { CreateOrganizationConfigData } from "@/lib/types/api";
 
 interface PaymentSettingsTabProps {
   formData: CreateOrganizationConfigData;
   setFormData: Dispatch<SetStateAction<CreateOrganizationConfigData>>;
-  // legacy props kept for backward compat — no longer used visually
-  showRazorpayKeyId?: boolean;
-  setShowRazorpayKeyId?: (value: boolean) => void;
-  showRazorpayKeySecret?: boolean;
-  setShowRazorpayKeySecret?: (value: boolean) => void;
 }
 
 const PAYMENT_MODES = [
@@ -47,8 +32,7 @@ const PAYMENT_MODES = [
   {
     id: "per_course" as const,
     label: "Per Course",
-    description:
-      "Students pay individually for each course or test series.",
+    description: "Students pay individually for each course or test series.",
     icon: CreditCard,
     color: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-50 dark:bg-blue-950/30",
@@ -58,8 +42,7 @@ const PAYMENT_MODES = [
   {
     id: "subscription" as const,
     label: "Subscription",
-    description:
-      "Students pay once to unlock access to all courses and test series.",
+    description: "Students pay once to unlock access to all courses and test series.",
     icon: Crown,
     color: "text-amber-600 dark:text-amber-400",
     bg: "bg-amber-50 dark:bg-amber-950/30",
@@ -68,39 +51,21 @@ const PAYMENT_MODES = [
   },
 ];
 
-const PAYMENT_GATEWAYS = [
-  {
-    id: "flouci" as const,
-    label: "Flouci",
-    description: "Flouci hosted checkout integration using public and secret keys.",
-  },
-  {
-    id: "konnect" as const,
-    label: "Konnect",
-    description: "Direct Konnect hosted checkout integration.",
-  },
-];
-
 export function PaymentSettingsTab({
   formData,
   setFormData,
 }: PaymentSettingsTabProps) {
-  const [showApiKey, setShowApiKey] = useState(false);
-  const [showWalletId, setShowWalletId] = useState(false);
-
   const currentMode = formData.paymentMode || "per_course";
-  const needsPaidGateway = currentMode === "per_course" || currentMode === "subscription";
-  const currentGateway = formData.paymentGateway || "konnect";
+  const needsPaidGateway =
+    currentMode === "per_course" || currentMode === "subscription";
 
   return (
     <div className="space-y-6">
-      {/* Payment Mode Selector */}
       <Card className="rounded-xl border-border/60">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg">Payment Mode</CardTitle>
           <CardDescription>
-            Choose how students access your content. This setting applies to all
-            courses and test series.
+            Choose how students access your content. This setting applies to all courses and test series.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -161,7 +126,6 @@ export function PaymentSettingsTab({
         </CardContent>
       </Card>
 
-      {/* Subscription Settings — only when subscription mode */}
       {currentMode === "subscription" && (
         <Card className="rounded-xl border-amber-200 dark:border-amber-900 bg-amber-50/30 dark:bg-amber-950/10">
           <CardHeader className="pb-4">
@@ -178,13 +142,12 @@ export function PaymentSettingsTab({
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Subscription Type Toggle */}
             <div className="space-y-3">
               <Label className="text-sm font-medium">
                 Billing Type <span className="text-destructive">*</span>
               </Label>
               <div className="grid grid-cols-2 gap-3">
-                {([
+                {[
                   {
                     id: "onetime" as const,
                     label: "One-time",
@@ -197,8 +160,9 @@ export function PaymentSettingsTab({
                     desc: "Renew every 30 days",
                     icon: "🔄",
                   },
-                ]).map((opt) => {
-                  const isSelected = (formData.subscriptionType || "onetime") === opt.id;
+                ].map((opt) => {
+                  const isSelected =
+                    (formData.subscriptionType || "onetime") === opt.id;
                   return (
                     <button
                       key={opt.id}
@@ -233,16 +197,12 @@ export function PaymentSettingsTab({
               </div>
             </div>
 
-            {/* Subscription Price */}
             <div className="space-y-2">
-              <Label
-                htmlFor="subscriptionPrice"
-                className="text-sm font-medium"
-              >
+              <Label htmlFor="subscriptionPrice" className="text-sm font-medium">
                 Subscription Price ({formData.currency || "TND"}){" "}
                 <span className="text-destructive">*</span>
               </Label>
-              <Input
+              <input
                 id="subscriptionPrice"
                 type="number"
                 min="0"
@@ -255,7 +215,7 @@ export function PaymentSettingsTab({
                   }))
                 }
                 placeholder="e.g. 50"
-                className="max-w-xs rounded-xl font-mono"
+                className="w-full max-w-xs rounded-xl border border-input bg-background px-3 py-2 font-mono text-sm"
               />
               <p className="text-xs text-muted-foreground">
                 {(formData.subscriptionType || "onetime") === "monthly"
@@ -267,7 +227,6 @@ export function PaymentSettingsTab({
         </Card>
       )}
 
-      {/* Free mode info */}
       {currentMode === "free" && (
         <Card className="rounded-xl border-emerald-200 dark:border-emerald-900 bg-emerald-50/30 dark:bg-emerald-950/10">
           <CardContent className="flex gap-3 p-4">
@@ -277,16 +236,13 @@ export function PaymentSettingsTab({
                 Free Access Mode
               </p>
               <p className="mt-0.5 text-sm text-emerald-800 dark:text-emerald-200">
-                All courses and test series will be available for free. Students
-                can enroll instantly without any payment. You don&apos;t need to
-                configure Konnect credentials.
+                All courses and test series will be available for free. Students can enroll instantly without any payment.
               </p>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Gateway selection and credentials */}
       {needsPaidGateway && (
         <Card className="rounded-xl border-border/60">
           <CardHeader className="pb-4">
@@ -307,54 +263,18 @@ export function PaymentSettingsTab({
                 </svg>
               </div>
               <div>
-                <CardTitle className="text-lg">
-                  Payment Gateway
-                </CardTitle>
+                <CardTitle className="text-lg">Payment Gateway</CardTitle>
                 <CardDescription className="mt-0.5">
-                  Choose the provider used for paid checkout flows.
+                  Konnect is managed globally from the backend environment.
                 </CardDescription>
               </div>
               <Badge className="ml-auto bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400 border-0">
-                Required
+                Konnect
               </Badge>
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-6">
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">
-                Gateway <span className="text-destructive">*</span>
-              </Label>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {PAYMENT_GATEWAYS.map((gateway) => {
-                  const selected = currentGateway === gateway.id;
-                  return (
-                    <button
-                      key={gateway.id}
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          paymentGateway: gateway.id,
-                        }))
-                      }
-                      className={`rounded-xl border-2 p-3 text-left transition ${
-                        selected
-                          ? "border-primary/70 bg-primary/5"
-                          : "border-border/60 hover:border-border"
-                      }`}
-                    >
-                      <p className="text-sm font-semibold">{gateway.label}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {gateway.description}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Security Warning */}
+          <CardContent className="space-y-4">
             <div className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/20">
               <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
               <div>
@@ -362,210 +282,21 @@ export function PaymentSettingsTab({
                   Security Notice
                 </p>
                 <p className="mt-0.5 text-sm text-amber-800 dark:text-amber-200">
-                  Payment API credentials are sensitive. Never share them in public channels.
+                  Payment credentials live in the backend `.env` file so every organization shares the same Konnect setup.
                 </p>
               </div>
             </div>
 
-            {currentGateway === "flouci" && (
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="flouciPublicKey" className="text-sm font-medium">
-                  Flouci Public Key <span className="text-destructive">*</span>
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="flouciPublicKey"
-                    type={showApiKey ? "text" : "password"}
-                    value={formData.razorpayKeyId || ""}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        razorpayKeyId: e.target.value,
-                      }))
-                    }
-                    autoComplete="off"
-                    spellCheck={false}
-                    placeholder="Flouci public key..."
-                    className="font-mono text-sm pr-24 rounded-xl"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowApiKey(!showApiKey)}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 text-muted-foreground hover:text-foreground"
-                  >
-                    {showApiKey ? (
-                      <span className="flex items-center gap-1 text-xs">
-                        <EyeOff className="h-3.5 w-3.5" /> Hide
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1 text-xs">
-                        <Eye className="h-3.5 w-3.5" /> Show
-                      </span>
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="flouciSecretKey" className="text-sm font-medium">
-                  Flouci Secret Key <span className="text-destructive">*</span>
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="flouciSecretKey"
-                    type={showWalletId ? "text" : "password"}
-                    value={formData.razorpayKeySecret || ""}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        razorpayKeySecret: e.target.value,
-                      }))
-                    }
-                    autoComplete="off"
-                    spellCheck={false}
-                    placeholder="Flouci secret key..."
-                    className="font-mono text-sm pr-24 rounded-xl"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowWalletId(!showWalletId)}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 text-muted-foreground hover:text-foreground"
-                  >
-                    {showWalletId ? (
-                      <span className="flex items-center gap-1 text-xs">
-                        <EyeOff className="h-3.5 w-3.5" /> Hide
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1 text-xs">
-                        <Eye className="h-3.5 w-3.5" /> Show
-                      </span>
-                    )}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  These fields reuse the existing secure credential storage for the legacy Flouci integration.
-                </p>
-              </div>
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-3">
+              <p className="text-sm font-semibold text-foreground">
+                Global Konnect configuration
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Paid checkout uses the shared Konnect API key and wallet ID from the backend environment for every organization.
+                Org admins can manage pricing and payment mode, but not the payment credentials.
+              </p>
             </div>
-            )}
-            {currentGateway === "konnect" && (
-            <div className="space-y-5">
-              {/* Konnect API Key */}
-              <div className="space-y-2">
-                <Label htmlFor="konnectApiKey" className="text-sm font-medium">
-                  Konnect API Key{" "}
-                  <span className="text-destructive">*</span>
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="konnectApiKey"
-                    type={showApiKey ? "text" : "password"}
-                    value={formData.konnectApiKey || ""}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        konnectApiKey: e.target.value,
-                      }))
-                    }
-                    onCopy={(e) => e.preventDefault()}
-                    onCut={(e) => e.preventDefault()}
-                    autoComplete="off"
-                    data-lpignore="true"
-                    spellCheck={false}
-                    placeholder="e.g. 66b3a9f8e4b0c2d1a5f6..."
-                    className="font-mono text-sm pr-24 rounded-xl"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowApiKey(!showApiKey)}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 text-muted-foreground hover:text-foreground"
-                  >
-                    {showApiKey ? (
-                      <span className="flex items-center gap-1 text-xs">
-                        <EyeOff className="h-3.5 w-3.5" /> Hide
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1 text-xs">
-                        <Eye className="h-3.5 w-3.5" /> Show
-                      </span>
-                    )}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Found in your{" "}
-                  <a
-                    href="https://app.konnect.network"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    Konnect Dashboard
-                  </a>{" "}
-                  → Settings → API Keys
-                </p>
-              </div>
 
-              {/* Konnect Wallet ID */}
-              <div className="space-y-2">
-                <Label
-                  htmlFor="konnectWalletId"
-                  className="text-sm font-medium"
-                >
-                  Receiver Wallet ID{" "}
-                  <span className="text-destructive">*</span>
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="konnectWalletId"
-                    type={showWalletId ? "text" : "password"}
-                    value={formData.konnectWalletId || ""}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        konnectWalletId: e.target.value,
-                      }))
-                    }
-                    onCopy={(e) => e.preventDefault()}
-                    onCut={(e) => e.preventDefault()}
-                    autoComplete="off"
-                    spellCheck={false}
-                    placeholder="e.g. 64f2b1c3e8a9d4f7..."
-                    className="font-mono text-sm pr-24 rounded-xl"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowWalletId(!showWalletId)}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 text-muted-foreground hover:text-foreground"
-                  >
-                    {showWalletId ? (
-                      <span className="flex items-center gap-1 text-xs">
-                        <EyeOff className="h-3.5 w-3.5" /> Hide
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1 text-xs">
-                        <Eye className="h-3.5 w-3.5" /> Show
-                      </span>
-                    )}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Your Konnect wallet ID — payments will be deposited into this
-                  wallet.
-                </p>
-              </div>
-            </div>
-            )}
-
-            {/* How it works */}
             <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-3">
               <p className="text-sm font-semibold text-foreground">
                 How{" "}
@@ -586,7 +317,7 @@ export function PaymentSettingsTab({
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
                         2
                       </span>
-                      Student pays the subscription fee via the selected gateway
+                      Student pays the subscription fee through Konnect
                     </li>
                     <li className="flex gap-2">
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
@@ -601,13 +332,13 @@ export function PaymentSettingsTab({
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
                         1
                       </span>
-                      Student clicks Enroll → backend initializes gateway checkout
+                      Student clicks Enroll and the backend initializes Konnect checkout
                     </li>
                     <li className="flex gap-2">
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
                         2
                       </span>
-                      Student is redirected to the selected gateway&apos;s secure checkout
+                      Student is redirected to Konnect&apos;s secure checkout
                     </li>
                     <li className="flex gap-2">
                       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">

@@ -53,11 +53,6 @@ model OrganizationConfig {
   contactPhone   String?
 
   // Payment
-  razorpayKeyId     String?
-  razorpayKeySecret String?
-  konnectApiKey     String?
-  konnectWalletId   String?
-  paymentGateway    String?  @default("konnect")
   paymentMode       String?  @default("per_course")
   subscriptionPrice Float?   @default(0)
   subscriptionType  String?  @default("onetime")

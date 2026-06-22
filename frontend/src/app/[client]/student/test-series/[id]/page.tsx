@@ -24,7 +24,7 @@ import {
   useClientTestsInSeries,
   useClientEnrollFreeTestSeries,
 } from "@/hooks/test-series-client";
-import { useTestSeriesFlouciPayment } from "@/hooks/use-test-series-payment";
+import { useTestSeriesKonnectPayment } from "@/hooks/use-test-series-payment";
 import {
   ErrorMessage,
   SuccessMessage,
@@ -90,7 +90,7 @@ export default function StudentTestSeriesDetailPage() {
   // Mutations and hooks
   const enrollFreeMutation = useClientEnrollFreeTestSeries();
   const { initializePayment, isLoading: isPaymentLoading } =
-    useTestSeriesFlouciPayment();
+    useTestSeriesKonnectPayment();
   const currency = useOrgCurrency();
 
   const testSeries = testSeriesData?.data;

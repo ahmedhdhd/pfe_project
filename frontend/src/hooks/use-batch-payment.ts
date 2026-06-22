@@ -28,7 +28,3 @@ export const useBatchKonnectPayment = () => {
     isLoading,
   };
 };
-
-// Keep legacy export name for any files still referencing it (will be cleaned up)
-/** @deprecated Use useBatchKonnectPayment */
-export const useBatchFlouciPayment = useBatchKonnectPayment;

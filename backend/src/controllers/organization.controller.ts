@@ -28,7 +28,7 @@ export const createOrganization = async (req: Request, res: Response, next: Next
 export const getPublicConfig = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { slug } = req.params;
-    let config = await prisma.organizationConfig.findFirst({
+    let config: any = await prisma.organizationConfig.findFirst({
       where: { OR: [{ slug }, { organization: { subdomain: slug } }, { organization: { domain: slug } }] },
     });
     
@@ -48,11 +48,6 @@ export const getPublicConfig = async (req: Request, res: Response, next: NextFun
         domain: org.domain,
         contactEmail: null,
         contactPhone: null,
-        razorpayKeyId: null,
-        razorpayKeySecret: null,
-        konnectApiKey: null,
-        konnectWalletId: null,
-        paymentGateway: "konnect",
         paymentMode: "per_course",
         subscriptionType: "FREE",
         subscriptionPrice: 0,
@@ -103,7 +98,20 @@ export const getAdminConfig = async (req: AuthRequest, res: Response, next: Next
 export const createOrUpdateConfig = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const organizationId = req.user!.organizationId;
-    const { theme, features, testimonials, faq, socialLinks, smtpConfig, ...rest } = req.body;
+    const {
+      theme,
+      features,
+      testimonials,
+      faq,
+      socialLinks,
+      smtpConfig,
+      razorpayKeyId: _legacyRazorpayKeyId,
+      razorpayKeySecret: _legacyRazorpayKeySecret,
+      konnectApiKey: _legacyKonnectApiKey,
+      konnectWalletId: _legacyKonnectWalletId,
+      paymentGateway: _legacyPaymentGateway,
+      ...rest
+    } = req.body;
     const data = {
       ...rest,
       organizationId,
@@ -166,16 +174,33 @@ export const clearCache = async (_req: AuthRequest, res: Response, next: NextFun
   } catch (e) { next(e); }
 };
 
-function formatConfig(config: Record<string, unknown>) {
+function formatConfig(config: any) {
+  const {
+    razorpayKeyId,
+    razorpayKeySecret,
+    konnectApiKey,
+    konnectWalletId,
+    paymentGateway,
+    ...safeConfig
+  } = config;
   return {
-    ...config,
-    theme: config.themeJson,
-    features: config.featuresJson,
-    testimonials: config.testimonialsJson,
-    faq: config.faqJson,
-    socialLinks: config.socialLinksJson,
-    smtpConfig: config.smtpConfigJson,
-    themeJson: undefined, featuresJson: undefined, testimonialsJson: undefined,
-    faqJson: undefined, socialLinksJson: undefined, smtpConfigJson: undefined,
+    ...safeConfig,
+    theme: safeConfig.themeJson,
+    features: safeConfig.featuresJson,
+    testimonials: safeConfig.testimonialsJson,
+    faq: safeConfig.faqJson,
+    socialLinks: safeConfig.socialLinksJson,
+    smtpConfig: safeConfig.smtpConfigJson,
+    themeJson: undefined,
+    featuresJson: undefined,
+    testimonialsJson: undefined,
+    faqJson: undefined,
+    socialLinksJson: undefined,
+    smtpConfigJson: undefined,
+    razorpayKeyId: undefined,
+    razorpayKeySecret: undefined,
+    konnectApiKey: undefined,
+    konnectWalletId: undefined,
+    paymentGateway: undefined,
   };
 }

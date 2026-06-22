@@ -5,6 +5,17 @@ const KONNECT_API_BASE = (
   process.env.KONNECT_API_BASE || DEFAULT_KONNECT_API_BASE
 ).replace(/\/+$/, '');
 
+export const getKonnectCredentials = () => {
+  const apiKey = process.env.KONNECT_API_KEY?.trim();
+  const walletId = process.env.KONNECT_WALLET_ID?.trim();
+
+  if (!apiKey || !walletId) {
+    throw new Error('KONNECT_API_KEY and KONNECT_WALLET_ID are required');
+  }
+
+  return { apiKey, walletId };
+};
+
 export interface KonnectInitRequest {
   receiverWalletId: string;
   amount: number; // in Millimes

@@ -93,8 +93,6 @@ export default function AdminSettingsPage() {
     []
   );
 
-  const [showRazorpayKeyId, setShowRazorpayKeyId] = useState(false);
-  const [showRazorpayKeySecret, setShowRazorpayKeySecret] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
 
@@ -124,7 +122,6 @@ export default function AdminSettingsPage() {
     ctaUrl: "",
     metaTitle: "",
     metaDescription: "",
-    paymentGateway: "konnect",
     openRouterApiKey: "",
   });
 
@@ -162,11 +159,6 @@ export default function AdminSettingsPage() {
         heroTitle: config.heroTitle,
         heroSubtitle: config.heroSubtitle,
         motto: config.motto,
-        razorpayKeyId: config.razorpayKeyId,
-        razorpayKeySecret: config.razorpayKeySecret,
-        konnectApiKey: config.konnectApiKey,
-        konnectWalletId: config.konnectWalletId,
-        paymentGateway: config.paymentGateway || "konnect",
         openRouterApiKey: config.openRouterApiKey || "",
         paymentMode: config.paymentMode || 'per_course',
         subscriptionPrice: config.subscriptionPrice || 0,
@@ -481,10 +473,6 @@ export default function AdminSettingsPage() {
             <PaymentSettingsTab
               formData={formData}
               setFormData={setFormData}
-              showRazorpayKeyId={showRazorpayKeyId}
-              setShowRazorpayKeyId={setShowRazorpayKeyId}
-              showRazorpayKeySecret={showRazorpayKeySecret}
-              setShowRazorpayKeySecret={setShowRazorpayKeySecret}
             />
           </TabsContent>
 

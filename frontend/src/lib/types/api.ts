@@ -231,13 +231,6 @@ export interface OrganizationConfig {
   domain?: string;
   contactEmail?: string;
   contactPhone?: string;
-  /** @deprecated use konnectApiKey */
-  razorpayKeyId?: string;
-  /** @deprecated use konnectWalletId */
-  razorpayKeySecret?: string;
-  konnectApiKey?: string;
-  konnectWalletId?: string;
-  paymentGateway?: 'konnect' | 'flouci';
   openRouterApiKey?: string;
   paymentMode?: 'free' | 'per_course' | 'subscription';
   subscriptionPrice?: number;
@@ -284,13 +277,6 @@ export interface CreateOrganizationConfigData {
   domain?: string;
   contactEmail?: string;
   contactPhone?: string;
-  /** @deprecated use konnectApiKey */
-  razorpayKeyId?: string;
-  /** @deprecated use konnectWalletId */
-  razorpayKeySecret?: string;
-  konnectApiKey?: string;
-  konnectWalletId?: string;
-  paymentGateway?: 'konnect' | 'flouci';
   openRouterApiKey?: string;
   paymentMode?: 'free' | 'per_course' | 'subscription';
   subscriptionPrice?: number;

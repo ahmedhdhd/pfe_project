@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.5.2 Chrome/142.0.7444.265 Electron/39.6.1 Safari/537.36" version="29.5.2">
   <diagram name="Registration + Email Verification - Detailed" id="seq_reg_verify_detailed">
-    <mxGraphModel dx="2190" dy="1026" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2000" pageHeight="2400" math="0" shadow="0">
+    <mxGraphModel dx="1712" dy="1026" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2000" pageHeight="2400" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -355,13 +355,13 @@
         <mxCell id="act_bcrypt" parent="alt2" style="html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="" vertex="1">
           <mxGeometry height="50" width="10" x="1275" y="560" as="geometry" />
         </mxCell>
-        <mxCell id="alt1" parent="1" style="swimlane;startSize=30;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=1;" value="alt" vertex="1">
+        <mxCell id="alt1" parent="1" style="swimlane;startSize=30;fillColor=#fff2cc;strokeColor=#222222;fontSize=13;fontStyle=1;" value="alt" vertex="1">
           <mxGeometry height="640" width="1840" x="50" y="360" as="geometry" />
         </mxCell>
-        <mxCell id="alt1_if" parent="alt1" style="text;html=1;fontSize=12;fontStyle=1;fillColor=none;strokeColor=none;" value="[if] Email already registered (user !== null)" vertex="1">
+        <mxCell id="alt1_if" parent="alt1" style="text;html=1;fontSize=12;fontStyle=1;fillColor=none;strokeColor=none;" value="&amp;nbsp;" vertex="1">
           <mxGeometry height="20" width="310" x="5" y="5" as="geometry" />
         </mxCell>
-        <mxCell id="f1a" edge="1" parent="alt1" style="html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#b85450;fontSize=11;" value="→ 409 Conflict { message: &#39;Email already in use&#39; }">
+        <mxCell id="f1a" edge="1" parent="alt1" style="html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#b85450;fontSize=11;" value="→ 409 Conflict { message:&amp;nbsp;&lt;div&gt;&#39;Email already in use&#39; }&lt;/div&gt;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="860" y="40" as="sourcePoint" />
             <mxPoint x="640" y="40" as="targetPoint" />
@@ -403,7 +403,7 @@
             <mxPoint x="860" y="250" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="m8" edge="1" parent="alt1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="8. Generate verification token (crypto.randomUUID())">
+        <mxCell id="m8" edge="1" parent="alt1" style="html=1;endArrow=block;endFill=1;fontSize=11;" value="8. Generate verification toke">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="870" y="285" />
@@ -450,6 +450,9 @@
         <mxCell id="act_db2" parent="alt1" style="html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="" vertex="1">
           <mxGeometry height="50" width="10" x="1072" y="203" as="geometry" />
         </mxCell>
+        <mxCell id="laokkx6gArvcQTkjOBkQ-1" parent="alt1" style="text;whiteSpace=wrap;html=1;fillColor=none;" value="&lt;span style=&quot;color: rgb(0, 0, 0); font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 700; letter-spacing: normal; orphans: 2; text-align: left; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: nowrap; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;&quot;&gt;[if] Email already registered (user !== null)&lt;/span&gt;" vertex="1">
+          <mxGeometry height="40" width="270" x="10" y="40" as="geometry" />
+        </mxCell>
         <mxCell id="yf2RuVhPFN4K-mcIWRUO-5" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.5;" target="act_es" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1537" y="148" as="sourcePoint" />
@@ -457,7 +460,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="act_es" parent="1" style="html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="" vertex="1">
-          <mxGeometry height="50" width="10" x="1532.5" y="740" as="geometry" />
+          <mxGeometry height="70" width="10" x="1532.5" y="740" as="geometry" />
         </mxCell>
         <mxCell id="m12" edge="1" parent="1" source="act_ctrl1" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=11;entryX=0.75;entryY=0.895;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.333;exitY=0.971;exitDx=0;exitDy=0;exitPerimeter=0;" target="act_api1" value="12. 201 Created&lt;div&gt;&amp;nbsp;{ message: &#39;Check your mailbox&#39; }&lt;/div&gt;">
           <mxGeometry relative="1" as="geometry">
