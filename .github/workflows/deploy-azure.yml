@@ -47,33 +47,29 @@ jobs:
 
 
 
+      - name: Log in to Azure Container Registry
+        run: az acr login --name ${{ env.AZURE_ACR_NAME }}
+
       - name: Build and push backend image
         run: |
-          az acr build \
-            --registry "${{ env.AZURE_ACR_NAME }}" \
-            --image "queztlearn-backend:${{ github.sha }}" \
-            --image "queztlearn-backend:latest" \
-            --file backend/Dockerfile \
-            backend
+          ACR_LOGIN_SERVER=$(az acr show --name "${{ env.AZURE_ACR_NAME }}" --query loginServer -o tsv)
+          docker build -t "${ACR_LOGIN_SERVER}/queztlearn-backend:${{ github.sha }}" -t "${ACR_LOGIN_SERVER}/queztlearn-backend:latest" -f backend/Dockerfile backend
+          docker push "${ACR_LOGIN_SERVER}/queztlearn-backend:${{ github.sha }}"
+          docker push "${ACR_LOGIN_SERVER}/queztlearn-backend:latest"
 
       - name: Build and push frontend image
         run: |
-          az acr build \
-            --registry "${{ env.AZURE_ACR_NAME }}" \
-            --image "queztlearn-frontend:${{ github.sha }}" \
-            --image "queztlearn-frontend:latest" \
-            --build-arg "NEXT_PUBLIC_API_URL=${{ env.NEXT_PUBLIC_API_URL }}" \
-            --file frontend/Dockerfile \
-            frontend
+          ACR_LOGIN_SERVER=$(az acr show --name "${{ env.AZURE_ACR_NAME }}" --query loginServer -o tsv)
+          docker build --build-arg "NEXT_PUBLIC_API_URL=${{ env.NEXT_PUBLIC_API_URL }}" -t "${ACR_LOGIN_SERVER}/queztlearn-frontend:${{ github.sha }}" -t "${ACR_LOGIN_SERVER}/queztlearn-frontend:latest" -f frontend/Dockerfile frontend
+          docker push "${ACR_LOGIN_SERVER}/queztlearn-frontend:${{ github.sha }}"
+          docker push "${ACR_LOGIN_SERVER}/queztlearn-frontend:latest"
 
       - name: Build and push AI image
         run: |
-          az acr build \
-            --registry "${{ env.AZURE_ACR_NAME }}" \
-            --image "queztlearn-ai:${{ github.sha }}" \
-            --image "queztlearn-ai:latest" \
-            --file ai-service/Dockerfile \
-            ai-service
+          ACR_LOGIN_SERVER=$(az acr show --name "${{ env.AZURE_ACR_NAME }}" --query loginServer -o tsv)
+          docker build -t "${ACR_LOGIN_SERVER}/queztlearn-ai:${{ github.sha }}" -t "${ACR_LOGIN_SERVER}/queztlearn-ai:latest" -f ai-service/Dockerfile ai-service
+          docker push "${ACR_LOGIN_SERVER}/queztlearn-ai:${{ github.sha }}"
+          docker push "${ACR_LOGIN_SERVER}/queztlearn-ai:latest"
 
       - name: Update backend Web App
         run: |
