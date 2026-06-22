@@ -354,7 +354,7 @@ export const reorderContents = async (req: Request, res: Response, next: NextFun
   try {
     const topicId = toOptionalString(req.params.topicId);
     const orderedContentIds = Array.isArray(req.body?.orderedContentIds)
-      ? req.body.orderedContentIds.filter((value): value is string => isNonEmptyString(value))
+      ? req.body.orderedContentIds.filter((value: any): value is string => isNonEmptyString(value))
       : [];
 
     if (!topicId) {
@@ -383,14 +383,14 @@ export const reorderContents = async (req: Request, res: Response, next: NextFun
 
     if (
       uniqueOrderedIds.size !== orderedContentIds.length ||
-      orderedContentIds.some((id) => !existingIds.has(id))
+      orderedContentIds.some((id: string) => !existingIds.has(id))
     ) {
       sendError(res, 'orderedContentIds contains invalid content ids', 400);
       return;
     }
 
     await prisma.$transaction(
-      orderedContentIds.map((id, index) =>
+      orderedContentIds.map((id: string, index: number) =>
         prisma.content.update({
           where: { id },
           data: { order: index },

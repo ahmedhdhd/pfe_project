@@ -5,6 +5,7 @@
 import { promises as fsPromises } from 'fs';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
+// @ts-ignore
 import WebSocket from 'ws';
 
 export const LIVE_SESSION_RECORDINGS_FOLDER = 'live-sessions';
