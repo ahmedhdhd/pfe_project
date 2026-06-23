@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Award, Loader2, Palette, ShieldCheck, Type } from "@/components/icons";
+import { Award, Loader2, Palette, Type } from "@/components/icons";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -422,42 +422,6 @@ export function CourseCertificateTab({
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <ShieldCheck className="h-4 w-4 text-primary" />
-              How it works
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm text-muted-foreground">
-            <div className="rounded-xl border border-border/60 bg-muted/20 px-4 py-4">
-              <p className="font-medium text-foreground">Automatic fields</p>
-              <ul className="mt-3 space-y-2">
-                <li>Student name is filled when they claim the certificate.</li>
-                <li>Issue date is generated automatically.</li>
-                <li>
-                  If signer name is empty, the course creator is used on the PDF.
-                </li>
-              </ul>
-            </div>
-
-            <div className="rounded-xl border border-border/60 bg-background px-4 py-4">
-              <p className="font-medium text-foreground">Current status</p>
-              <div className="mt-3 space-y-2">
-                <p>
-                  Template:{" "}
-                  <span className="text-foreground">{selectedTemplate.name}</span>
-                </p>
-                <p>
-                  Live for students:{" "}
-                  <span className="text-foreground">
-                    {form.enabled ? "Enabled" : "Disabled"}
-                  </span>
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

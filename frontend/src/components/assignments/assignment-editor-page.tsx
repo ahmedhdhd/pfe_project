@@ -290,20 +290,14 @@ export function AssignmentEditorPage({
         setSelectedQuestionId(firstQuestion.id);
       }
       setIsAiDialogOpen(false);
-      const chunkCount = result.data.ragChunksUsed ?? 0;
-      toast.success(
-        `Generated ${result.data.questions.length} questions from ${chunkCount} course content ${chunkCount === 1 ? "chunk" : "chunks"}.`
-      );
+      toast.success(`Generated ${result.data.questions.length} questions with AI.`);
     } catch (error: unknown) {
       const message =
         error && typeof error === "object" && "response" in error
           ? (error as { response?: { data?: { message?: string } } }).response?.data
               ?.message
           : undefined;
-      toast.error(
-        message ||
-          "Unable to generate assignment questions. Ensure course lessons are indexed for RAG."
-      );
+      toast.error(message || "Unable to generate assignment questions with AI.");
     }
   };
 
@@ -1023,11 +1017,6 @@ export function AssignmentEditorPage({
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Generate Assignment with AI</DialogTitle>
-            <DialogDescription>
-              Questions are generated from indexed course lesson content (RAG). Link this
-              assignment to a topic for tighter scope, describe what to assess, and ensure
-              lessons have extracted text and embeddings before generating.
-            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">

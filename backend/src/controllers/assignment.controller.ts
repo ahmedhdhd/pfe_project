@@ -636,19 +636,6 @@ export const generateAssignmentWithAi = async (
       return;
     }
 
-    if (parsed.ragStatus === 'no_chunks' || !normalizeJsonArray(parsed.questions).length) {
-      sendError(
-        res,
-        'No indexed course content was found for this assignment. Ensure lessons are indexed in the RAG pipeline for the selected course or topic, then try again.',
-        422
-      );
-      return;
-    }
-
-    logger.info(
-      `Assignment AI generation used ${parsed.ragChunksUsed ?? 0} RAG chunks for assignment ${assignment.id}`
-    );
-
     const questions = normalizeJsonArray(parsed.questions)
       .map((question: any) => {
         const type = normalizeQuestionType(question?.type);
@@ -711,8 +698,8 @@ export const generateAssignmentWithAi = async (
 
     sendSuccess(res, {
       questions: created,
-      ragChunksUsed: parsed.ragChunksUsed ?? 0,
-      ragStatus: parsed.ragStatus || 'ok',
+      ragChunksUsed: 0,
+      ragStatus: 'llm',
     }, undefined, 201);
   } catch (e) {
     next(e);

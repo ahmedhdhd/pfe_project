@@ -89,12 +89,7 @@ def build_assignment_generation_prompt(
     teacher_prompt: str,
     count: int,
     level: str,
-    retrieved_chunks: list[dict[str, Any]],
 ) -> str:
-    rag_section = _format_rag_section(
-        retrieved_chunks,
-        heading="RETRIEVED COURSE CONTENT (use as primary context, but use general knowledge if needed):",
-    )
     scope = course_name or "the course"
     if topic_name:
         scope = f"{topic_name} in {scope}"
@@ -102,10 +97,11 @@ def build_assignment_generation_prompt(
     return f"""You are an expert instructional designer creating LMS assignment questions.
 
 CRITICAL RULES:
-- Use the retrieved course content below as your primary context.
-- You MAY use general knowledge to fill in gaps if the retrieved context is insufficient or missing.
+- Use only the assignment details below and your general instructional design knowledge.
+- Do not depend on indexed course content, embeddings, or retrieval results.
 - Ensure questions are accurate and relevant to the assignment topic.
 - Reference concepts and terminology appropriately.
+- Prefer clear, teachable questions that fit the requested difficulty level.
 
 Assignment scope: {scope}
 Assignment title: {assignment_title}
@@ -114,8 +110,6 @@ Teacher instructions: {teacher_prompt}
 Difficulty: {level}
 Number of questions: {count}
 Difficulty requirement: {_level_instruction(level)}
-
-{rag_section}
 
 Return JSON only:
 {{
@@ -134,7 +128,7 @@ Return JSON only:
 Supported types: QUIZ, TRUE_FALSE, SHORT_ANSWER only.
 For QUIZ: exactly 4 options with ids a,b,c,d and one correct optionId.
 For TRUE_FALSE: include correctAnswer.value as boolean.
-For SHORT_ANSWER: include correctAnswer.text grounded in the retrieved content."""
+For SHORT_ANSWER: include correctAnswer.text that matches the assignment scope and difficulty."""
 
 
 def build_assignment_feedback_prompt(
@@ -194,7 +188,7 @@ Submission details:
 {chr(10).join(question_blocks)[:24000]}"""
 
 
-async def generate_assignment_questions_with_rag(
+async def generate_assignment_questions_with_llm(
     *,
     api_key: str,
     model: str,
@@ -209,34 +203,6 @@ async def generate_assignment_questions_with_rag(
     count: int,
     level: str,
 ) -> dict[str, Any]:
-    retrieval_query = " ".join(
-        part
-        for part in [
-            teacher_prompt,
-            assignment_title,
-            assignment_description,
-            topic_name,
-            course_name,
-        ]
-        if part
-    ).strip()
-
-    retrieved = await retrieve_course_chunks(
-        api_key=api_key,
-        batch_id=batch_id,
-        query_text=retrieval_query,
-        topic_id=topic_id,
-        content_ids=content_ids,
-        top_k=settings.rag_assignment_generation_top_k,
-    )
-
-    if not retrieved:
-        return {
-            "questions": [],
-            "ragChunksUsed": 0,
-            "ragStatus": "no_chunks",
-        }
-
     prompt = build_assignment_generation_prompt(
         assignment_title=assignment_title,
         assignment_description=assignment_description,
@@ -245,7 +211,6 @@ async def generate_assignment_questions_with_rag(
         teacher_prompt=teacher_prompt,
         count=count,
         level=level,
-        retrieved_chunks=retrieved,
     )
 
     parsed = await chat_json(
@@ -262,8 +227,8 @@ async def generate_assignment_questions_with_rag(
 
     return {
         "questions": questions,
-        "ragChunksUsed": len(retrieved),
-        "ragStatus": "ok",
+        "ragChunksUsed": 0,
+        "ragStatus": "llm",
     }
 
 

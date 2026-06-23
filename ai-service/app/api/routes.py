@@ -31,7 +31,7 @@ from app.services.playground import generate_playground_html
 from app.services.summaries import build_schedule_summary_prompt
 from app.services.assignment_ai import (
     evaluate_assignment_submission_with_rag,
-    generate_assignment_questions_with_rag,
+    generate_assignment_questions_with_llm,
 )
 from app.services.prompts import build_system_prompt_with_rag
 from app.services.theme_engine import generate_theme_bundle
@@ -216,7 +216,7 @@ async def assignment_generate(body: AssignmentGenerateRequest) -> dict[str, Any]
     if not api_key:
         raise HTTPException(status_code=400, detail="OpenRouter API key is not configured")
     try:
-        result = await generate_assignment_questions_with_rag(
+        result = await generate_assignment_questions_with_llm(
             api_key=api_key,
             model=settings.openrouter_model,
             batch_id=body.batch_id,
@@ -230,15 +230,6 @@ async def assignment_generate(body: AssignmentGenerateRequest) -> dict[str, Any]
             count=body.count,
             level=body.level,
         )
-        if result.get("ragStatus") == "no_chunks":
-            raise HTTPException(
-                status_code=422,
-                detail=(
-                    "No indexed course content was found for this assignment scope. "
-                    "Ensure lessons are indexed in the RAG pipeline (extracted text + embeddings) "
-                    "for the selected course or topic, then try again."
-                ),
-            )
         return result
     except HTTPException:
         raise
