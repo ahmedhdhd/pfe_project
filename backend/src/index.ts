@@ -1,3 +1,12 @@
+process.on('uncaughtException', (err) => {
+  console.error('!!! UNCAUGHT EXCEPTION AT TOP LEVEL !!!', err);
+  setTimeout(() => process.exit(1), 300000);
+});
+process.on('unhandledRejection', (err) => {
+  console.error('!!! UNHANDLED REJECTION AT TOP LEVEL !!!', err);
+  setTimeout(() => process.exit(1), 300000);
+});
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
