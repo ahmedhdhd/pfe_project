@@ -1,11 +1,11 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.5.2 Chrome/142.0.7444.265 Electron/39.6.1 Safari/537.36" version="29.5.2">
   <diagram name="Class Diagram — Release 2" id="class_r2">
-    <mxGraphModel dx="1407" dy="604" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2200" pageHeight="1400" math="0" shadow="0">
+    <mxGraphModel dx="1453" dy="882" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2200" pageHeight="1400" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="user" parent="1" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1;" value="User" vertex="1">
-          <mxGeometry height="200" width="200" x="-90" y="370" as="geometry" />
+          <mxGeometry height="200" width="200" x="110" y="370" as="geometry" />
         </mxCell>
         <mxCell id="user_sep" parent="user" style="line;strokeColor=#82b366;fontSize=14;" value="" vertex="1">
           <mxGeometry height="10" width="200" y="30" as="geometry" />
@@ -73,8 +73,32 @@
         <mxCell id="batch_a11" parent="batch" style="text;html=1;fontSize=14;align=left;spacingLeft=8;" value="+ certificateEnabled : Boolean" vertex="1">
           <mxGeometry height="18" width="230" y="225" as="geometry" />
         </mxCell>
+        <mxCell id="content" parent="1" style="swimlane;startSize=30;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;fontStyle=1;" value="Content" vertex="1">
+          <mxGeometry height="150" width="200" x="1070" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="content_sep" parent="content" style="line;strokeColor=#b85450;fontSize=14;" value="" vertex="1">
+          <mxGeometry height="10" width="200" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="content_a1" parent="content" style="text;html=1;fontSize=14;align=left;spacingLeft=8;" value="+ id : String" vertex="1">
+          <mxGeometry height="18" width="200" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="content_a2" parent="content" style="text;html=1;fontSize=14;align=left;spacingLeft=8;" value="+ topicId : String  {FK}" vertex="1">
+          <mxGeometry height="18" width="200" y="63" as="geometry" />
+        </mxCell>
+        <mxCell id="content_a3" parent="content" style="text;html=1;fontSize=14;align=left;spacingLeft=8;" value="+ title : String" vertex="1">
+          <mxGeometry height="18" width="200" y="81" as="geometry" />
+        </mxCell>
+        <mxCell id="content_a4" parent="content" style="text;html=1;fontSize=14;align=left;spacingLeft=8;" value="+ type : ContentType" vertex="1">
+          <mxGeometry height="18" width="200" y="99" as="geometry" />
+        </mxCell>
+        <mxCell id="content_a5" parent="content" style="text;html=1;fontSize=14;align=left;spacingLeft=8;" value="+ videoUrl : String?" vertex="1">
+          <mxGeometry height="18" width="200" y="117" as="geometry" />
+        </mxCell>
+        <mxCell id="content_a6" parent="content" style="text;html=1;fontSize=14;align=left;spacingLeft=8;" value="+ pdfUrl : String?" vertex="1">
+          <mxGeometry height="18" width="200" y="135" as="geometry" />
+        </mxCell>
         <mxCell id="batchenrollment" parent="1" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;" value="Enrollment" vertex="1">
-          <mxGeometry height="140" width="220" x="800" y="410" as="geometry" />
+          <mxGeometry height="140" width="220" x="660" y="500" as="geometry" />
         </mxCell>
         <mxCell id="batchenrollment_sep" parent="batchenrollment" style="line;strokeColor=#6c8ebf;fontSize=14;" value="" vertex="1">
           <mxGeometry height="10" width="220" y="30" as="geometry" />
@@ -95,7 +119,7 @@
           <mxGeometry height="18" width="220" y="117" as="geometry" />
         </mxCell>
         <mxCell id="contentprogress" parent="1" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;" value="ContentProgress" vertex="1">
-          <mxGeometry height="180" width="220" x="660" y="655" as="geometry" />
+          <mxGeometry height="180" width="220" x="770" y="645" as="geometry" />
         </mxCell>
         <mxCell id="contentprogress_sep" parent="contentprogress" style="line;strokeColor=#6c8ebf;fontSize=14;" value="" vertex="1">
           <mxGeometry height="10" width="220" y="30" as="geometry" />
@@ -155,7 +179,7 @@
           <mxGeometry height="18" width="230" y="189" as="geometry" />
         </mxCell>
         <mxCell id="assignmentquestion" parent="1" style="swimlane;startSize=30;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=14;fontStyle=1;" value="AssignmentQuestion" vertex="1">
-          <mxGeometry height="180" width="230" x="1230" y="270" as="geometry" />
+          <mxGeometry height="180" width="230" x="1190" y="115" as="geometry" />
         </mxCell>
         <mxCell id="assignmentquestion_sep" parent="assignmentquestion" style="line;strokeColor=#d79b00;fontSize=14;" value="" vertex="1">
           <mxGeometry height="10" width="230" y="30" as="geometry" />
@@ -182,7 +206,7 @@
           <mxGeometry height="18" width="230" y="153" as="geometry" />
         </mxCell>
         <mxCell id="assignmentsubmission" parent="1" style="swimlane;startSize=30;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=14;fontStyle=1;" value="AssignmentSubmission" vertex="1">
-          <mxGeometry height="200" width="230" x="1050" y="500" as="geometry" />
+          <mxGeometry height="200" width="230" x="900" y="380" as="geometry" />
         </mxCell>
         <mxCell id="assignmentsubmission_sep" parent="assignmentsubmission" style="line;strokeColor=#d79b00;fontSize=14;" value="" vertex="1">
           <mxGeometry height="10" width="230" y="30" as="geometry" />
@@ -260,7 +284,7 @@
           <mxGeometry height="18" width="180" y="117" as="geometry" />
         </mxCell>
         <mxCell id="announcement" parent="1" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;" value="Announcement" vertex="1">
-          <mxGeometry height="180" width="310" x="-10" y="30" as="geometry" />
+          <mxGeometry height="180" width="220" x="100" y="100" as="geometry" />
         </mxCell>
         <mxCell id="announcement_sep" parent="announcement" style="line;strokeColor=#6c8ebf;fontSize=14;" value="" vertex="1">
           <mxGeometry height="10" width="220" y="30" as="geometry" />
@@ -372,6 +396,19 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="r3_t" connectable="0" parent="r3" style="resizable=0;html=1;fontSize=14;" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.9" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r4" edge="1" parent="1" source="content" style="endArrow=none;html=1;fontSize=14;" target="contentprogress">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r4_s" connectable="0" parent="r4" style="resizable=0;html=1;fontSize=14;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.9" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r4_t" connectable="0" parent="r4" style="resizable=0;html=1;fontSize=14;" value="*" vertex="1">
           <mxGeometry relative="1" x="0.9" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>

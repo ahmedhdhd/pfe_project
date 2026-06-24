@@ -11,6 +11,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ShieldAlert, Gift, CreditCard, Check } from "@/components/icons";
 import { CreateOrganizationConfigData } from "@/lib/types/api";
+import { api } from "@/lib/api/client";
+import { toast } from "sonner";
 
 interface PaymentSettingsTabProps {
   formData: CreateOrganizationConfigData;
@@ -40,12 +42,63 @@ const PAYMENT_MODES = [
   },
 ];
 
+const PAYMENT_GATEWAYS = [
+  {
+    id: "KONNECT" as const,
+    label: "Konnect",
+    description: "Keep the current shared Konnect setup.",
+  },
+  {
+    id: "STRIPE_CONNECT" as const,
+    label: "Stripe Connect",
+    description: "Let this organization connect its own Stripe account.",
+  },
+];
+
 export function PaymentSettingsTab({
   formData,
   setFormData,
 }: PaymentSettingsTabProps) {
   const currentMode = formData.paymentMode || "per_course";
+  const currentGateway = formData.paymentGateway || "KONNECT";
   const needsPaidGateway = currentMode === "per_course";
+
+  const handleConnectStripe = async () => {
+    try {
+      const response = await api.startStripeConnect();
+      const url = response.data?.data?.url;
+      if (!response.data?.success || !url) {
+        throw new Error(response.data?.message || "Failed to start Stripe Connect");
+      }
+      window.location.assign(url);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to start Stripe Connect"
+      );
+    }
+  };
+
+  const handleDisconnectStripe = async () => {
+    try {
+      const response = await api.disconnectStripeConnect();
+      if (!response.data?.success) {
+        throw new Error(response.data?.message || "Failed to disconnect Stripe");
+      }
+      setFormData((prev) => ({
+        ...prev,
+        paymentGateway: "KONNECT",
+        stripeChargesEnabled: false,
+        stripePayoutsEnabled: false,
+        stripeDetailsSubmitted: false,
+        stripeConnectedAt: undefined,
+      }));
+      toast.success("Stripe account disconnected");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to disconnect Stripe"
+      );
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -152,63 +205,114 @@ export function PaymentSettingsTab({
               <div>
                 <CardTitle className="text-lg">Payment Gateway</CardTitle>
                 <CardDescription className="mt-0.5">
-                  Konnect is managed globally from the backend environment.
+                  Choose Konnect or let this organization connect its own Stripe account.
                 </CardDescription>
               </div>
-              <Badge className="ml-auto bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400 border-0">
-                Konnect
-              </Badge>
             </div>
           </CardHeader>
 
           <CardContent className="space-y-4">
-            <div className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/20">
-              <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
-              <div>
-                <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
-                  Security Notice
-                </p>
-                <p className="mt-0.5 text-sm text-amber-800 dark:text-amber-200">
-                  Payment credentials live in the backend `.env` file so every organization shares the same Konnect setup.
-                </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {PAYMENT_GATEWAYS.map((gateway) => {
+                const isSelected = currentGateway === gateway.id;
+                return (
+                  <button
+                    key={gateway.id}
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        paymentGateway: gateway.id,
+                      }))
+                    }
+                    className={`relative rounded-xl border-2 p-4 text-left transition-all duration-200 hover:shadow-md ${
+                      isSelected
+                        ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                        : "border-border/60 hover:border-border"
+                    }`}
+                  >
+                    {isSelected && (
+                      <div className="absolute right-2 top-2">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+                          <Check className="h-3 w-3 text-primary-foreground" />
+                        </div>
+                      </div>
+                    )}
+                    <p className="text-sm font-semibold">{gateway.label}</p>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                      {gateway.description}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+
+            {currentGateway === "KONNECT" ? (
+              <div className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/20">
+                <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+                <div>
+                  <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                    Konnect mode
+                  </p>
+                  <p className="mt-0.5 text-sm text-amber-800 dark:text-amber-200">
+                    The current checkout flow stays on the shared Konnect setup.
+                  </p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-950/20">
+                  <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+                      Stripe Connect
+                    </p>
+                    <p className="mt-0.5 text-sm text-emerald-800 dark:text-emerald-200">
+                      Connect the organization&apos;s Stripe account and keep the checkout branded to that account.
+                    </p>
+                  </div>
+                </div>
 
-            <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-3">
-              <p className="text-sm font-semibold text-foreground">
-                Global Konnect configuration
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Paid checkout uses the shared Konnect API key and wallet ID from the backend environment for every organization.
-                Org admins can manage pricing and payment mode, but not the payment credentials.
-              </p>
-            </div>
+                <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-3">
+                  <p className="text-sm font-semibold text-foreground">
+                    Connection status
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formData.stripeDetailsSubmitted
+                      ? "Stripe account connected."
+                      : "Stripe account not connected yet."}
+                  </p>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <Badge variant={formData.stripeChargesEnabled ? "default" : "secondary"}>
+                      Charges {formData.stripeChargesEnabled ? "enabled" : "disabled"}
+                    </Badge>
+                    <Badge variant={formData.stripePayoutsEnabled ? "default" : "secondary"}>
+                      Payouts {formData.stripePayoutsEnabled ? "enabled" : "disabled"}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Stripe checkout works best with USD or EUR in this codebase.
+                  </p>
+                </div>
 
-            <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-3">
-              <p className="text-sm font-semibold text-foreground">
-                How per-course payments work
-              </p>
-              <ol className="text-sm text-muted-foreground space-y-1.5 list-none">
-                <li className="flex gap-2">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                    1
-                  </span>
-                  Student clicks Enroll and the backend initializes Konnect checkout
-                </li>
-                <li className="flex gap-2">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                    2
-                  </span>
-                  Student is redirected to Konnect&apos;s secure checkout
-                </li>
-                <li className="flex gap-2">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                    3
-                  </span>
-                  After payment, enrollment is activated automatically
-                </li>
-              </ol>
-            </div>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleConnectStripe}
+                    className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                  >
+                    Connect Stripe
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDisconnectStripe}
+                    className="rounded-xl border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+                  >
+                    Disconnect
+                  </button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

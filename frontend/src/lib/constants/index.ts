@@ -4,6 +4,7 @@ export const ROLES = {
   ADMIN: "admin" as const,
   TEACHER: "teacher" as const,
   STUDENT: "student" as const,
+  SUPER_ADMIN: "super_admin" as const,
 } as const;
 
 // Admin navigation items (main domain)
@@ -180,6 +181,28 @@ export const STUDENT_NAVIGATION_ITEMS: NavigationItem[] = [
   // },
 ];
 
+// Super admin navigation items (platform domain)
+export const PLATFORM_NAVIGATION_ITEMS: NavigationItem[] = [
+  {
+    title: "Dashboard",
+    href: "/platform/dashboard",
+    icon: "LayoutDashboard",
+    roles: ["super_admin"],
+  },
+  {
+    title: "Organisations",
+    href: "/platform/organizations",
+    icon: "Building2",
+    roles: ["super_admin"],
+  },
+  {
+    title: "Reports",
+    href: "/platform/reports",
+    icon: "FileWarning",
+    roles: ["super_admin"],
+  },
+];
+
 // Legacy navigation items for backward compatibility
 export const NAVIGATION_ITEMS: NavigationItem[] = [
   {
@@ -338,6 +361,10 @@ export const getNavigationItems = (
 
   // Normalize role to lowercase for comparison
   const normalizedRole = role?.toLowerCase();
+
+  if (normalizedRole === ROLES.SUPER_ADMIN) {
+    return PLATFORM_NAVIGATION_ITEMS;
+  }
 
   // Main domain (teslaacademy.com) or localhost - admin and teacher
   if (

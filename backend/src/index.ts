@@ -46,15 +46,24 @@ import platformRoutes from './routes/platform.routes';
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(helmet());
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow any origin to support multi-tenant subdomains and custom domains
-    callback(null, true);
-  },
+// Handle preflight OPTIONS requests immediately
+app.options('*', cors({
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  crossOriginOpenerPolicy: false,
 }));
 
 const isProduction = process.env.NODE_ENV === 'production';

@@ -509,9 +509,6 @@ export default function PageEditorPage() {
                 rows={4}
                 placeholder="Example: A modern medical exam prep LMS for Arabic and French students. Clean white surfaces, confident blue accents, soft gradients, premium dashboard feeling, high readability, and polished CTA buttons."
               />
-              <p className="text-sm text-muted-foreground">
-                The generated result will fill your theme colors and the custom CSS already used on your org LMS website.
-              </p>
               <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"

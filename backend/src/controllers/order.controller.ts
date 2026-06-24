@@ -5,6 +5,12 @@ import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/auth';
 import { sendError, sendSuccess } from '../utils/response';
 import { createKonnectPayment, getKonnectCredentials } from '../utils/konnect';
+import {
+  createStripeCheckoutSession,
+  isStripeCurrencySupported,
+  normalizePaymentGateway,
+  retrieveStripeCheckoutSession,
+} from '../utils/stripeConnect';
 
 const PAYMENT_CURRENCY_FALLBACK = 'TND';
 const MANUAL_PAYMENT_PROVIDERS = ['BANK_TRANSFER', 'MANDAT_MINUTE_POSTE'] as const;
@@ -309,8 +315,10 @@ export const createCourseOrderCheckout = async (
         paymentMode: true,
         currency: true,
         themeJson: true,
-      },
-    });
+        paymentGateway: true,
+        stripeAccountId: true,
+      } as any,
+    }) as any;
 
     if ((config?.paymentMode || 'per_course') !== 'per_course') {
       sendError(res, 'Per-course checkout is not enabled for this organization', 400);
@@ -425,13 +433,53 @@ export const createCourseOrderCheckout = async (
     const order = await prisma.order.create({
       data: {
         ...baseOrderData,
-        paymentProvider: 'KONNECT',
+        paymentProvider:
+          config?.stripeAccountId && normalizePaymentGateway(config?.paymentGateway) === 'STRIPE_CONNECT'
+            ? 'STRIPE_CONNECT'
+            : 'KONNECT',
         paymentStatus: 'PENDING',
         manualReviewStatus: ManualOrderStatus.NOT_REQUIRED,
       },
     });
 
     try {
+      if (order.paymentProvider === 'STRIPE_CONNECT') {
+        if (!config?.stripeAccountId) {
+          throw new Error('Stripe Connect is not connected for this organization');
+        }
+        if (!isStripeCurrencySupported(currency)) {
+          throw new Error('Stripe Connect checkout supports only USD and EUR in this project');
+        }
+
+        const payment = await createStripeCheckoutSession({
+          connectedAccountId: config.stripeAccountId,
+          amount,
+          currency,
+          orderId: order.id,
+          organizationId,
+          itemName:
+            items.length === 1 ? items[0].title : `${items.length} courses checkout`,
+          customerEmail: email,
+          customerName: `${firstName} ${lastName}`.trim(),
+          successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=batch&entityId=${entityId}&provider=stripe`,
+          cancelUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=batch&entityId=${entityId}&provider=stripe`,
+        });
+
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { providerOrderId: payment.id },
+        });
+
+        sendSuccess(res, {
+          orderId: order.id,
+          payUrl: payment.url,
+          paymentLink: payment.url,
+          paymentRef: payment.id,
+          purchasedBatchIds: items.map((item) => item.batchId),
+        });
+        return;
+      }
+
       const { apiKey, walletId } = getKonnectCredentials();
       const payment = await createKonnectPayment(apiKey, {
         receiverWalletId: walletId,
@@ -466,7 +514,7 @@ export const createCourseOrderCheckout = async (
         data: {
           paymentStatus: 'FAILED',
           failureReason:
-            error instanceof Error ? error.message : 'Failed to initialize Konnect payment',
+            error instanceof Error ? error.message : 'Failed to initialize payment',
         },
       });
       throw error;

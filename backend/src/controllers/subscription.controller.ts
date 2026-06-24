@@ -4,10 +4,19 @@ import prisma from '../utils/prisma';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../middleware/auth';
 import { createKonnectPayment, getKonnectCredentials, verifyKonnectPayment } from '../utils/konnect';
+import {
+  createStripeCheckoutSession,
+  isStripeCurrencySupported,
+  normalizePaymentGateway,
+  retrieveStripeCheckoutSession,
+} from '../utils/stripeConnect';
 
 const PAYMENT_CURRENCY = 'TND';
 const toMillimes = (amount: number) => Math.round(amount * 1000);
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+const isStripeConnectConfigured = (config: { paymentGateway?: unknown; stripeAccountId?: string | null }) =>
+  normalizePaymentGateway(config?.paymentGateway) === 'STRIPE_CONNECT' && !!config?.stripeAccountId;
 
 /**
  * Check if a subscription order is still active based on subscription type.
@@ -32,6 +41,15 @@ export const getSubscriptionStatus = async (req: AuthRequest, res: Response, nex
 
     const config = await prisma.organizationConfig.findUnique({
       where: { organizationId: orgId },
+      select: {
+        paymentMode: true,
+        subscriptionPrice: true,
+        subscriptionType: true,
+        currency: true,
+        themeJson: true,
+        paymentGateway: true,
+        stripeAccountId: true,
+      } as any,
     }) as any;
 
     if (config?.paymentMode !== 'subscription') {
@@ -46,7 +64,7 @@ export const getSubscriptionStatus = async (req: AuthRequest, res: Response, nex
         userId,
         organizationId: orgId,
         entityType: 'BATCH',
-        paymentProvider: { in: ['KONNECT', 'FLOUCI'] },
+        paymentProvider: { in: ['KONNECT', 'FLOUCI', 'STRIPE_CONNECT'] },
         paymentStatus: 'SUCCESS',
         receiptId: { startsWith: 'sub_' },
       },
@@ -99,7 +117,7 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
       where: {
         userId,
         organizationId: orgId,
-        paymentProvider: { in: ['KONNECT', 'FLOUCI'] },
+        paymentProvider: { in: ['KONNECT', 'FLOUCI', 'STRIPE_CONNECT'] },
         paymentStatus: 'SUCCESS',
         receiptId: { startsWith: 'sub_' },
       },
@@ -120,7 +138,7 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
         entityId: orgId,
         amount: subscriptionPrice,
         currency: PAYMENT_CURRENCY,
-        paymentProvider: 'KONNECT',
+        paymentProvider: isStripeConnectConfigured(config) ? 'STRIPE_CONNECT' : 'KONNECT',
         receiptId: `sub_${uuidv4()}`,
         paymentStatus: 'PENDING',
       },
@@ -128,13 +146,43 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
 
     try {
       const userObj = await prisma.user.findUnique({ where: { id: userId } });
+      if (order.paymentProvider === 'STRIPE_CONNECT') {
+        if (!isStripeCurrencySupported(config.currency)) {
+          throw new Error('Stripe Connect checkout supports only USD and EUR in this project');
+        }
+
+        const payment = await createStripeCheckoutSession({
+          connectedAccountId: config.stripeAccountId,
+          amount: subscriptionPrice,
+          currency: config.currency,
+          orderId: order.id,
+          organizationId: orgId,
+          itemName: `Subscription - ${config.name || 'Organization'}`,
+          customerEmail: userObj?.email || undefined,
+          customerName: userObj?.email?.split('@')[0] || 'Learner',
+          successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=subscription&provider=stripe`,
+          cancelUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=subscription&provider=stripe`,
+        });
+
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { providerOrderId: payment.id },
+        });
+
+        sendSuccess(res, {
+          payUrl: payment.url,
+          paymentRef: payment.id,
+        });
+        return;
+      }
+
       const { apiKey, walletId } = getKonnectCredentials();
       const payment = await createKonnectPayment(apiKey, {
         receiverWalletId: walletId,
         amount: amountMillimes,
         token: config.currency === 'USD' || config.currency === 'EUR' ? config.currency : 'TND',
         orderId: order.id,
-        firstName: userObj?.username || 'Learner',
+        firstName: userObj?.email?.split('@')[0] || 'Learner',
         email: userObj?.email || undefined,
         successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=subscription`,
         failUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=subscription`,
@@ -155,7 +203,7 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
         where: { id: order.id },
         data: {
           paymentStatus: 'FAILED',
-          failureReason: error instanceof Error ? error.message : 'Failed to initialize Konnect payment',
+          failureReason: error instanceof Error ? error.message : 'Failed to initialize payment',
         },
       });
       throw error;
@@ -191,10 +239,53 @@ export const subscriptionVerify = async (req: AuthRequest, res: Response, next: 
 
     const config = await prisma.organizationConfig.findUnique({
       where: { organizationId: order.organizationId },
+      select: { paymentGateway: true, stripeAccountId: true } as any,
     }) as any;
 
     let status = '';
     let providerPaymentId: string | null = null;
+
+    const useStripe = order.paymentProvider === 'STRIPE_CONNECT';
+    if (useStripe) {
+      const paymentDetails = await retrieveStripeCheckoutSession(paymentRef || order.providerOrderId || order.id);
+      status = paymentDetails.payment_status || 'open';
+      providerPaymentId = paymentDetails.payment_intent || null;
+
+      if (status !== 'paid') {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: {
+            paymentStatus: status === 'open' ? 'PENDING' : 'FAILED',
+            failureReason: status === 'open' ? 'Payment is still pending' : `Stripe payment status: ${status}`,
+            providerPaymentId,
+          },
+        });
+
+        sendSuccess(res, {
+          verified: false,
+          status: status.toUpperCase(),
+          message: status === 'open'
+            ? 'Your payment is still pending. Please check again in a moment.'
+            : 'Your payment was not completed successfully.',
+        });
+        return;
+      }
+
+      await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          paymentProvider: 'STRIPE_CONNECT',
+          paymentStatus: 'SUCCESS',
+          providerPaymentId,
+          failureReason: null,
+          completedAt: new Date(),
+        },
+      });
+
+      sendSuccess(res, { verified: true, status: 'SUCCESS', message: 'Subscription activated successfully' });
+      return;
+    }
+
     const { apiKey } = getKonnectCredentials();
     const paymentDetails = await verifyKonnectPayment(apiKey, paymentRef);
     status = paymentDetails.payment.status;

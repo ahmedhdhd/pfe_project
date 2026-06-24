@@ -49,6 +49,7 @@ export const getPublicConfig = async (req: Request, res: Response, next: NextFun
         contactEmail: null,
         contactPhone: null,
         paymentMode: "per_course",
+        paymentGateway: "KONNECT",
         subscriptionType: "FREE",
         subscriptionPrice: 0,
         currency: "TND",
@@ -109,7 +110,11 @@ export const createOrUpdateConfig = async (req: AuthRequest, res: Response, next
       razorpayKeySecret: _legacyRazorpayKeySecret,
       konnectApiKey: _legacyKonnectApiKey,
       konnectWalletId: _legacyKonnectWalletId,
-      paymentGateway: _legacyPaymentGateway,
+      stripeAccountId: _stripeAccountId,
+      stripeChargesEnabled: _stripeChargesEnabled,
+      stripePayoutsEnabled: _stripePayoutsEnabled,
+      stripeDetailsSubmitted: _stripeDetailsSubmitted,
+      stripeConnectedAt: _stripeConnectedAt,
       ...rest
     } = req.body;
     const data = {
@@ -125,8 +130,8 @@ export const createOrUpdateConfig = async (req: AuthRequest, res: Response, next
     };
     const config = await prisma.organizationConfig.upsert({
       where: { organizationId },
-      create: data,
-      update: data,
+      create: data as any,
+      update: data as any,
     });
     sendSuccess(res, formatConfig(config));
   } catch (e) { next(e); }
@@ -180,7 +185,7 @@ function formatConfig(config: any) {
     razorpayKeySecret,
     konnectApiKey,
     konnectWalletId,
-    paymentGateway,
+    stripeAccountId,
     ...safeConfig
   } = config;
   return {
@@ -201,6 +206,6 @@ function formatConfig(config: any) {
     razorpayKeySecret: undefined,
     konnectApiKey: undefined,
     konnectWalletId: undefined,
-    paymentGateway: undefined,
+    stripeAccountId: undefined,
   };
 }

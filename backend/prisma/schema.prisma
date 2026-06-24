@@ -54,11 +54,17 @@ model OrganizationConfig {
 
   // Payment
   paymentMode       String?  @default("per_course")
+  paymentGateway    String?  @default("KONNECT")
   subscriptionPrice Float?   @default(0)
   subscriptionType  String?  @default("onetime")
   currency          String? @default("TND")
   taxPercentage     String?
   invoicePrefix     String?
+  stripeAccountId   String?  @unique
+  stripeChargesEnabled Boolean @default(false)
+  stripePayoutsEnabled Boolean @default(false)
+  stripeDetailsSubmitted Boolean @default(false)
+  stripeConnectedAt DateTime?
 
   // Branding
   logoUrl    String?
