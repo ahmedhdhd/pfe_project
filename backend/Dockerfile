@@ -19,7 +19,7 @@ ENV PORT=4000
 
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
-RUN npm ci --omit=dev && npm install prisma@5.15.0 --no-save
+RUN npm ci --omit=dev --ignore-scripts && npm install prisma@5.15.0 --no-save
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma

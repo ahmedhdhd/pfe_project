@@ -144,6 +144,27 @@ app.use('/api/announcements',       studentAnnouncementRoutes);
 
 app.use(errorHandler);
 
-app.listen(PORT, () => logger.info(`🚀 TeslaAcademy API running on port ${PORT}`));
+async function startServer() {
+  try {
+    // Attempt to start the server
+    const server = app.listen(PORT, () => {
+      logger.info(`🚀 TeslaAcademy API running on port ${PORT}`);
+      console.log(`🚀 TeslaAcademy API running on port ${PORT}`);
+    });
+
+    server.on('error', (error) => {
+      logger.error('❌ Server startup error:', error);
+      console.error('❌ Server startup error:', error);
+    });
+
+  } catch (error) {
+    logger.error('❌ Fatal error during startup:', error);
+    console.error('❌ Fatal error during startup:', error);
+    // Keep process alive for 5 minutes so Azure can capture logs
+    setTimeout(() => process.exit(1), 300000); 
+  }
+}
+
+startServer();
 
 export default app;
