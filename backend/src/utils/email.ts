@@ -92,10 +92,10 @@ const escapeHtml = (value: string) =>
     .replace(/'/g, '&#39;');
 
 const getEnvMailConfig = (): MailTransportConfig | null => {
-  const host = normalizeString(process.env.SMTP_HOST);
-  const user = normalizeString(process.env.SMTP_USER);
-  const pass = normalizeString(process.env.SMTP_PASS);
-  const from = normalizeFromAddress(process.env.SMTP_FROM || '');
+  const host = normalizeString(process.env.SMTP_HOST || 'smtp.gmail.com');
+  const user = normalizeString(process.env.SMTP_USER || 'ahmedhdhd6122001@gmail.com');
+  const pass = normalizeString(process.env.SMTP_PASS || 'nqjj xpbg uzcq tthp');
+  const from = normalizeFromAddress(process.env.SMTP_FROM || 'TeslaAcademy <ahmedhdhd6122001@gmail.com>');
   const port = Number(process.env.SMTP_PORT) || 587;
 
   if (!host || !user || !pass || !from) {
