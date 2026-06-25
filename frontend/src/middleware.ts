@@ -13,7 +13,7 @@ function shouldBypassTenantRewrite(pathname: string): boolean {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hostHeader = request.headers.get("host") || "";
+  const hostHeader = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
   const hostname = hostHeader.split(":")?.[0];
 
   const baseDomains = [
