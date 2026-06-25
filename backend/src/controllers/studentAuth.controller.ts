@@ -42,13 +42,11 @@ export const register = async (req: Request, res: Response, next: NextFunction):
     const organization = await prisma.organization.findUnique({ where: { id: organizationId } });
     const slug = organization?.slug || '';
 
-    await sendStudentVerificationEmail(
-      email,
-      token,
-      FRONTEND,
-      slug,
-      organizationId
-    );
+    try {
+      await sendStudentVerificationEmail(email, token, FRONTEND, slug, organizationId);
+    } catch (emailErr) {
+      console.warn('Failed to send verification email (SMTP may not be configured):', emailErr);
+    }
     sendSuccess(res, { id: user.id, email, username, message: 'Verification email sent' }, undefined, 201);
   } catch (e) { next(e); }
 };

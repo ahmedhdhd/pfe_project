@@ -17,8 +17,13 @@ export const register = async (req: Request, res: Response, next: NextFunction):
     const user = await prisma.user.create({ data: { organizationId, email, username, role: 'ADMIN', isVerified: false } });
     const token = uuidv4();
     await prisma.emailToken.create({ data: { userId: user.id, token, type: 'VERIFY_EMAIL', expiresAt: new Date(Date.now() + 86400000) } });
-    await sendVerificationEmail(email, token, FRONTEND, organizationId);
-    sendSuccess(res, { id: user.id, email, username, message: 'Verification email sent' }, undefined, 201);
+    try {
+      await sendVerificationEmail(email, token, FRONTEND, organizationId);
+    } catch (emailErr) {
+      console.warn('Failed to send verification email (SMTP may not be configured):', emailErr);
+    }
+    
+    sendSuccess(res, { id: user.id, email, username, message: 'Admin account created. If SMTP is not configured, please verify manually.' }, undefined, 201);
   } catch (e) { next(e); }
 };
 
