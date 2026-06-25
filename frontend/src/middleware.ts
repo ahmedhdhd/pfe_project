@@ -16,14 +16,28 @@ export function middleware(request: NextRequest) {
   const hostHeader = request.headers.get("host") || "";
   const hostname = hostHeader.split(":")?.[0];
 
-  // Extract subdomain from hostname (e.g., "mit" from "mit.teslaacademy.com")
-  const subdomain =
-    hostname.endsWith(".teslaacademy.com") && hostname !== "teslaacademy.com"
-      ? hostname.replace(".teslaacademy.com", "")
-      : null;
+  const baseDomains = [
+    "teslaacademy.com",
+    "teslaacademy.in",
+    "teslaacademy.dedyn.io",
+    process.env.NEXT_PUBLIC_MAIN_DOMAIN || ""
+  ].filter(Boolean);
 
-  // Handle main domain (teslaacademy.com or www.teslaacademy.com) - admin and teacher dashboards
-  if (hostname === "teslaacademy.com" || hostname === "www.teslaacademy.com") {
+  let subdomain: string | null = null;
+  let isMainDomain = false;
+
+  for (const base of baseDomains) {
+    if (hostname === base || hostname === `www.${base}`) {
+      isMainDomain = true;
+      break;
+    } else if (hostname.endsWith(`.${base}`)) {
+      subdomain = hostname.replace(`.${base}`, "");
+      break;
+    }
+  }
+
+  // Handle main domain (e.g., teslaacademy.com or teslaacademy.dedyn.io) - admin and teacher dashboards
+  if (isMainDomain) {
     // Allow admin, teacher, login, and root routes on main domain
     if (
       pathname.startsWith("/admin") ||
@@ -38,12 +52,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Handle subdomain requests (e.g., mit.teslaacademy.com)
-  if (
-    (hostname.endsWith(".teslaacademy.com") ||
-      hostname.endsWith(".teslaacademy.in")) &&
-    subdomain
-  ) {
+  // Handle subdomain requests (e.g., mit.teslaacademy.dedyn.io)
+  if (subdomain) {
     if (shouldBypassTenantRewrite(pathname)) {
       return NextResponse.next();
     }
