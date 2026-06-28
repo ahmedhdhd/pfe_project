@@ -177,12 +177,12 @@ export default function LoginPage() {
     <div className="min-h-screen flex overflow-hidden">
       {/* Left Side - Branding */}
       <BrandingSidebar
-        title="Welcome Back"
-        subtitle="Sign in to your dashboard"
+        title=""
+        subtitle="Manage your organization securely"
         features={[
-          "Access your account",
-          "Manage your content",
-          "Track your progress",
+          "Monitor learners",
+          "Manage courses",
+          "Track performance",
         ]}
       />
 
@@ -191,17 +191,17 @@ export default function LoginPage() {
         <div className="w-full max-w-lg">
           {/* Header */}
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold mb-2">Sign In</h2>
+            <h2 className="text-2xl font-bold mb-2">Welcome to TeslaAcademy</h2>
             <p className="text-muted-foreground">
-              Enter your credentials to access your dashboard
+              Enter your credentials to access the dashboard
             </p>
           </div>
 
           {/* Login Form */}
           <Card>
             <CardHeader>
-              <CardTitle>Sign In</CardTitle>
-              <CardDescription>Sign in to your admin dashboard</CardDescription>
+              <CardTitle></CardTitle>
+              <CardDescription></CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">

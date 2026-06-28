@@ -1,0 +1,148 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.5.2 Chrome/142.0.7444.265 Electron/39.6.1 Safari/537.36" version="29.5.2">
+  <diagram name="Use Case Diagram — Release 2" id="uc_r2">
+    <mxGraphModel dx="1744" dy="1058" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1800" pageHeight="1300" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="system_box" parent="1" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];shape=mxgraph.uml.package;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#333333;strokeWidth=2;fontSize=15;fontStyle=1;align=left;verticalAlign=top;" value="" vertex="1">
+          <mxGeometry height="960" width="890" x="270" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_student" parent="1" style="shape=umlActor;whiteSpace=wrap;html=1;align=center;fontSize=12;fontStyle=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Student" vertex="1">
+          <mxGeometry height="80" width="60" x="1250" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_instructor" parent="1" style="shape=umlActor;whiteSpace=wrap;html=1;align=center;fontSize=12;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Instructor" vertex="1">
+          <mxGeometry height="80" width="60" x="140" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_my_courses" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="My Courses" vertex="1">
+          <mxGeometry height="55" width="180" x="530" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_access_lesson" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Access Lesson Content" vertex="1">
+          <mxGeometry height="55" width="200" x="580" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_complete_lesson" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Mark Lesson as Completed" vertex="1">
+          <mxGeometry height="55" width="210" x="650" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_track_progress" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Track Course Progress" vertex="1">
+          <mxGeometry height="55" width="200" x="950" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_create_assignment" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="Create Assignment" vertex="1">
+          <mxGeometry height="55" width="180" x="350" y="835" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_add_assignment_resources" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="Add Resources to Assignment" vertex="1">
+          <mxGeometry height="55" width="210" x="370" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_publish_assignment" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="Publish Assignment" vertex="1">
+          <mxGeometry height="55" width="180" x="380" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_submit_assignment" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Submit Assignment" vertex="1">
+          <mxGeometry height="55" width="180" x="710" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_review_assignment" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="Review &amp; Grade Submissions" vertex="1">
+          <mxGeometry height="55" width="220" x="390" y="525" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_view_assignments" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="View Assignments" vertex="1">
+          <mxGeometry height="55" width="190" x="800" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_view_feedback" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="View Feedback &amp; Grades" vertex="1">
+          <mxGeometry height="55" width="200" x="900" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_publish_announcement" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="Publish Announcement" vertex="1">
+          <mxGeometry height="55" width="190" x="400" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_view_announcements" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="View Announcements" vertex="1">
+          <mxGeometry height="55" width="190" x="780" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_download_certificate" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Download Certificate" vertex="1">
+          <mxGeometry height="55" width="200" x="680" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_browse_catalog" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Browse Catalog" vertex="1">
+          <mxGeometry height="55" width="190" x="890" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_search_course" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Search Course" vertex="1">
+          <mxGeometry height="55" width="180" x="580" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_filter_courses" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Filter Courses" vertex="1">
+          <mxGeometry height="55" width="180" x="590" y="940" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_course_details" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="View Course Details" vertex="1">
+          <mxGeometry height="55" width="210" x="620" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_rate_course" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Rate &amp; Review Course" vertex="1">
+          <mxGeometry height="55" width="210" x="600" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_enroll_free" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Enroll in Free Course" vertex="1">
+          <mxGeometry height="55" width="200" x="940" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="s1" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_my_courses">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s2" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_access_lesson">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s3" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_complete_lesson">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s4" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_track_progress">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s5" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_submit_assignment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s6" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_view_assignments">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s7" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_view_feedback">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s8" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_view_announcements">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s9" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_download_certificate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s11" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_browse_catalog">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s12" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_search_course">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s13" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_filter_courses">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s14" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_course_details">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s15" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_rate_course">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s16" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_enroll_free">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="i1" edge="1" parent="1" source="actor_instructor" style="endArrow=none;html=1;" target="uc_create_assignment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="i2" edge="1" parent="1" source="actor_instructor" style="endArrow=none;html=1;" target="uc_add_assignment_resources">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="i3" edge="1" parent="1" source="actor_instructor" style="endArrow=none;html=1;" target="uc_publish_assignment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="i4" edge="1" parent="1" source="actor_instructor" style="endArrow=none;html=1;" target="uc_review_assignment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="i5" edge="1" parent="1" source="actor_instructor" style="endArrow=none;html=1;" target="uc_publish_announcement">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_complete_progress" edge="1" parent="1" source="uc_complete_lesson" style="dashed=1;endArrow=open;endFill=0;html=1;fontSize=10;" target="uc_track_progress" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_browse_details" edge="1" parent="1" source="uc_browse_catalog" style="dashed=1;endArrow=open;endFill=0;html=1;fontSize=10;" target="uc_course_details" value="&amp;lt;&amp;lt;extande&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_enroll_details" edge="1" parent="1" source="uc_enroll_free" style="dashed=1;endArrow=open;endFill=0;html=1;fontSize=10;" target="uc_course_details" value="&amp;lt;&amp;lt;extande&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -22,7 +22,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Settings2,
-  Bot,
 } from "@/components/icons";
 import { toast } from "sonner";
 import {
@@ -40,7 +39,6 @@ import { HomepageSettingsTab } from "./components/HomepageSettingsTab";
 import { PaymentSettingsTab } from "./components/PaymentSettingsTab";
 import { ContactSettingsTab } from "./components/ContactSettingsTab";
 import { SeoAdvancedTab } from "./components/SeoAdvancedTab";
-import { AiSettingsTab } from "./components/AiSettingsTab";
 
 const normalizeCurrency = (currency?: string) => {
   const normalized = currency?.trim().toUpperCase();
@@ -383,12 +381,12 @@ export default function AdminSettingsPage() {
           (configData?.success && configData.data?.name)
             ? `${configData.data.name} — Settings`
             : currentUser?.organizationName
-              ? `${currentUser.organizationName} — Settings`
+              ? `${currentUser.organizationName} Settings`
               : "Settings"
         }
         description={
           (configData?.success && configData.data)
-            ? `Organization: ${configData.data.name} · Slug: ${configData.data.slug}`
+            ? `  `
             : (currentUser?.organizationName && currentUser?.organizationSlug)
               ? `Organization: ${currentUser.organizationName} · Slug: ${currentUser.organizationSlug}`
               : "Manage your organization settings, theme, and configuration"
@@ -421,10 +419,6 @@ export default function AdminSettingsPage() {
             <TabsTrigger value="contact">
               <Mail className="h-4 w-4 mr-2" />
               Contact & Support
-            </TabsTrigger>
-            <TabsTrigger value="ai">
-              <Bot className="h-4 w-4 mr-2" />
-              AI
             </TabsTrigger>
           </TabsList>
 
@@ -492,10 +486,6 @@ export default function AdminSettingsPage() {
             <SeoAdvancedTab formData={formData} setFormData={setFormData} />
           </TabsContent>
 
-          {/* AI Settings */}
-          <TabsContent value="ai" className="space-y-4">
-            <AiSettingsTab formData={formData} setFormData={setFormData} />
-          </TabsContent>
         </Tabs>
 
         <div className="flex justify-end mt-6">

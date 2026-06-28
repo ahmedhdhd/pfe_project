@@ -1,0 +1,88 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.5.2 Chrome/142.0.7444.265 Electron/39.6.1 Safari/537.36" version="29.5.2">
+  <diagram name="Use Case Diagram — Release 3" id="uc_r3">
+    <mxGraphModel dx="1246" dy="756" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1800" pageHeight="1500" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="system_box" parent="1" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];shape=mxgraph.uml.package;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#333333;strokeWidth=2;fontSize=15;fontStyle=1;align=left;verticalAlign=top;" value="" vertex="1">
+          <mxGeometry height="570" width="970" x="260" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_student" parent="1" style="shape=umlActor;whiteSpace=wrap;html=1;align=center;fontSize=12;fontStyle=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Student" vertex="1">
+          <mxGeometry height="80" width="60" x="140" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_instructor" parent="1" style="shape=umlActor;whiteSpace=wrap;html=1;align=center;fontSize=12;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Instructor" vertex="1">
+          <mxGeometry height="80" width="60" x="150" y="457.5" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_org_admin" parent="1" style="shape=umlActor;whiteSpace=wrap;html=1;align=center;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Organization Administrator" vertex="1">
+          <mxGeometry height="80" width="60" x="1260" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_buy_course" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Buy Paid Course" vertex="1">
+          <mxGeometry height="55" width="200" x="330" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_confirm_payment" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Confirm Payment" vertex="1">
+          <mxGeometry height="55" width="200" x="690" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_payment_history" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="View Payment History" vertex="1">
+          <mxGeometry height="55" width="220" x="390" y="185" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_schedule_live" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="Schedule Live Session" vertex="1">
+          <mxGeometry height="55" width="210" x="630" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_start_live" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="Start Live Session" vertex="1">
+          <mxGeometry height="55" width="210" x="700" y="215" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_join_live" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Join Live Session" vertex="1">
+          <mxGeometry height="55" width="210" x="400" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_generate_summary" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Generate Automatic Summary" vertex="1">
+          <mxGeometry height="55" width="220" x="1000" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_ask_ai" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Ask Questions to AI Assistant" vertex="1">
+          <mxGeometry height="55" width="220" x="300" y="405" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_ai_feedback" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Receive AI Feedback on Assignment" vertex="1">
+          <mxGeometry height="55" width="230" x="385" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_generate_questions" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="Generate Questions Automatically" vertex="1">
+          <mxGeometry height="55" width="240" x="330" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_generate_theme" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="Generate Visual Theme with AI" vertex="1">
+          <mxGeometry height="55" width="220" x="750" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="s1" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_buy_course">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s2" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_payment_history">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s3" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_join_live">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s4" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_ask_ai">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s5" edge="1" parent="1" source="actor_student" style="endArrow=none;html=1;" target="uc_ai_feedback">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="i1" edge="1" parent="1" source="actor_instructor" style="endArrow=none;html=1;" target="uc_schedule_live">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="i2" edge="1" parent="1" source="actor_instructor" style="endArrow=none;html=1;" target="uc_start_live">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="i3" edge="1" parent="1" source="actor_instructor" style="endArrow=none;html=1;" target="uc_generate_questions">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="o1" edge="1" parent="1" source="actor_org_admin" style="endArrow=none;html=1;" target="uc_generate_theme">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_buy_confirm" edge="1" parent="1" source="uc_buy_course" style="dashed=1;endArrow=open;endFill=0;html=1;fontSize=10;" target="uc_confirm_payment" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_start_summary" edge="1" parent="1" source="uc_start_live" style="dashed=1;endArrow=open;endFill=0;html=1;fontSize=10;" target="uc_generate_summary" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
