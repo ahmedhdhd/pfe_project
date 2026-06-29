@@ -179,6 +179,7 @@ const stripeRequest = async <T>(
   options: {
     method?: string;
     body?: URLSearchParams;
+    timeoutMs?: number;
   } = {}
 ): Promise<T> => {
   const { secretKey } = getStripeConfig();
@@ -186,21 +187,35 @@ const stripeRequest = async <T>(
     throw new Error('STRIPE_SECRET_KEY is not configured');
   }
 
-  const response = await fetch(`${STRIPE_API_BASE}${path}`, {
-    method: options.method || 'GET',
-    headers: {
-      Authorization: `Bearer ${secretKey}`,
-      ...(options.body ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}),
-    },
-    body: options.body,
-  });
+  const timeoutMs = options.timeoutMs ?? 25_000;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  const raw = (await response.json().catch(() => ({}))) as StripeApiError & T;
-  if (!response.ok) {
-    throw new Error(raw.error?.message || `Stripe request failed (${response.status})`);
+  try {
+    const response = await fetch(`${STRIPE_API_BASE}${path}`, {
+      method: options.method || 'GET',
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+        ...(options.body ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}),
+      },
+      body: options.body,
+    });
+
+    const raw = (await response.json().catch(() => ({}))) as StripeApiError & T;
+    if (!response.ok) {
+      throw new Error(raw.error?.message || `Stripe request failed (${response.status})`);
+    }
+
+    return raw as T;
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Stripe request timed out');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  return raw as T;
 };
 
 export const createStripeConnectAuthorizeUrl = (params: {
@@ -231,6 +246,7 @@ export const exchangeStripeOAuthCode = async (code: string) => {
     code,
     grant_type: 'authorization_code',
     client_id: clientId,
+    redirect_uri: redirectUri,
   });
 
   return stripeRequest<{

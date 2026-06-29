@@ -32,6 +32,22 @@ export const handleStripeConnectCallback = async (
   req: AuthRequest,
   res: Response
 ): Promise<void> => {
+  const frontendUrl = process.env.FRONTEND_URL?.trim().replace(/\/$/, '') || '';
+
+  const redirectWithStatus = (status: 'connected' | 'failed', reason?: string) => {
+    if (!frontendUrl) {
+      sendError(res, 'FRONTEND_URL is not configured on the backend', 500);
+      return;
+    }
+
+    const redirectUrl = new URL('/admin/settings', `${frontendUrl}/`);
+    redirectUrl.searchParams.set('stripe_connect', status);
+    if (reason) {
+      redirectUrl.searchParams.set('reason', reason);
+    }
+    res.redirect(redirectUrl.toString());
+  };
+
   try {
     const code = typeof req.query.code === 'string' ? req.query.code.trim() : '';
     const state = typeof req.query.state === 'string' ? req.query.state.trim() : '';
@@ -42,10 +58,7 @@ export const handleStripeConnectCallback = async (
         : '';
 
     if (error) {
-      const redirectUrl = new URL(`${process.env.FRONTEND_URL}/admin/settings`);
-      redirectUrl.searchParams.set('stripe_connect', 'failed');
-      redirectUrl.searchParams.set('reason', errorDescription || error);
-      res.redirect(redirectUrl.toString());
+      redirectWithStatus('failed', errorDescription || error);
       return;
     }
 
@@ -63,7 +76,7 @@ export const handleStripeConnectCallback = async (
     });
 
     if (!organization) {
-      sendError(res, 'Organization not found', 404);
+      redirectWithStatus('failed', 'Organization not found');
       return;
     }
 
@@ -90,17 +103,12 @@ export const handleStripeConnectCallback = async (
       } as any,
     });
 
-    const redirectUrl = new URL(`${process.env.FRONTEND_URL}/admin/settings`);
-    redirectUrl.searchParams.set('stripe_connect', 'connected');
-    res.redirect(redirectUrl.toString());
+    redirectWithStatus('connected');
   } catch (error) {
-    const redirectUrl = new URL(`${process.env.FRONTEND_URL}/admin/settings`);
-    redirectUrl.searchParams.set('stripe_connect', 'failed');
-    redirectUrl.searchParams.set(
-      'reason',
+    redirectWithStatus(
+      'failed',
       error instanceof Error ? error.message : 'Failed to connect Stripe account'
     );
-    res.redirect(redirectUrl.toString());
   }
 };
 
