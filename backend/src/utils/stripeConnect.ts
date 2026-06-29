@@ -297,7 +297,6 @@ export const createStripeTestAccount = async (): Promise<{
   body.set('capabilities[card_payments][requested]', 'true');
   body.set('capabilities[transfers][requested]', 'true');
   body.set('business_type', 'individual');
-  body.set('business_profile[url]', 'https://example.com');
 
   const account = await stripeRequest<{
     id: string;
