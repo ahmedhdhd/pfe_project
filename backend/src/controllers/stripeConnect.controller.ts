@@ -5,9 +5,9 @@ import { AuthRequest } from '../middleware/auth';
 import {
   createStripeConnectAuthorizeUrl,
   createStripeConnectState,
-  createStripeTestAccount,
   exchangeStripeOAuthCode,
   isStripeTestMode,
+  provisionStripeTestAccount,
   retrieveStripeAccount,
   verifyStripeConnectState,
 } from '../utils/stripeConnect';
@@ -17,62 +17,8 @@ export const startStripeConnect = async (
   res: Response
 ): Promise<void> => {
   try {
-    const organizationId = req.user!.organizationId;
-
-    /* ───── Test / sandbox shortcut ───── */
-    if (isStripeTestMode()) {
-      const organization = await prisma.organization.findUnique({
-        where: { id: organizationId },
-        select: { name: true, slug: true },
-      });
-
-      if (!organization) {
-        sendError(res, 'Organization not found', 404);
-        return;
-      }
-
-      const testAccount = await createStripeTestAccount();
-
-      await prisma.organizationConfig.upsert({
-        where: { organizationId },
-        create: {
-          organizationId,
-          name: organization.name,
-          slug: organization.slug,
-          paymentGateway: 'STRIPE_CONNECT',
-          stripeAccountId: testAccount.accountId,
-          stripeChargesEnabled: testAccount.chargesEnabled,
-          stripePayoutsEnabled: testAccount.payoutsEnabled,
-          stripeDetailsSubmitted: testAccount.detailsSubmitted,
-          stripeConnectedAt: new Date(),
-        } as any,
-        update: {
-          paymentGateway: 'STRIPE_CONNECT',
-          stripeAccountId: testAccount.accountId,
-          stripeChargesEnabled: testAccount.chargesEnabled,
-          stripePayoutsEnabled: testAccount.payoutsEnabled,
-          stripeDetailsSubmitted: testAccount.detailsSubmitted,
-          stripeConnectedAt: new Date(),
-        } as any,
-      });
-
-      sendSuccess(
-        res,
-        {
-          testMode: true,
-          stripeAccountId: testAccount.accountId,
-          stripeChargesEnabled: testAccount.chargesEnabled,
-          stripePayoutsEnabled: testAccount.payoutsEnabled,
-          stripeDetailsSubmitted: testAccount.detailsSubmitted,
-        },
-        'Test Stripe account created and linked successfully'
-      );
-      return;
-    }
-
-    /* ───── Normal OAuth flow ───── */
     const state = createStripeConnectState({
-      organizationId,
+      organizationId: req.user!.organizationId,
       userId: req.user!.userId,
     });
 
@@ -125,7 +71,25 @@ export const handleStripeConnectCallback = async (
 
     const decodedState = verifyStripeConnectState(state);
     const tokenResponse = await exchangeStripeOAuthCode(code);
-    const account = await retrieveStripeAccount(tokenResponse.stripe_user_id);
+    const connectedAccountId = tokenResponse.stripe_user_id;
+
+    /* ───── Test mode: auto-provision the account so charges are enabled ───── */
+    let chargesEnabled: boolean;
+    let payoutsEnabled: boolean;
+    let detailsSubmitted: boolean;
+
+    if (isStripeTestMode()) {
+      const provisioned = await provisionStripeTestAccount(connectedAccountId);
+      chargesEnabled = provisioned.chargesEnabled;
+      payoutsEnabled = provisioned.payoutsEnabled;
+      detailsSubmitted = provisioned.detailsSubmitted;
+    } else {
+      const account = await retrieveStripeAccount(connectedAccountId);
+      chargesEnabled = account.charges_enabled;
+      payoutsEnabled = account.payouts_enabled;
+      detailsSubmitted = account.details_submitted;
+    }
+
     const organization = await prisma.organization.findUnique({
       where: { id: decodedState.organizationId },
       select: { name: true, slug: true },
@@ -143,18 +107,18 @@ export const handleStripeConnectCallback = async (
         name: organization.name,
         slug: organization.slug,
         paymentGateway: 'STRIPE_CONNECT',
-        stripeAccountId: tokenResponse.stripe_user_id,
-        stripeChargesEnabled: account.charges_enabled,
-        stripePayoutsEnabled: account.payouts_enabled,
-        stripeDetailsSubmitted: account.details_submitted,
+        stripeAccountId: connectedAccountId,
+        stripeChargesEnabled: chargesEnabled,
+        stripePayoutsEnabled: payoutsEnabled,
+        stripeDetailsSubmitted: detailsSubmitted,
         stripeConnectedAt: new Date(),
       } as any,
       update: {
         paymentGateway: 'STRIPE_CONNECT',
-        stripeAccountId: tokenResponse.stripe_user_id,
-        stripeChargesEnabled: account.charges_enabled,
-        stripePayoutsEnabled: account.payouts_enabled,
-        stripeDetailsSubmitted: account.details_submitted,
+        stripeAccountId: connectedAccountId,
+        stripeChargesEnabled: chargesEnabled,
+        stripePayoutsEnabled: payoutsEnabled,
+        stripeDetailsSubmitted: detailsSubmitted,
         stripeConnectedAt: new Date(),
       } as any,
     });
@@ -192,3 +156,4 @@ export const disconnectStripeConnect = async (
     sendError(res, error instanceof Error ? error.message : 'Failed to disconnect Stripe', 400);
   }
 };
+

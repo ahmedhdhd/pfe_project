@@ -334,34 +334,21 @@ export const isStripeTestMode = (): boolean => {
 };
 
 /**
- * Creates a fully-provisioned Stripe Express connected account via the API.
- * Fills in all required fields (individual info, bank account, TOS, etc.)
- * so that `charges_enabled` becomes `true` without manual onboarding.
+ * Provisions an existing Stripe Express connected account with all required
+ * fields (individual info, bank account, TOS, etc.) so that `charges_enabled`
+ * becomes `true` without manual onboarding in the Stripe dashboard.
  *
+ * Call this **after** the OAuth callback has linked the account.
  * **Only intended for test / sandbox environments.**
  */
-export const createStripeTestAccount = async (): Promise<{
-  accountId: string;
+export const provisionStripeTestAccount = async (
+  accountId: string
+): Promise<{
   chargesEnabled: boolean;
   payoutsEnabled: boolean;
   detailsSubmitted: boolean;
 }> => {
-  // ── 1. Create the Express account ──
-  const createBody = new URLSearchParams();
-  createBody.set('type', 'express');
-  createBody.set('country', 'US');
-  createBody.set('capabilities[card_payments][requested]', 'true');
-  createBody.set('capabilities[transfers][requested]', 'true');
-  createBody.set('business_type', 'individual');
-
-  const account = await stripeRequest<{
-    id: string;
-    charges_enabled: boolean;
-    payouts_enabled: boolean;
-    details_submitted: boolean;
-  }>('/accounts', { method: 'POST', body: createBody });
-
-  // ── 2. Update with all required fields so Stripe enables charges ──
+  // ── 1. Update with all required fields so Stripe enables charges ──
   const updateBody = new URLSearchParams();
 
   // Individual details (Stripe test-mode dummy data)
@@ -389,12 +376,12 @@ export const createStripeTestAccount = async (): Promise<{
   updateBody.set('tos_acceptance[date]', String(Math.floor(Date.now() / 1000)));
   updateBody.set('tos_acceptance[ip]', '127.0.0.1');
 
-  await stripeRequest<{ id: string }>(`/accounts/${account.id}`, {
+  await stripeRequest<{ id: string }>(`/accounts/${accountId}`, {
     method: 'POST',
     body: updateBody,
   });
 
-  // ── 3. Add a test bank account (Stripe test routing + account numbers) ──
+  // ── 2. Add a test bank account (Stripe test routing + account numbers) ──
   const bankBody = new URLSearchParams();
   bankBody.set('external_account[object]', 'bank_account');
   bankBody.set('external_account[country]', 'US');
@@ -402,23 +389,23 @@ export const createStripeTestAccount = async (): Promise<{
   bankBody.set('external_account[routing_number]', '110000000'); // Stripe test routing number
   bankBody.set('external_account[account_number]', '000123456789'); // Stripe test account number
 
-  await stripeRequest<{ id: string }>(`/accounts/${account.id}/external_accounts`, {
+  await stripeRequest<{ id: string }>(`/accounts/${accountId}/external_accounts`, {
     method: 'POST',
     body: bankBody,
   });
 
-  // ── 4. Re-fetch the account to get the final status ──
+  // ── 3. Re-fetch the account to get the final status ──
   const updated = await stripeRequest<{
     id: string;
     charges_enabled: boolean;
     payouts_enabled: boolean;
     details_submitted: boolean;
-  }>(`/accounts/${account.id}`);
+  }>(`/accounts/${accountId}`);
 
   return {
-    accountId: updated.id,
     chargesEnabled: updated.charges_enabled,
     payoutsEnabled: updated.payouts_enabled,
     detailsSubmitted: updated.details_submitted,
   };
 };
+
