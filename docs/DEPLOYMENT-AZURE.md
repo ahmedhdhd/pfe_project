@@ -63,4 +63,5 @@ The old PowerShell setup/deploy scripts are no longer used:
 
 - `NEXT_PUBLIC_API_URL` must point to the backend public URL.
 - `AI_SERVICE_URL` must point to the AI service public URL.
+- Stripe Connect OAuth callback uses the frontend URL (`FRONTEND_URL/admin/organization-config/config/stripe/callback`), which is proxied to the backend by a Next.js route handler. Register that exact URL in the Stripe Dashboard redirect URIs.
 - If you change either URL, update the GitHub variables and re-run the workflow.

@@ -39,7 +39,7 @@ export const getStripeConfig = () => {
   const frontendUrl = getEnv('FRONTEND_URL');
   const redirectUri = getEnv(
     'STRIPE_CONNECT_REDIRECT_URI',
-    `${getEnv('BACKEND_PUBLIC_URL', getEnv('FRONTEND_URL'))}/admin/organization-config/config/stripe/callback`
+    `${getEnv('FRONTEND_URL')}/admin/organization-config/config/stripe/callback`
   );
   const stateSecret = getEnv('STRIPE_CONNECT_STATE_SECRET', getEnv('JWT_SECRET'));
 

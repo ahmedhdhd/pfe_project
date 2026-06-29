@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/common/page-header";
@@ -73,6 +74,7 @@ const extractMutationErrorMessage = (error: unknown) => {
 };
 
 export default function AdminSettingsPage() {
+  const searchParams = useSearchParams();
   const { data: currentUser } = useCurrentUser();
   const { data: configData, isLoading: configLoading } =
     useOrganizationConfigAdmin();
@@ -187,6 +189,24 @@ export default function AdminSettingsPage() {
       }));
     }
   }, [configData, currentUser]);
+
+  useEffect(() => {
+    const stripeConnectStatus = searchParams.get("stripe_connect");
+    if (!stripeConnectStatus) return;
+
+    if (stripeConnectStatus === "connected") {
+      toast.success("Stripe account connected successfully");
+    } else if (stripeConnectStatus === "failed") {
+      const reason =
+        searchParams.get("reason") || "Failed to connect Stripe account";
+      toast.error(reason);
+    }
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete("stripe_connect");
+    url.searchParams.delete("reason");
+    window.history.replaceState({}, "", url.toString());
+  }, [searchParams]);
 
   const handleLogoUpload = (fileData: {
     key: string;
