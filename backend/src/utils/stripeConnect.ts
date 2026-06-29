@@ -66,6 +66,7 @@ export const isStripeCurrencySupported = (currency: unknown) => {
   if (typeof currency !== 'string') {
     return false;
   }
+
   const normalized = currency.trim().toUpperCase();
   return SUPPORTED_CURRENCIES.has(normalized) || normalized === 'TND';
 };
@@ -74,21 +75,44 @@ export const normalizeStripeCurrency = (currency: unknown) => {
   if (!isStripeCurrencySupported(currency)) {
     return null;
   }
+
   const normalized = (currency as string).trim().toUpperCase();
-  // Stripe doesn't support TND, so we fallback to USD
+  // Stripe does not support TND; charge in USD using a fixed conversion rate.
   if (normalized === 'TND') {
     return 'usd';
   }
+
   return normalized.toLowerCase() as 'usd' | 'eur';
 };
 
 export const toStripeMinorUnits = (amount: number, currency: string = 'usd') => {
   let convertedAmount = amount;
   if (currency.trim().toUpperCase() === 'TND') {
-    // Hardcoded conversion rate: 1 TND = 0.32 USD (approximate)
+    // Approximate rate used for Stripe checkout when org currency is TND.
     convertedAmount = amount * 0.32;
   }
+
   return Math.max(0, Math.round(convertedAmount * 100));
+};
+
+export const getStripeConnectCheckoutBlockReason = (config: {
+  stripeAccountId?: string | null;
+  stripeChargesEnabled?: boolean | null;
+  currency?: string | null;
+}) => {
+  if (!config.stripeAccountId) {
+    return 'Stripe Connect is not connected for this organization';
+  }
+
+  if (!config.stripeChargesEnabled) {
+    return 'Stripe is connected but not ready to accept payments yet. Complete Stripe onboarding in admin settings.';
+  }
+
+  if (!isStripeCurrencySupported(config.currency)) {
+    return 'Stripe Connect checkout supports only USD, EUR, and TND in this project';
+  }
+
+  return null;
 };
 
 const base64UrlEncode = (value: string) =>
@@ -261,7 +285,10 @@ export const createStripeCheckoutSession = async (params: {
   body.set('payment_intent_data[metadata][orderId]', params.orderId);
   body.set('payment_intent_data[metadata][organizationId]', params.organizationId);
   body.set('line_items[0][price_data][currency]', stripeCurrency);
-  body.set('line_items[0][price_data][unit_amount]', String(toStripeMinorUnits(params.amount)));
+  body.set(
+    'line_items[0][price_data][unit_amount]',
+    String(toStripeMinorUnits(params.amount, params.currency))
+  );
   body.set('line_items[0][price_data][product_data][name]', params.itemName);
   body.set(
     'line_items[0][price_data][product_data][description]',

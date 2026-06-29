@@ -9,7 +9,7 @@ import { createKonnectPayment, getKonnectCredentials, verifyKonnectPayment } fro
 import { getOrderBatchIds, grantOrderEntitlements } from './order.controller';
 import {
   createStripeCheckoutSession,
-  isStripeCurrencySupported,
+  getStripeConnectCheckoutBlockReason,
   normalizePaymentGateway,
   retrieveStripeCheckoutSession,
 } from '../utils/stripeConnect';
@@ -1415,6 +1415,7 @@ export const checkoutBatch = async (req: AuthRequest, res: Response, next: NextF
         themeJson: true,
         paymentGateway: true,
         stripeAccountId: true,
+        stripeChargesEnabled: true,
       } as any,
     }) as any;
     if ((config?.paymentMode || 'per_course') !== 'per_course') {
@@ -1437,8 +1438,9 @@ export const checkoutBatch = async (req: AuthRequest, res: Response, next: NextF
 
     try {
       if (order.paymentProvider === 'STRIPE_CONNECT') {
-        if (!isStripeCurrencySupported(config.currency)) {
-          throw new Error('Stripe Connect checkout supports only USD and EUR in this project');
+        const stripeBlockReason = getStripeConnectCheckoutBlockReason(config);
+        if (stripeBlockReason) {
+          throw new Error(stripeBlockReason);
         }
 
         const payment = await createStripeCheckoutSession({
@@ -1495,14 +1497,17 @@ export const checkoutBatch = async (req: AuthRequest, res: Response, next: NextF
         amount: amountMillimes,
       });
     } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Failed to initialize payment';
       await prisma.order.update({
         where: { id: order.id },
         data: {
           paymentStatus: 'FAILED',
-          failureReason: error instanceof Error ? error.message : 'Failed to initialize payment',
+          failureReason: message,
         },
       });
-      throw error;
+      sendError(res, message, 400);
+      return;
     }
   } catch (e) { next(e); }
 };
@@ -1639,6 +1644,7 @@ export const konnectCheckoutBatch = async (req: AuthRequest, res: Response, next
         themeJson: true,
         paymentGateway: true,
         stripeAccountId: true,
+        stripeChargesEnabled: true,
       } as any,
     }) as any;
     if ((config?.paymentMode || 'per_course') !== 'per_course') {
@@ -1662,8 +1668,9 @@ export const konnectCheckoutBatch = async (req: AuthRequest, res: Response, next
 
     try {
       if (order.paymentProvider === 'STRIPE_CONNECT') {
-        if (!isStripeCurrencySupported(config.currency)) {
-          throw new Error('Stripe Connect checkout supports only USD and EUR in this project');
+        const stripeBlockReason = getStripeConnectCheckoutBlockReason(config);
+        if (stripeBlockReason) {
+          throw new Error(stripeBlockReason);
         }
 
         const payment = await createStripeCheckoutSession({
@@ -1714,17 +1721,19 @@ export const konnectCheckoutBatch = async (req: AuthRequest, res: Response, next
         paymentRef: payment.paymentRef,
       });
     } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to initialize payment';
       await prisma.order.update({
         where: { id: order.id },
         data: {
           paymentStatus: 'FAILED',
-          failureReason:
-            error instanceof Error
-              ? error.message
-              : 'Failed to initialize payment',
+          failureReason: message,
         },
       });
-      throw error;
+      sendError(res, message, 400);
+      return;
     }
   } catch (e) { next(e); }
 };

@@ -7,7 +7,7 @@ import { sendError, sendSuccess } from '../utils/response';
 import { createKonnectPayment, getKonnectCredentials } from '../utils/konnect';
 import {
   createStripeCheckoutSession,
-  isStripeCurrencySupported,
+  getStripeConnectCheckoutBlockReason,
   normalizePaymentGateway,
   retrieveStripeCheckoutSession,
 } from '../utils/stripeConnect';
@@ -317,6 +317,7 @@ export const createCourseOrderCheckout = async (
         themeJson: true,
         paymentGateway: true,
         stripeAccountId: true,
+        stripeChargesEnabled: true,
       } as any,
     }) as any;
 
@@ -444,11 +445,13 @@ export const createCourseOrderCheckout = async (
 
     try {
       if (order.paymentProvider === 'STRIPE_CONNECT') {
-        if (!config?.stripeAccountId) {
-          throw new Error('Stripe Connect is not connected for this organization');
-        }
-        if (!isStripeCurrencySupported(currency)) {
-          throw new Error('Stripe Connect checkout supports only USD and EUR in this project');
+        const stripeBlockReason = getStripeConnectCheckoutBlockReason({
+          stripeAccountId: config?.stripeAccountId,
+          stripeChargesEnabled: config?.stripeChargesEnabled,
+          currency,
+        });
+        if (stripeBlockReason) {
+          throw new Error(stripeBlockReason);
         }
 
         const payment = await createStripeCheckoutSession({
@@ -509,15 +512,17 @@ export const createCourseOrderCheckout = async (
         purchasedBatchIds: items.map((item) => item.batchId),
       });
     } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Failed to initialize payment';
       await prisma.order.update({
         where: { id: order.id },
         data: {
           paymentStatus: 'FAILED',
-          failureReason:
-            error instanceof Error ? error.message : 'Failed to initialize payment',
+          failureReason: message,
         },
       });
-      throw error;
+      sendError(res, message, 400);
+      return;
     }
   } catch (error) {
     next(error);

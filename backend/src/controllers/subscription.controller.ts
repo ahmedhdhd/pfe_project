@@ -6,7 +6,7 @@ import { AuthRequest } from '../middleware/auth';
 import { createKonnectPayment, getKonnectCredentials, verifyKonnectPayment } from '../utils/konnect';
 import {
   createStripeCheckoutSession,
-  isStripeCurrencySupported,
+  getStripeConnectCheckoutBlockReason,
   normalizePaymentGateway,
   retrieveStripeCheckoutSession,
 } from '../utils/stripeConnect';
@@ -147,8 +147,9 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
     try {
       const userObj = await prisma.user.findUnique({ where: { id: userId } });
       if (order.paymentProvider === 'STRIPE_CONNECT') {
-        if (!isStripeCurrencySupported(config.currency)) {
-          throw new Error('Stripe Connect checkout supports only USD and EUR in this project');
+        const stripeBlockReason = getStripeConnectCheckoutBlockReason(config);
+        if (stripeBlockReason) {
+          throw new Error(stripeBlockReason);
         }
 
         const payment = await createStripeCheckoutSession({
@@ -199,14 +200,17 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
         paymentRef: payment.paymentRef,
       });
     } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Failed to initialize payment';
       await prisma.order.update({
         where: { id: order.id },
         data: {
           paymentStatus: 'FAILED',
-          failureReason: error instanceof Error ? error.message : 'Failed to initialize payment',
+          failureReason: message,
         },
       });
-      throw error;
+      sendError(res, message, 400);
+      return;
     }
   } catch (e) { next(e); }
 };
