@@ -5,7 +5,9 @@ import { AuthRequest } from '../middleware/auth';
 import {
   createStripeConnectAuthorizeUrl,
   createStripeConnectState,
+  createStripeTestAccount,
   exchangeStripeOAuthCode,
+  isStripeTestMode,
   retrieveStripeAccount,
   verifyStripeConnectState,
 } from '../utils/stripeConnect';
@@ -15,8 +17,62 @@ export const startStripeConnect = async (
   res: Response
 ): Promise<void> => {
   try {
+    const organizationId = req.user!.organizationId;
+
+    /* ───── Test / sandbox shortcut ───── */
+    if (isStripeTestMode()) {
+      const organization = await prisma.organization.findUnique({
+        where: { id: organizationId },
+        select: { name: true, slug: true },
+      });
+
+      if (!organization) {
+        sendError(res, 'Organization not found', 404);
+        return;
+      }
+
+      const testAccount = await createStripeTestAccount();
+
+      await prisma.organizationConfig.upsert({
+        where: { organizationId },
+        create: {
+          organizationId,
+          name: organization.name,
+          slug: organization.slug,
+          paymentGateway: 'STRIPE_CONNECT',
+          stripeAccountId: testAccount.accountId,
+          stripeChargesEnabled: testAccount.chargesEnabled,
+          stripePayoutsEnabled: testAccount.payoutsEnabled,
+          stripeDetailsSubmitted: testAccount.detailsSubmitted,
+          stripeConnectedAt: new Date(),
+        } as any,
+        update: {
+          paymentGateway: 'STRIPE_CONNECT',
+          stripeAccountId: testAccount.accountId,
+          stripeChargesEnabled: testAccount.chargesEnabled,
+          stripePayoutsEnabled: testAccount.payoutsEnabled,
+          stripeDetailsSubmitted: testAccount.detailsSubmitted,
+          stripeConnectedAt: new Date(),
+        } as any,
+      });
+
+      sendSuccess(
+        res,
+        {
+          testMode: true,
+          stripeAccountId: testAccount.accountId,
+          stripeChargesEnabled: testAccount.chargesEnabled,
+          stripePayoutsEnabled: testAccount.payoutsEnabled,
+          stripeDetailsSubmitted: testAccount.detailsSubmitted,
+        },
+        'Test Stripe account created and linked successfully'
+      );
+      return;
+    }
+
+    /* ───── Normal OAuth flow ───── */
     const state = createStripeConnectState({
-      organizationId: req.user!.organizationId,
+      organizationId,
       userId: req.user!.userId,
     });
 
