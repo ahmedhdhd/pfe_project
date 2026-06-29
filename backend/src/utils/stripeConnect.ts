@@ -66,20 +66,30 @@ export const isStripeCurrencySupported = (currency: unknown) => {
   if (typeof currency !== 'string') {
     return false;
   }
-
-  return SUPPORTED_CURRENCIES.has(currency.trim().toUpperCase());
+  const normalized = currency.trim().toUpperCase();
+  return SUPPORTED_CURRENCIES.has(normalized) || normalized === 'TND';
 };
 
 export const normalizeStripeCurrency = (currency: unknown) => {
   if (!isStripeCurrencySupported(currency)) {
     return null;
   }
-
-  return (currency as string).trim().toLowerCase() as 'usd' | 'eur';
+  const normalized = (currency as string).trim().toUpperCase();
+  // Stripe doesn't support TND, so we fallback to USD
+  if (normalized === 'TND') {
+    return 'usd';
+  }
+  return normalized.toLowerCase() as 'usd' | 'eur';
 };
 
-export const toStripeMinorUnits = (amount: number) =>
-  Math.max(0, Math.round(amount * 100));
+export const toStripeMinorUnits = (amount: number, currency: string = 'usd') => {
+  let convertedAmount = amount;
+  if (currency.trim().toUpperCase() === 'TND') {
+    // Hardcoded conversion rate: 1 TND = 0.32 USD (approximate)
+    convertedAmount = amount * 0.32;
+  }
+  return Math.max(0, Math.round(convertedAmount * 100));
+};
 
 const base64UrlEncode = (value: string) =>
   Buffer.from(value).toString('base64url');
