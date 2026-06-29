@@ -49,6 +49,7 @@ The old PowerShell setup/deploy scripts are no longer used:
 - `AZURE_AI_APP`
 - `NEXT_PUBLIC_API_URL`
 - `AI_SERVICE_URL`
+- `FRONTEND_URL` (e.g. `https://teslaacademy.dedyn.io` — used by Stripe OAuth redirect after connect)
 
 ## Workflow behavior
 
@@ -62,6 +63,8 @@ The old PowerShell setup/deploy scripts are no longer used:
 ## Notes
 
 - `NEXT_PUBLIC_API_URL` must point to the backend public URL.
+- `FRONTEND_URL` must point to the frontend public URL (same host students/admins use).
 - `AI_SERVICE_URL` must point to the AI service public URL.
 - Stripe Connect OAuth callback uses the frontend URL (`FRONTEND_URL/admin/organization-config/config/stripe/callback`), which is proxied to the backend by a Next.js route handler. Register that exact URL in the Stripe Dashboard redirect URIs.
+- Do not redeploy an older commit that predates the Stripe callback route (`frontend/src/app/admin/organization-config/config/stripe/callback/route.ts`) or OAuth will return a frontend 404.
 - If you change either URL, update the GitHub variables and re-run the workflow.

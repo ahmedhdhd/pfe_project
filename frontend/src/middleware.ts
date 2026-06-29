@@ -13,6 +13,12 @@ function shouldBypassTenantRewrite(pathname: string): boolean {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Stripe OAuth callback must hit the Next.js route handler, not tenant rewrites.
+  if (pathname === "/admin/organization-config/config/stripe/callback") {
+    return NextResponse.next();
+  }
+
   const hostHeader = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
   const hostname = hostHeader.split(":")?.[0];
 

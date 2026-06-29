@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+function getApiBaseUrl(): string | undefined {
+  const raw =
+    process.env.BACKEND_API_URL?.trim() ||
+    process.env.NEXT_PUBLIC_API_URL?.trim();
+  return raw?.replace(/\/$/, "");
+}
 
 /**
  * Stripe Connect OAuth redirects here (frontend domain). Proxy the callback
@@ -8,8 +13,9 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
  */
 export async function GET(request: NextRequest) {
   const settingsUrl = new URL("/admin/settings", request.url);
+  const apiBaseUrl = getApiBaseUrl();
 
-  if (!API_BASE_URL) {
+  if (!apiBaseUrl) {
     settingsUrl.searchParams.set("stripe_connect", "failed");
     settingsUrl.searchParams.set("reason", "Backend API URL is not configured");
     return NextResponse.redirect(settingsUrl);
@@ -17,7 +23,7 @@ export async function GET(request: NextRequest) {
 
   const callbackUrl = new URL(
     "/admin/organization-config/config/stripe/callback",
-    API_BASE_URL
+    apiBaseUrl
   );
   callbackUrl.search = request.nextUrl.search;
 
@@ -32,11 +38,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(location);
     }
 
+    let reason = "Unexpected response from Stripe callback handler";
+    try {
+      const payload = (await response.json()) as { message?: string };
+      if (payload.message) {
+        reason = payload.message;
+      }
+    } catch {
+      // Backend may not return JSON on failure.
+    }
+
     settingsUrl.searchParams.set("stripe_connect", "failed");
-    settingsUrl.searchParams.set(
-      "reason",
-      "Unexpected response from Stripe callback handler"
-    );
+    settingsUrl.searchParams.set("reason", reason);
     return NextResponse.redirect(settingsUrl);
   } catch (error) {
     settingsUrl.searchParams.set("stripe_connect", "failed");
