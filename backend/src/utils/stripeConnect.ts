@@ -323,3 +323,102 @@ export const createStripeCheckoutSession = async (params: {
 
 export const retrieveStripeCheckoutSession = async (sessionId: string) =>
   stripeRequest<StripeCheckoutSession>(`/checkout/sessions/${sessionId}`);
+
+/**
+ * Returns true when the configured Stripe secret key is a test-mode key
+ * (i.e. starts with `sk_test_`).
+ */
+export const isStripeTestMode = (): boolean => {
+  const { secretKey } = getStripeConfig();
+  return !!secretKey && secretKey.startsWith('sk_test_');
+};
+
+/**
+ * Creates a fully-provisioned Stripe Express connected account via the API.
+ * Fills in all required fields (individual info, bank account, TOS, etc.)
+ * so that `charges_enabled` becomes `true` without manual onboarding.
+ *
+ * **Only intended for test / sandbox environments.**
+ */
+export const createStripeTestAccount = async (): Promise<{
+  accountId: string;
+  chargesEnabled: boolean;
+  payoutsEnabled: boolean;
+  detailsSubmitted: boolean;
+}> => {
+  // ── 1. Create the Express account ──
+  const createBody = new URLSearchParams();
+  createBody.set('type', 'express');
+  createBody.set('country', 'US');
+  createBody.set('capabilities[card_payments][requested]', 'true');
+  createBody.set('capabilities[transfers][requested]', 'true');
+  createBody.set('business_type', 'individual');
+
+  const account = await stripeRequest<{
+    id: string;
+    charges_enabled: boolean;
+    payouts_enabled: boolean;
+    details_submitted: boolean;
+  }>('/accounts', { method: 'POST', body: createBody });
+
+  // ── 2. Update with all required fields so Stripe enables charges ──
+  const updateBody = new URLSearchParams();
+
+  // Individual details (Stripe test-mode dummy data)
+  updateBody.set('individual[first_name]', 'Test');
+  updateBody.set('individual[last_name]', 'User');
+  updateBody.set('individual[email]', 'test@example.com');
+  updateBody.set('individual[phone]', '+15555555555');
+  updateBody.set('individual[dob][day]', '1');
+  updateBody.set('individual[dob][month]', '1');
+  updateBody.set('individual[dob][year]', '1990');
+  updateBody.set('individual[address][line1]', '123 Test St');
+  updateBody.set('individual[address][city]', 'San Francisco');
+  updateBody.set('individual[address][state]', 'CA');
+  updateBody.set('individual[address][postal_code]', '94111');
+  updateBody.set('individual[ssn_last_4]', '0000');
+
+  // Business profile
+  updateBody.set('business_profile[mcc]', '5734'); // Computer Software Stores
+  updateBody.set('business_profile[url]', 'https://teslaacademy.dedyn.io');
+
+  // Statement descriptor
+  updateBody.set('settings[payments][statement_descriptor]', 'TESLAACADEMY');
+
+  // TOS acceptance
+  updateBody.set('tos_acceptance[date]', String(Math.floor(Date.now() / 1000)));
+  updateBody.set('tos_acceptance[ip]', '127.0.0.1');
+
+  await stripeRequest<{ id: string }>(`/accounts/${account.id}`, {
+    method: 'POST',
+    body: updateBody,
+  });
+
+  // ── 3. Add a test bank account (Stripe test routing + account numbers) ──
+  const bankBody = new URLSearchParams();
+  bankBody.set('external_account[object]', 'bank_account');
+  bankBody.set('external_account[country]', 'US');
+  bankBody.set('external_account[currency]', 'usd');
+  bankBody.set('external_account[routing_number]', '110000000'); // Stripe test routing number
+  bankBody.set('external_account[account_number]', '000123456789'); // Stripe test account number
+
+  await stripeRequest<{ id: string }>(`/accounts/${account.id}/external_accounts`, {
+    method: 'POST',
+    body: bankBody,
+  });
+
+  // ── 4. Re-fetch the account to get the final status ──
+  const updated = await stripeRequest<{
+    id: string;
+    charges_enabled: boolean;
+    payouts_enabled: boolean;
+    details_submitted: boolean;
+  }>(`/accounts/${account.id}`);
+
+  return {
+    accountId: updated.id,
+    chargesEnabled: updated.charges_enabled,
+    payoutsEnabled: updated.payouts_enabled,
+    detailsSubmitted: updated.details_submitted,
+  };
+};

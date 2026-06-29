@@ -71,6 +71,24 @@ export function PaymentSettingsTab({
       }
 
       const data = response.data?.data;
+
+      // Test mode: account was created & linked server-side – no redirect needed
+      if (data?.testMode) {
+        setFormData((prev) => ({
+          ...prev,
+          paymentGateway: "STRIPE_CONNECT",
+          stripeChargesEnabled: data.stripeChargesEnabled ?? false,
+          stripePayoutsEnabled: data.stripePayoutsEnabled ?? false,
+          stripeDetailsSubmitted: data.stripeDetailsSubmitted ?? false,
+          stripeConnectedAt: new Date().toISOString(),
+        }));
+        toast.success(
+          response.data?.message || "Test Stripe account connected successfully"
+        );
+        return;
+      }
+
+      // Normal OAuth flow – redirect to Stripe
       const url = data?.url;
       if (!url) {
         throw new Error("Failed to start Stripe Connect");
