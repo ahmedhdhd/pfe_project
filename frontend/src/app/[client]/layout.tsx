@@ -18,7 +18,8 @@ function extractSubdomainFromHost(host: string | null): string | null {
   // Handle production subdomains (e.g., mityy.teslaacademy.com)
   if (
     hostname.endsWith(".teslaacademy.com") ||
-    hostname.endsWith(".teslaacademy.in")
+    hostname.endsWith(".teslaacademy.in") ||
+    hostname.endsWith(".teslaacademy.dedyn.io")
   ) {
     const parts = hostname.split(".");
     if (parts.length > 2) {

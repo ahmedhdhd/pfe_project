@@ -19,7 +19,8 @@ export function extractOrganizationSlug(): string | null {
   // Handle production subdomains (e.g., stanford.teslaacademy.com)
   if (
     hostname.endsWith(".teslaacademy.com") ||
-    hostname.endsWith(".teslaacademy.in")
+    hostname.endsWith(".teslaacademy.in") ||
+    hostname.endsWith(".teslaacademy.dedyn.io")
   ) {
     const parts = hostname.split(".");
     if (parts.length > 2) {
@@ -66,7 +67,8 @@ export function isOrganizationSubdomain(): boolean {
   const hostname = window.location.hostname;
   return (
     (hostname.endsWith(".teslaacademy.com") ||
-      hostname.endsWith(".teslaacademy.in")) &&
+      hostname.endsWith(".teslaacademy.in") ||
+      hostname.endsWith(".teslaacademy.dedyn.io")) &&
     hostname.split(".").length > 2
   );
 }

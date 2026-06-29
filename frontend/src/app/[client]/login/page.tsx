@@ -310,7 +310,7 @@ export default function ClientLogin() {
         </div>
       }
     >
-      <ClientProvider domain={clientId}>
+      <ClientProvider subdomain={clientId}>
         <ClientLoginContent />
       </ClientProvider>
     </Suspense>
