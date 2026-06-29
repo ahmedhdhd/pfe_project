@@ -84,7 +84,9 @@ jobs:
           az webapp config appsettings set \
             --name "${{ env.AZURE_BACKEND_APP }}" \
             --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
-            --settings AI_SERVICE_URL="${{ env.AI_SERVICE_URL }}"
+            --settings \
+              AI_SERVICE_URL="${{ vars.AI_SERVICE_URL }}" \
+              AI_SERVICE_INTERNAL_TOKEN="${{ secrets.AI_SERVICE_INTERNAL_TOKEN }}"
 
       - name: Update frontend Web App
         run: |
@@ -107,3 +109,21 @@ jobs:
             --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
             --container-image-name "${ACR_LOGIN_SERVER}/queztlearn-ai:${{ github.sha }}" \
             --container-registry-url "https://${ACR_LOGIN_SERVER}"
+          az webapp config appsettings set \
+            --name "${{ env.AZURE_AI_APP }}" \
+            --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
+            --settings \
+              PORT=8000 \
+              AI_SERVICE_INTERNAL_TOKEN="${{ secrets.AI_SERVICE_INTERNAL_TOKEN }}" \
+              DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              DIRECT_URL="${{ secrets.DIRECT_URL }}" \
+              OPENROUTER_API_KEY="${{ secrets.OPENROUTER_API_KEY }}" \
+              OPENROUTER_MODEL="deepseek/deepseek-chat-v3-0324" \
+              OPENROUTER_EMBEDDING_MODEL="openai/text-embedding-3-large" \
+              OPENROUTER_PLAYGROUND_MODEL="deepseek/deepseek-chat-v3-0324" \
+              OPENROUTER_HTTP_REFERER="https://teslaacademy.dedyn.io" \
+              OPENROUTER_APP_TITLE="TeslaAcademy LMS" \
+              OPENROUTER_SUMMARY_MAX_TOKENS=1200 \
+              OPENROUTER_ASSIGNMENT_FEEDBACK_MAX_TOKENS=1400 \
+              OPENROUTER_ASSIGNMENT_GENERATION_MAX_TOKENS=2200 \
+              GROQ_API_KEY="${{ secrets.GROQ_API_KEY }}"
