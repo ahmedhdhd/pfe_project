@@ -9,6 +9,7 @@ import {
   normalizePaymentGateway,
   retrieveStripeCheckoutSession,
 } from '../utils/stripeConnect';
+import { buildTenantFrontendUrl } from '../utils/frontend-url';
 
 const PAYMENT_CURRENCY = 'TND';
 const toMillimes = (amount: number) => Math.round(amount * 1000);
@@ -145,7 +146,17 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
 
     try {
       const userObj = await prisma.user.findUnique({ where: { id: userId } });
+      const organization = await prisma.organization.findUnique({
+        where: { id: orgId },
+        select: { subdomain: true },
+      });
       if (order.paymentProvider === 'STRIPE') {
+        const returnPath = `/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=subscription&provider=stripe`;
+        const returnUrl = buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          returnPath
+        );
         const payment = await createStripeCheckoutSession({
           amount: subscriptionPrice,
           currency: config.currency,
@@ -154,8 +165,8 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
           itemName: `Subscription - ${config.name || 'Organization'}`,
           customerEmail: userObj?.email || undefined,
           customerName: userObj?.email?.split('@')[0] || 'Learner',
-          successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=subscription&provider=stripe`,
-          cancelUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=subscription&provider=stripe`,
+          successUrl: returnUrl,
+          cancelUrl: returnUrl,
         });
 
         await prisma.order.update({
@@ -178,8 +189,16 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
         orderId: order.id,
         firstName: userObj?.email?.split('@')[0] || 'Learner',
         email: userObj?.email || undefined,
-        successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=subscription`,
-        failUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=subscription`,
+        successUrl: buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          `/student/payment/konnect?payment_ref={paymentRef}&type=subscription`
+        ),
+        failUrl: buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          `/student/payment/konnect?payment_ref={paymentRef}&type=subscription`
+        ),
         theme: 'light',
       });
 

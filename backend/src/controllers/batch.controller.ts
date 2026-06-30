@@ -12,6 +12,7 @@ import {
   normalizePaymentGateway,
   retrieveStripeCheckoutSession,
 } from '../utils/stripeConnect';
+import { buildTenantFrontendUrl } from '../utils/frontend-url';
 
 const PAYMENT_CURRENCY = 'TND';
 const toMillimes = (amount: number) => Math.max(0, Math.round(amount * 1000));
@@ -1417,6 +1418,10 @@ export const checkoutBatch = async (req: AuthRequest, res: Response, next: NextF
         stripeChargesEnabled: true,
       } as any,
     }) as any;
+    const organization = await prisma.organization.findUnique({
+      where: { id: batch.organizationId },
+      select: { subdomain: true },
+    });
     if ((config?.paymentMode || 'per_course') !== 'per_course') {
       sendError(res, 'Per-course checkout is not enabled for this organization', 400);
       return;
@@ -1437,6 +1442,12 @@ export const checkoutBatch = async (req: AuthRequest, res: Response, next: NextF
 
     try {
       if (order.paymentProvider === 'STRIPE') {
+        const returnPath = `/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=batch&entityId=${batchId}&provider=stripe`;
+        const returnUrl = buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          returnPath
+        );
         const payment = await createStripeCheckoutSession({
           amount: discounted,
           currency: config.currency,
@@ -1445,8 +1456,8 @@ export const checkoutBatch = async (req: AuthRequest, res: Response, next: NextF
           itemName: batch.name,
           customerEmail: req.user!.email || undefined,
           customerName: req.user!.email?.split('@')[0] || 'Learner',
-          successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=batch&entityId=${batchId}&provider=stripe`,
-          cancelUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=batch&entityId=${batchId}&provider=stripe`,
+          successUrl: returnUrl,
+          cancelUrl: returnUrl,
         });
 
         await prisma.order.update({
@@ -1472,8 +1483,16 @@ export const checkoutBatch = async (req: AuthRequest, res: Response, next: NextF
         orderId: order.id,
         firstName: req.user!.email?.split('@')[0] || 'Learner',
         email: req.user!.email || undefined,
-        successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=batch&entityId=${batchId}`,
-        failUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=batch&entityId=${batchId}`,
+        successUrl: buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          `/student/payment/konnect?payment_ref={paymentRef}&type=batch&entityId=${batchId}`
+        ),
+        failUrl: buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          `/student/payment/konnect?payment_ref={paymentRef}&type=batch&entityId=${batchId}`
+        ),
         theme: config.themeJson ? 'dark' : 'light',
       });
 
@@ -1660,7 +1679,17 @@ export const konnectCheckoutBatch = async (req: AuthRequest, res: Response, next
     });
 
     try {
+      const organization = await prisma.organization.findUnique({
+        where: { id: batch.organizationId },
+        select: { subdomain: true },
+      });
       if (order.paymentProvider === 'STRIPE') {
+        const returnPath = `/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=batch&entityId=${batchId}&provider=stripe`;
+        const returnUrl = buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          returnPath
+        );
         const payment = await createStripeCheckoutSession({
           amount: discounted,
           currency: config.currency,
@@ -1669,8 +1698,8 @@ export const konnectCheckoutBatch = async (req: AuthRequest, res: Response, next
           itemName: batch.name,
           customerEmail: req.user!.email || undefined,
           customerName: req.user!.email?.split('@')[0] || 'Learner',
-          successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=batch&entityId=${batchId}&provider=stripe`,
-          cancelUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=batch&entityId=${batchId}&provider=stripe`,
+          successUrl: returnUrl,
+          cancelUrl: returnUrl,
         });
 
         await prisma.order.update({
@@ -1693,8 +1722,16 @@ export const konnectCheckoutBatch = async (req: AuthRequest, res: Response, next
         orderId: order.id,
         firstName: req.user!.email?.split('@')[0] || 'Learner',
         email: req.user!.email || undefined,
-        successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=batch&entityId=${batchId}`,
-        failUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=batch&entityId=${batchId}`,
+        successUrl: buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          `/student/payment/konnect?payment_ref={paymentRef}&type=batch&entityId=${batchId}`
+        ),
+        failUrl: buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          `/student/payment/konnect?payment_ref={paymentRef}&type=batch&entityId=${batchId}`
+        ),
         theme: config.themeJson ? 'dark' : 'light',
       });
 

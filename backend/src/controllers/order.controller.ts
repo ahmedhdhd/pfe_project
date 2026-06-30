@@ -10,6 +10,7 @@ import {
   normalizePaymentGateway,
   retrieveStripeCheckoutSession,
 } from '../utils/stripeConnect';
+import { buildTenantFrontendUrl } from '../utils/frontend-url';
 
 const PAYMENT_CURRENCY_FALLBACK = 'TND';
 const MANUAL_PAYMENT_PROVIDERS = ['BANK_TRANSFER', 'MANDAT_MINUTE_POSTE'] as const;
@@ -319,6 +320,10 @@ export const createCourseOrderCheckout = async (
         stripeChargesEnabled: true,
       } as any,
     }) as any;
+    const organization = await prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { subdomain: true },
+    });
 
     if ((config?.paymentMode || 'per_course') !== 'per_course') {
       sendError(res, 'Per-course checkout is not enabled for this organization', 400);
@@ -444,6 +449,12 @@ export const createCourseOrderCheckout = async (
 
     try {
       if (order.paymentProvider === 'STRIPE') {
+        const returnPath = `/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=batch&entityId=${entityId}&provider=stripe`;
+        const successUrl = buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          returnPath
+        );
         const payment = await createStripeCheckoutSession({
           amount,
           currency,
@@ -453,8 +464,8 @@ export const createCourseOrderCheckout = async (
             items.length === 1 ? items[0].title : `${items.length} courses checkout`,
           customerEmail: email,
           customerName: `${firstName} ${lastName}`.trim(),
-          successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=batch&entityId=${entityId}&provider=stripe`,
-          cancelUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=batch&entityId=${entityId}&provider=stripe`,
+          successUrl,
+          cancelUrl: successUrl,
         });
 
         await prisma.order.update({
@@ -483,8 +494,16 @@ export const createCourseOrderCheckout = async (
         phoneNumber: phone,
         email,
         orderId: order.id,
-        successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=batch&entityId=${entityId}`,
-        failUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=batch&entityId=${entityId}`,
+        successUrl: buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          `/student/payment/konnect?payment_ref={paymentRef}&type=batch&entityId=${entityId}`
+        ),
+        failUrl: buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          `/student/payment/konnect?payment_ref={paymentRef}&type=batch&entityId=${entityId}`
+        ),
         theme: config?.themeJson ? 'dark' : 'light',
       });
 

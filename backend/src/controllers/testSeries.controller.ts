@@ -10,6 +10,7 @@ import {
   normalizePaymentGateway,
   retrieveStripeCheckoutSession,
 } from '../utils/stripeConnect';
+import { buildTenantFrontendUrl } from '../utils/frontend-url';
 
 const PAYMENT_CURRENCY = 'TND';
 const toMillimes = (amount: number) => Math.max(0, Math.round(amount * 1000));
@@ -732,7 +733,17 @@ export const checkoutTestSeries = async (req: AuthRequest, res: Response, next: 
     });
 
     try {
+      const organization = await prisma.organization.findUnique({
+        where: { id: ts.organizationId },
+        select: { subdomain: true },
+      });
       if (order.paymentProvider === 'STRIPE') {
+        const returnPath = `/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=test-series&entityId=${testSeriesId}&provider=stripe`;
+        const returnUrl = buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          returnPath
+        );
         const payment = await createStripeCheckoutSession({
           amount: discounted,
           currency: config.currency,
@@ -741,8 +752,8 @@ export const checkoutTestSeries = async (req: AuthRequest, res: Response, next: 
           itemName: ts.title,
           customerEmail: req.user!.email || undefined,
           customerName: req.user!.email?.split('@')[0] || 'Learner',
-          successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=test-series&entityId=${testSeriesId}&provider=stripe`,
-          cancelUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=test-series&entityId=${testSeriesId}&provider=stripe`,
+          successUrl: returnUrl,
+          cancelUrl: returnUrl,
         });
 
         await prisma.order.update({
@@ -768,8 +779,16 @@ export const checkoutTestSeries = async (req: AuthRequest, res: Response, next: 
         orderId: order.id,
         firstName: req.user!.email?.split('@')[0] || 'Learner',
         email: req.user!.email || undefined,
-        successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=test-series&entityId=${testSeriesId}`,
-        failUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=test-series&entityId=${testSeriesId}`,
+        successUrl: buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          `/student/payment/konnect?payment_ref={paymentRef}&type=test-series&entityId=${testSeriesId}`
+        ),
+        failUrl: buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          `/student/payment/konnect?payment_ref={paymentRef}&type=test-series&entityId=${testSeriesId}`
+        ),
         theme: config.themeJson ? 'dark' : 'light',
       });
 
@@ -945,7 +964,17 @@ export const konnectCheckoutTestSeries = async (req: AuthRequest, res: Response,
     });
 
     try {
+      const organization = await prisma.organization.findUnique({
+        where: { id: ts.organizationId },
+        select: { subdomain: true },
+      });
       if (order.paymentProvider === 'STRIPE') {
+        const returnPath = `/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=test-series&entityId=${testSeriesId}&provider=stripe`;
+        const returnUrl = buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          returnPath
+        );
         const payment = await createStripeCheckoutSession({
           amount: discounted,
           currency: config.currency,
@@ -954,8 +983,8 @@ export const konnectCheckoutTestSeries = async (req: AuthRequest, res: Response,
           itemName: ts.title,
           customerEmail: req.user!.email || undefined,
           customerName: req.user!.email?.split('@')[0] || 'Learner',
-          successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=test-series&entityId=${testSeriesId}&provider=stripe`,
-          cancelUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={CHECKOUT_SESSION_ID}&type=test-series&entityId=${testSeriesId}&provider=stripe`,
+          successUrl: returnUrl,
+          cancelUrl: returnUrl,
         });
 
         await prisma.order.update({
@@ -978,8 +1007,16 @@ export const konnectCheckoutTestSeries = async (req: AuthRequest, res: Response,
         orderId: order.id,
         firstName: req.user!.email?.split('@')[0] || 'Learner',
         email: req.user!.email || undefined,
-        successUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=test-series&entityId=${testSeriesId}`,
-        failUrl: `${process.env.FRONTEND_URL}/student/payment/konnect?payment_ref={paymentRef}&type=test-series&entityId=${testSeriesId}`,
+        successUrl: buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          `/student/payment/konnect?payment_ref={paymentRef}&type=test-series&entityId=${testSeriesId}`
+        ),
+        failUrl: buildTenantFrontendUrl(
+          process.env.FRONTEND_URL,
+          organization?.subdomain,
+          `/student/payment/konnect?payment_ref={paymentRef}&type=test-series&entityId=${testSeriesId}`
+        ),
         theme: config.themeJson ? 'dark' : 'light',
       });
 
