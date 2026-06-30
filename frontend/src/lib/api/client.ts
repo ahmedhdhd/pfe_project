@@ -499,16 +499,6 @@ export const api = {
       data
     ),
 
-  startStripeConnect: () =>
-    apiClient.post<ApiResponse<{ url: string }>>(
-      "/admin/organization-config/config/stripe/connect"
-    ),
-
-  disconnectStripeConnect: () =>
-    apiClient.post<ApiResponse<{ paymentGateway: string }>>(
-      "/admin/organization-config/config/stripe/disconnect"
-    ),
-
   getOrganizationConfigAdmin: () =>
     apiClient.get<OrganizationConfigResponse>("/admin/organization-config/config"),
 

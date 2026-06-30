@@ -7,7 +7,6 @@ import { sendError, sendSuccess } from '../utils/response';
 import { createKonnectPayment, getKonnectCredentials } from '../utils/konnect';
 import {
   createStripeCheckoutSession,
-  getStripeConnectCheckoutBlockReason,
   normalizePaymentGateway,
   retrieveStripeCheckoutSession,
 } from '../utils/stripeConnect';
@@ -435,8 +434,8 @@ export const createCourseOrderCheckout = async (
       data: {
         ...baseOrderData,
         paymentProvider:
-          config?.stripeAccountId && normalizePaymentGateway(config?.paymentGateway) === 'STRIPE_CONNECT'
-            ? 'STRIPE_CONNECT'
+          normalizePaymentGateway(config?.paymentGateway) === 'STRIPE'
+            ? 'STRIPE'
             : 'KONNECT',
         paymentStatus: 'PENDING',
         manualReviewStatus: ManualOrderStatus.NOT_REQUIRED,
@@ -444,18 +443,8 @@ export const createCourseOrderCheckout = async (
     });
 
     try {
-      if (order.paymentProvider === 'STRIPE_CONNECT') {
-        const stripeBlockReason = getStripeConnectCheckoutBlockReason({
-          stripeAccountId: config?.stripeAccountId,
-          stripeChargesEnabled: config?.stripeChargesEnabled,
-          currency,
-        });
-        if (stripeBlockReason) {
-          throw new Error(stripeBlockReason);
-        }
-
+      if (order.paymentProvider === 'STRIPE') {
         const payment = await createStripeCheckoutSession({
-          connectedAccountId: config.stripeAccountId,
           amount,
           currency,
           orderId: order.id,

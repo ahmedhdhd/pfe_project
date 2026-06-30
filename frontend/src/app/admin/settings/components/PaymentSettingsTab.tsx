@@ -49,9 +49,9 @@ const PAYMENT_GATEWAYS = [
     description: "Keep the current shared Konnect setup.",
   },
   {
-    id: "STRIPE_CONNECT" as const,
-    label: "Stripe Connect",
-    description: "Let this organization connect its own Stripe account.",
+    id: "STRIPE" as const,
+    label: "Stripe Checkout",
+    description: "Use direct Stripe checkout for this organization.",
   },
 ];
 
@@ -63,47 +63,7 @@ export function PaymentSettingsTab({
   const currentGateway = formData.paymentGateway || "KONNECT";
   const needsPaidGateway = currentMode === "per_course";
 
-  const handleConnectStripe = async () => {
-    try {
-      const response = await api.startStripeConnect();
-      if (!response.data?.success) {
-        throw new Error(response.data?.message || "Failed to start Stripe Connect");
-      }
 
-      const data = response.data?.data;
-      const url = data?.url;
-      if (!url) {
-        throw new Error("Failed to start Stripe Connect");
-      }
-      window.location.assign(url);
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to start Stripe Connect"
-      );
-    }
-  };
-
-  const handleDisconnectStripe = async () => {
-    try {
-      const response = await api.disconnectStripeConnect();
-      if (!response.data?.success) {
-        throw new Error(response.data?.message || "Failed to disconnect Stripe");
-      }
-      setFormData((prev) => ({
-        ...prev,
-        paymentGateway: "KONNECT",
-        stripeChargesEnabled: false,
-        stripePayoutsEnabled: false,
-        stripeDetailsSubmitted: false,
-        stripeConnectedAt: undefined,
-      }));
-      toast.success("Stripe account disconnected");
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to disconnect Stripe"
-      );
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -270,51 +230,12 @@ export function PaymentSettingsTab({
                   <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
                   <div>
                     <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
-                      Stripe Connect
+                      Stripe Checkout
                     </p>
                     <p className="mt-0.5 text-sm text-emerald-800 dark:text-emerald-200">
-                      Connect the organization&apos;s Stripe account and keep the checkout branded to that account.
+                      Payments will be processed using the platform's primary Stripe account.
                     </p>
                   </div>
-                </div>
-
-                <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-3">
-                  <p className="text-sm font-semibold text-foreground">
-                    Connection status
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {formData.stripeDetailsSubmitted
-                      ? "Stripe account connected."
-                      : "Stripe account not connected yet."}
-                  </p>
-                  <div className="flex flex-wrap gap-2 text-xs">
-                    <Badge variant={formData.stripeChargesEnabled ? "default" : "secondary"}>
-                      Charges {formData.stripeChargesEnabled ? "enabled" : "disabled"}
-                    </Badge>
-                    <Badge variant={formData.stripePayoutsEnabled ? "default" : "secondary"}>
-                      Payouts {formData.stripePayoutsEnabled ? "enabled" : "disabled"}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Stripe checkout works best with USD or EUR in this codebase.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={handleConnectStripe}
-                    className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-                  >
-                    Connect Stripe
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDisconnectStripe}
-                    className="rounded-xl border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
-                  >
-                    Disconnect
-                  </button>
                 </div>
               </div>
             )}

@@ -9,7 +9,6 @@ import { createKonnectPayment, getKonnectCredentials, verifyKonnectPayment } fro
 import { getOrderBatchIds, grantOrderEntitlements } from './order.controller';
 import {
   createStripeCheckoutSession,
-  getStripeConnectCheckoutBlockReason,
   normalizePaymentGateway,
   retrieveStripeCheckoutSession,
 } from '../utils/stripeConnect';
@@ -18,8 +17,8 @@ const PAYMENT_CURRENCY = 'TND';
 const toMillimes = (amount: number) => Math.max(0, Math.round(amount * 1000));
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
-const isStripeConnectConfigured = (config: { paymentGateway?: unknown; stripeAccountId?: string | null }) =>
-  normalizePaymentGateway(config?.paymentGateway) === 'STRIPE_CONNECT' && !!config?.stripeAccountId;
+const isStripeConfigured = (config: { paymentGateway?: unknown }) =>
+  normalizePaymentGateway(config?.paymentGateway) === 'STRIPE';
 
 const getOrganizationPaymentMode = async (organizationId: string) => {
   const config = await prisma.organizationConfig.findUnique({
@@ -1430,21 +1429,15 @@ export const checkoutBatch = async (req: AuthRequest, res: Response, next: NextF
         entityId: batchId,
         amount: discounted,
         currency: PAYMENT_CURRENCY,
-        paymentProvider: isStripeConnectConfigured(config) ? 'STRIPE_CONNECT' : 'KONNECT',
+        paymentProvider: isStripeConfigured(config) ? 'STRIPE' : 'KONNECT',
         receiptId: uuidv4(),
         paymentStatus: 'PENDING',
       },
     });
 
     try {
-      if (order.paymentProvider === 'STRIPE_CONNECT') {
-        const stripeBlockReason = getStripeConnectCheckoutBlockReason(config);
-        if (stripeBlockReason) {
-          throw new Error(stripeBlockReason);
-        }
-
+      if (order.paymentProvider === 'STRIPE') {
         const payment = await createStripeCheckoutSession({
-          connectedAccountId: config.stripeAccountId,
           amount: discounted,
           currency: config.currency,
           orderId: order.id,
@@ -1660,21 +1653,15 @@ export const konnectCheckoutBatch = async (req: AuthRequest, res: Response, next
         entityId: batchId,
         amount: discounted,
         currency: PAYMENT_CURRENCY,
-        paymentProvider: isStripeConnectConfigured(config) ? 'STRIPE_CONNECT' : 'KONNECT',
+        paymentProvider: isStripeConfigured(config) ? 'STRIPE' : 'KONNECT',
         receiptId: uuidv4(),
         paymentStatus: 'PENDING',
       },
     });
 
     try {
-      if (order.paymentProvider === 'STRIPE_CONNECT') {
-        const stripeBlockReason = getStripeConnectCheckoutBlockReason(config);
-        if (stripeBlockReason) {
-          throw new Error(stripeBlockReason);
-        }
-
+      if (order.paymentProvider === 'STRIPE') {
         const payment = await createStripeCheckoutSession({
-          connectedAccountId: config.stripeAccountId,
           amount: discounted,
           currency: config.currency,
           orderId: order.id,

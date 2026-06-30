@@ -6,7 +6,6 @@ import { AuthRequest } from '../middleware/auth';
 import { createKonnectPayment, getKonnectCredentials, verifyKonnectPayment } from '../utils/konnect';
 import {
   createStripeCheckoutSession,
-  getStripeConnectCheckoutBlockReason,
   normalizePaymentGateway,
   retrieveStripeCheckoutSession,
 } from '../utils/stripeConnect';
@@ -15,8 +14,8 @@ const PAYMENT_CURRENCY = 'TND';
 const toMillimes = (amount: number) => Math.round(amount * 1000);
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
-const isStripeConnectConfigured = (config: { paymentGateway?: unknown; stripeAccountId?: string | null }) =>
-  normalizePaymentGateway(config?.paymentGateway) === 'STRIPE_CONNECT' && !!config?.stripeAccountId;
+const isStripeConfigured = (config: { paymentGateway?: unknown }) =>
+  normalizePaymentGateway(config?.paymentGateway) === 'STRIPE';
 
 /**
  * Check if a subscription order is still active based on subscription type.
@@ -138,7 +137,7 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
         entityId: orgId,
         amount: subscriptionPrice,
         currency: PAYMENT_CURRENCY,
-        paymentProvider: isStripeConnectConfigured(config) ? 'STRIPE_CONNECT' : 'KONNECT',
+        paymentProvider: isStripeConfigured(config) ? 'STRIPE' : 'KONNECT',
         receiptId: `sub_${uuidv4()}`,
         paymentStatus: 'PENDING',
       },
@@ -146,14 +145,8 @@ export const subscriptionCheckout = async (req: AuthRequest, res: Response, next
 
     try {
       const userObj = await prisma.user.findUnique({ where: { id: userId } });
-      if (order.paymentProvider === 'STRIPE_CONNECT') {
-        const stripeBlockReason = getStripeConnectCheckoutBlockReason(config);
-        if (stripeBlockReason) {
-          throw new Error(stripeBlockReason);
-        }
-
+      if (order.paymentProvider === 'STRIPE') {
         const payment = await createStripeCheckoutSession({
-          connectedAccountId: config.stripeAccountId,
           amount: subscriptionPrice,
           currency: config.currency,
           orderId: order.id,

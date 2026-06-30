@@ -233,7 +233,7 @@ export interface OrganizationConfig {
   contactPhone?: string;
   openRouterApiKey?: string;
   paymentMode?: 'free' | 'per_course' | 'subscription';
-  paymentGateway?: 'KONNECT' | 'STRIPE_CONNECT';
+  paymentGateway?: 'KONNECT' | 'STRIPE';
   subscriptionPrice?: number;
   subscriptionType?: 'onetime' | 'monthly';
   currency?: string;
@@ -284,7 +284,7 @@ export interface CreateOrganizationConfigData {
   contactPhone?: string;
   openRouterApiKey?: string;
   paymentMode?: 'free' | 'per_course' | 'subscription';
-  paymentGateway?: 'KONNECT' | 'STRIPE_CONNECT';
+  paymentGateway?: 'KONNECT' | 'STRIPE';
   subscriptionPrice?: number;
   subscriptionType?: 'onetime' | 'monthly';
   currency?: string;
