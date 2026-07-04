@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useGetAllUsers, useDeleteUser, useCurrentUser } from "@/hooks";
-import { InviteUserModal } from "@/components/common/invite-user-modal";
+import { InviteUserModal } from "@/components/admin/invite-user-modal";
 import { Button } from "@/components/ui/button";
 import {
   Card,

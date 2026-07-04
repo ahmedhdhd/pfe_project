@@ -13,17 +13,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useVerifyBatchKonnectPayment, useVerifySubscription } from "@/hooks/api";
-import { useClientVerifyKonnectPayment } from "@/hooks/test-series-client";
 import { useStudentCourseCartStore } from "@/lib/store/student-course-cart";
 
 type CallbackState = "loading" | "success" | "pending" | "failed" | "error";
-type PaymentType = "batch" | "test-series" | "subscription";
+type PaymentType = "batch" | "subscription";
 
 export default function KonnectPaymentCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const verifyBatchPayment = useVerifyBatchKonnectPayment();
-  const verifyTestSeriesPayment = useClientVerifyKonnectPayment();
   const verifySubscription = useVerifySubscription();
   const removeCartItem = useStudentCourseCartStore((state) => state.removeItem);
   const removeCartItems = useStudentCourseCartStore((state) => state.removeItems);
@@ -41,8 +39,6 @@ export default function KonnectPaymentCallbackPage() {
       ? "/student/explore"
       : type === "batch" && entityId
       ? `/student/batches/${entityId}`
-      : type === "test-series" && entityId
-      ? `/student/test-series/${entityId}`
       : "/student";
 
   useEffect(() => {
@@ -51,7 +47,7 @@ export default function KonnectPaymentCallbackPage() {
     const verifyPayment = async () => {
       if (
         !paymentRef ||
-        (type !== "batch" && type !== "test-series" && type !== "subscription")
+        (type !== "batch" && type !== "subscription")
       ) {
         setState("error");
         setMessage("This payment return link is missing the required details.");
@@ -62,9 +58,7 @@ export default function KonnectPaymentCallbackPage() {
         const response =
           type === "batch"
             ? await verifyBatchPayment.mutateAsync({ paymentRef })
-            : type === "subscription"
-              ? await verifySubscription.mutateAsync({ paymentRef })
-              : await verifyTestSeriesPayment.mutateAsync({ paymentRef });
+            : await verifySubscription.mutateAsync({ paymentRef });
 
         if (!active) return;
 
@@ -142,7 +136,6 @@ export default function KonnectPaymentCallbackPage() {
     removeCartItems,
     verifyBatchPayment,
     verifySubscription,
-    verifyTestSeriesPayment,
   ]);
 
   const iconClasses = "h-7 w-7";
@@ -202,9 +195,7 @@ export default function KonnectPaymentCallbackPage() {
             <Button
               variant="ghost"
               onClick={() => window.location.reload()}
-              disabled={
-                verifyBatchPayment.isPending || verifyTestSeriesPayment.isPending
-              }
+              disabled={verifyBatchPayment.isPending}
               className="rounded-xl"
             >
               Check again

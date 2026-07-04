@@ -55,9 +55,9 @@ import {
   useGetTopicsByChapter,
   useGetWeakConcepts,
 } from "@/hooks";
-import { CreateChapterModal } from "@/components/common/create-chapter-modal";
-import { EditChapterModal } from "@/components/common/edit-chapter-modal";
-import { CreateTopicModal } from "@/components/common/create-topic-modal";
+import { CreateChapterModal } from "@/components/admin/create-chapter-modal";
+import { EditChapterModal } from "@/components/admin/edit-chapter-modal";
+import { CreateTopicModal } from "@/components/admin/create-topic-modal";
 
 interface Chapter {
   id: string;

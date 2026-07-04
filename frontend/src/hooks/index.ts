@@ -96,8 +96,6 @@ export {
   useCreateBatchCheckout,
   useVerifyBatchPayment,
   useEnrollFreeBatch,
-  useGetExploreTestSeries,
-  useGetExploreTestSeriesById,
   useGetClientSubjectsByBatch,
   useGetClientSubject,
   useGetClientChaptersBySubject,
@@ -135,12 +133,6 @@ export * from "./auth";
 
 // Common hooks
 export * from "./common";
-
-// Test Series hooks
-export * from "./test-series";
-export * from "./test-series-client";
-export * from "./test-attempts-client";
-export * from "./tests-client";
 
 // Schedule hooks
 export * from "./schedules";

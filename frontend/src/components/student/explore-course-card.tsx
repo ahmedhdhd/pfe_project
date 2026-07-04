@@ -5,8 +5,6 @@ import Image from "next/image";
 import {
   BookOpen,
   ArrowRight,
-  Clock,
-  Loader2,
 } from "@/components/icons";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,11 +18,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useOrgCurrency, useOrgPaymentMode } from "@/lib/store/organization-config";
 import { formatCurrency } from "@/lib/utils/format";
-import { useTestSeriesKonnectPayment } from "@/hooks/use-test-series-payment";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
-export type CourseType = "batch" | "test-series";
+export type CourseType = "batch";
 
 interface BaseCourseCardProps {
   id: string;
@@ -45,9 +41,6 @@ interface BaseCourseCardProps {
   endDate?: Date | string;
   language?: string;
   level?: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | string;
-  // Test series specific
-  isFree?: boolean;
-  durationDays?: number;
 }
 
 export function ExploreCourseCard({
@@ -64,65 +57,23 @@ export function ExploreCourseCard({
   class: className,
   language,
   level,
-  isFree = false,
-  durationDays,
 }: BaseCourseCardProps) {
   const router = useRouter();
   const currency = useOrgCurrency();
   const paymentMode = useOrgPaymentMode();
-  const showCoursePricing = type === "test-series" || paymentMode === "per_course";
-  const {
-    initializePayment: initializeTestSeriesPayment,
-    isLoading: isTestSeriesLoading,
-  } = useTestSeriesKonnectPayment();
+  const showCoursePricing = paymentMode === "per_course";
 
-  const finalPrice =
-    type === "test-series" && isFree
-      ? 0
-      : Math.round(totalPrice * (1 - discountPercentage / 100));
-  const isProcessing =
-    type === "test-series" && isTestSeriesLoading;
+  const finalPrice = Math.round(totalPrice * (1 - discountPercentage / 100));
 
   // Display teachers if provided (max 4)
   const displayTeachers = teachers.slice(0, 4);
 
   // Determine detail URL and button text
-  const detailUrl =
-    type === "batch" ? `/student/batches/${id}` : `/student/test-series/${id}`;
-  const buttonText =
-    type === "batch"
-      ? "View Details"
-      : type === "test-series" && isFree
-      ? "Enroll Free"
-      : "Buy Now";
+  const detailUrl = `/student/batches/${id}`;
+  const buttonText = "View Details";
 
-  // Handle payment for batch and test series
   const handlePayment = () => {
-    if (type === "batch") {
-      router.push(detailUrl);
-      return;
-    } else if (type === "test-series") {
-      if (isFree) {
-        router.push(detailUrl);
-      } else {
-        toast.loading("Initializing payment...");
-        initializeTestSeriesPayment(id, (error) => {
-          toast.dismiss();
-          console.error("Payment failed:", error);
-          const errorMessage =
-            (error && typeof error === "object" && "response" in error
-              ? (error.response as { data?: { message?: string } })?.data
-                  ?.message
-              : null) ||
-            (error instanceof Error ? error.message : null) ||
-            "Payment failed. Please try again or contact support.";
-          toast.error("Payment failed", {
-            description: errorMessage,
-            duration: 5000,
-          });
-        });
-      }
-    }
+    router.push(detailUrl);
   };
 
   return (
@@ -143,15 +94,6 @@ export function ExploreCourseCard({
             <BookOpen className="h-12 w-12 text-primary/20" />
           </div>
         )}
-
-        {/* Status Badge */}
-        <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
-          {type === "test-series" && isFree && (
-            <Badge className="bg-primary text-primary-foreground text-xs shadow-sm">
-              Free
-            </Badge>
-          )}
-        </div>
 
         {/* Instructor Avatars */}
         {displayTeachers.length > 0 && (
@@ -222,25 +164,14 @@ export function ExploreCourseCard({
 
         {/* Info Row */}
         <div className="space-y-1.5">
-          {type === "batch" ? (
-            <>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <BookOpen className="h-3.5 w-3.5 text-primary/50" />
-                <span>
-                  {[className ? `Class ${className}` : null, exam]
-                    .filter(Boolean)
-                    .join(" · ") || "Self-paced"}
-                </span>
-              </div>
-              </>
-            ) : (
-            durationDays && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Clock className="h-3.5 w-3.5 text-primary/50" />
-                <span>Valid for {durationDays} days</span>
-              </div>
-            )
-          )}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <BookOpen className="h-3.5 w-3.5 text-primary/50" />
+            <span>
+              {[className ? `Class ${className}` : null, exam]
+                .filter(Boolean)
+                .join(" · ") || "Self-paced"}
+            </span>
+          </div>
         </div>
 
         {/* ── Pricing + CTA ── */}
@@ -248,30 +179,24 @@ export function ExploreCourseCard({
           {/* Price */}
           {showCoursePricing && (
           <div>
-            {type === "test-series" && isFree ? (
-              <span className="text-xl font-bold text-primary">
-                Free
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-xl font-bold text-foreground">
+                {formatCurrency(finalPrice, currency)}
               </span>
-            ) : (
-              <div className="flex items-baseline gap-2 flex-wrap">
-                <span className="text-xl font-bold text-foreground">
-                  {formatCurrency(finalPrice, currency)}
-                </span>
-                {discountPercentage > 0 && (
-                  <>
-                    <span className="text-sm text-muted-foreground line-through">
-                      {formatCurrency(totalPrice, currency)}
-                    </span>
-                    <Badge
-                      variant="secondary"
-                      className="text-[10px] bg-primary/10 text-primary font-semibold"
-                    >
-                      {discountPercentage}% OFF
-                    </Badge>
-                  </>
-                )}
-              </div>
-            )}
+              {discountPercentage > 0 && (
+                <>
+                  <span className="text-sm text-muted-foreground line-through">
+                    {formatCurrency(totalPrice, currency)}
+                  </span>
+                  <Badge
+                    variant="secondary"
+                    className="text-[10px] bg-primary/10 text-primary font-semibold"
+                  >
+                    {discountPercentage}% OFF
+                  </Badge>
+                </>
+              )}
+            </div>
           </div>
           )}
 
@@ -280,16 +205,8 @@ export function ExploreCourseCard({
             <Button
               className="flex-1 h-10 font-medium text-sm rounded-xl"
               onClick={handlePayment}
-              disabled={isProcessing}
             >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                buttonText
-              )}
+              {buttonText}
             </Button>
             <Button
               variant="outline"

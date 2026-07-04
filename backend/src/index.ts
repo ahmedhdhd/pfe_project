@@ -31,15 +31,12 @@ import adminChapterRoutes from './routes/admin.chapter.routes';
 import adminTopicRoutes from './routes/admin.topic.routes';
 import adminContentRoutes from './routes/admin.content.routes';
 import adminScheduleRoutes from './routes/admin.schedule.routes';
-import adminTestSeriesRoutes from './routes/admin.testSeries.routes';
 import adminUserRoutes from './routes/admin.user.routes';
 import adminUploadRoutes from './routes/admin.upload.routes';
 import adminOrderRoutes from './routes/admin.order.routes';
 import studentBatchRoutes from './routes/student.batch.routes';
 import studentAssignmentRoutes from './routes/student.assignment.routes';
 import studentContentRoutes from './routes/student.content.routes';
-import studentTestSeriesRoutes from './routes/student.testSeries.routes';
-import studentAttemptRoutes from './routes/student.attempt.routes';
 import studentScheduleRoutes from './routes/student.schedule.routes';
 import studentProfileRoutes from './routes/student.profile.routes';
 import studentOrderRoutes from './routes/student.order.routes';
@@ -118,8 +115,6 @@ app.use('/admin/chapters',          adminChapterRoutes);
 app.use('/admin/topics',            adminTopicRoutes);
 app.use('/admin/contents',          adminContentRoutes);
 app.use('/admin/schedules',         adminScheduleRoutes);
-// Test series router handles /test-series, /tests, /sections, /questions internally
-app.use('/admin',                   adminTestSeriesRoutes);
 app.use('/admin/upload',            adminUploadRoutes);
 app.use('/admin/orders',            adminOrderRoutes);
 app.use('/admin/cache',             adminBatchRoutes); // clearCache lives on batch router
@@ -140,8 +135,6 @@ app.use('/api/chapters',            adminChapterRoutes);
 app.use('/api/topics',              adminTopicRoutes);
 app.use('/api/contents',            adminContentRoutes);
 app.use('/api/content',             studentContentRoutes);   // progress tracking
-app.use('/api',                     studentTestSeriesRoutes); // /test-series, /tests
-app.use('/api/attempts',            studentAttemptRoutes);
 app.use('/api/schedules',           studentScheduleRoutes);
 app.use('/api/orders',              studentOrderRoutes);
 app.use('/api/upload',              studentUploadRoutes);

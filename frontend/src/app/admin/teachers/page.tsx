@@ -33,8 +33,8 @@ import {
   Star,
 } from "@/components/icons";
 import { useGetAllTeachers, useDeleteTeacher, useCurrentUser } from "@/hooks";
-import { EditTeacherModal } from "@/components/common/edit-teacher-modal";
-import { InviteUserModal } from "@/components/common/invite-user-modal";
+import { EditTeacherModal } from "@/components/admin/edit-teacher-modal";
+import { InviteUserModal } from "@/components/admin/invite-user-modal";
 import { PremiumTeacherCard } from "@/components/teachers/premium-teacher-card";
 import { PremiumStatsCard } from "@/components/teachers/premium-stats-card";
 import { TeacherQuickView } from "@/components/teachers/teacher-quick-view";

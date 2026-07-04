@@ -147,7 +147,7 @@ function SidebarContent({ className }: { className?: string }) {
         normalizedPath === "/student/dashboard"
       );
     }
-    // Handle Explore route - include test-series and batches detail pages
+    // Handle Explore route - include batches detail pages
     if (href === "/student/explore") {
       return (
         normalizedPath.startsWith("/student/explore") ||

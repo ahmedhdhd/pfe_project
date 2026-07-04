@@ -9,7 +9,7 @@ import {
   RotateCcw,
   XCircle,
 } from "@/components/icons";
-import { QuestionRenderer } from "@/components/test-engine/question-renderer";
+import { QuestionRenderer } from "@/components/common/question-renderer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

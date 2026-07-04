@@ -37,10 +37,10 @@ import {
   Check,
 } from "@/components/icons";
 import { useGetChapter, useGetTopicsByChapter, useDeleteTopic } from "@/hooks";
-import { CreateTopicModal } from "@/components/common/create-topic-modal";
-import { EditTopicModal } from "@/components/common/edit-topic-modal";
-import { ViewTopicModal } from "@/components/common/view-topic-modal";
-import { CreateContentModal } from "@/components/common/create-content-modal";
+import { CreateTopicModal } from "@/components/admin/create-topic-modal";
+import { EditTopicModal } from "@/components/admin/edit-topic-modal";
+import { ViewTopicModal } from "@/components/admin/view-topic-modal";
+import { CreateContentModal } from "@/components/admin/create-content-modal";
 
 interface Topic {
   id: string;

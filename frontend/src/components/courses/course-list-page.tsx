@@ -27,8 +27,8 @@ import {
   Globe,
 } from "@/components/icons";
 import { useGetAllBatches, useDeleteBatch } from "@/hooks";
-import { CreateBatchModal } from "@/components/common/create-batch-modal";
-import { EditBatchModal } from "@/components/common/edit-batch-modal";
+import { CreateBatchModal } from "@/components/admin/create-batch-modal";
+import { EditBatchModal } from "@/components/admin/edit-batch-modal";
 import { useRolePermissions } from "@/hooks/common";
 import { useOrgCurrency, useOrgPaymentMode } from "@/lib/store/organization-config";
 import { formatCurrency } from "@/lib/utils/format";

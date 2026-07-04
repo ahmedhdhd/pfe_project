@@ -24,7 +24,7 @@ import {
 } from "@/components/icons";
 import { PageHeader } from "@/components/common/page-header";
 import { StatsSkeleton } from "@/components/common/loading-skeleton";
-import { InviteUserModal } from "@/components/common/invite-user-modal";
+import { InviteUserModal } from "@/components/admin/invite-user-modal";
 import { useCurrentUser } from "@/hooks";
 import {
   useGetAllBatches,

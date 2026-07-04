@@ -1,13 +1,13 @@
 "use client";
 
-import { TeacherAssignmentModal } from "@/components/common/teacher-assignment-modal";
-import { CreateTeacherModal } from "@/components/common/create-teacher-modal";
-import { EditTeacherModal } from "@/components/common/edit-teacher-modal";
-import { CreateSubjectModal } from "@/components/common/create-subject-modal";
-import { EditSubjectModal } from "@/components/common/edit-subject-modal";
-import { CreateScheduleModal } from "@/components/common/create-schedule-modal";
-import { EditScheduleModal } from "@/components/common/edit-schedule-modal";
-import { EditBatchModal } from "@/components/common/edit-batch-modal";
+import { TeacherAssignmentModal } from "@/components/admin/teacher-assignment-modal";
+import { CreateTeacherModal } from "@/components/admin/create-teacher-modal";
+import { EditTeacherModal } from "@/components/admin/edit-teacher-modal";
+import { CreateSubjectModal } from "@/components/admin/create-subject-modal";
+import { EditSubjectModal } from "@/components/admin/edit-subject-modal";
+import { CreateScheduleModal } from "@/components/admin/create-schedule-modal";
+import { EditScheduleModal } from "@/components/admin/edit-schedule-modal";
+import { EditBatchModal } from "@/components/admin/edit-batch-modal";
 import {
   Dialog,
   DialogContent,

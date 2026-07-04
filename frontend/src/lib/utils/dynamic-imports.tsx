@@ -67,7 +67,7 @@ export const HoverFooter = dynamic(
 
 export const CreateBatchModal = dynamic(
   () =>
-    import("@/components/common/create-batch-modal").then((mod) => ({
+    import("@/components/admin/create-batch-modal").then((mod) => ({
       default: mod.CreateBatchModal,
     })),
   { loading: () => <LoadingSpinner /> }
@@ -75,7 +75,7 @@ export const CreateBatchModal = dynamic(
 
 export const CreateTeacherModal = dynamic(
   () =>
-    import("@/components/common/create-teacher-modal").then((mod) => ({
+    import("@/components/admin/create-teacher-modal").then((mod) => ({
       default: mod.CreateTeacherModal,
     })),
   { loading: () => <LoadingSpinner /> }
@@ -83,7 +83,7 @@ export const CreateTeacherModal = dynamic(
 
 export const EditTeacherModal = dynamic(
   () =>
-    import("@/components/common/edit-teacher-modal").then((mod) => ({
+    import("@/components/admin/edit-teacher-modal").then((mod) => ({
       default: mod.EditTeacherModal,
     })),
   { loading: () => <LoadingSpinner /> }
@@ -91,7 +91,7 @@ export const EditTeacherModal = dynamic(
 
 export const CreateSubjectModal = dynamic(
   () =>
-    import("@/components/common/create-subject-modal").then((mod) => ({
+    import("@/components/admin/create-subject-modal").then((mod) => ({
       default: mod.CreateSubjectModal,
     })),
   { loading: () => <LoadingSpinner /> }
@@ -99,7 +99,7 @@ export const CreateSubjectModal = dynamic(
 
 export const EditSubjectModal = dynamic(
   () =>
-    import("@/components/common/edit-subject-modal").then((mod) => ({
+    import("@/components/admin/edit-subject-modal").then((mod) => ({
       default: mod.EditSubjectModal,
     })),
   { loading: () => <LoadingSpinner /> }
@@ -107,7 +107,7 @@ export const EditSubjectModal = dynamic(
 
 export const CreateChapterModal = dynamic(
   () =>
-    import("@/components/common/create-chapter-modal").then((mod) => ({
+    import("@/components/admin/create-chapter-modal").then((mod) => ({
       default: mod.CreateChapterModal,
     })),
   { loading: () => <LoadingSpinner /> }
@@ -115,7 +115,7 @@ export const CreateChapterModal = dynamic(
 
 export const EditChapterModal = dynamic(
   () =>
-    import("@/components/common/edit-chapter-modal").then((mod) => ({
+    import("@/components/admin/edit-chapter-modal").then((mod) => ({
       default: mod.EditChapterModal,
     })),
   { loading: () => <LoadingSpinner /> }
@@ -123,7 +123,7 @@ export const EditChapterModal = dynamic(
 
 export const CreateTopicModal = dynamic(
   () =>
-    import("@/components/common/create-topic-modal").then((mod) => ({
+    import("@/components/admin/create-topic-modal").then((mod) => ({
       default: mod.CreateTopicModal,
     })),
   { loading: () => <LoadingSpinner /> }
@@ -131,7 +131,7 @@ export const CreateTopicModal = dynamic(
 
 export const EditTopicModal = dynamic(
   () =>
-    import("@/components/common/edit-topic-modal").then((mod) => ({
+    import("@/components/admin/edit-topic-modal").then((mod) => ({
       default: mod.EditTopicModal,
     })),
   { loading: () => <LoadingSpinner /> }
@@ -139,7 +139,7 @@ export const EditTopicModal = dynamic(
 
 export const CreateContentModal = dynamic(
   () =>
-    import("@/components/common/create-content-modal").then((mod) => ({
+    import("@/components/admin/create-content-modal").then((mod) => ({
       default: mod.CreateContentModal,
     })),
   { loading: () => <LoadingSpinner /> }
@@ -147,7 +147,7 @@ export const CreateContentModal = dynamic(
 
 export const EditContentModal = dynamic(
   () =>
-    import("@/components/common/edit-content-modal").then((mod) => ({
+    import("@/components/admin/edit-content-modal").then((mod) => ({
       default: mod.EditContentModal,
     })),
   { loading: () => <LoadingSpinner /> }
@@ -155,7 +155,7 @@ export const EditContentModal = dynamic(
 
 export const CreateScheduleModal = dynamic(
   () =>
-    import("@/components/common/create-schedule-modal").then((mod) => ({
+    import("@/components/admin/create-schedule-modal").then((mod) => ({
       default: mod.CreateScheduleModal,
     })),
   { loading: () => <LoadingSpinner /> }
@@ -163,39 +163,15 @@ export const CreateScheduleModal = dynamic(
 
 export const EditScheduleModal = dynamic(
   () =>
-    import("@/components/common/edit-schedule-modal").then((mod) => ({
+    import("@/components/admin/edit-schedule-modal").then((mod) => ({
       default: mod.EditScheduleModal,
-    })),
-  { loading: () => <LoadingSpinner /> }
-);
-
-export const CreateTestSeriesModal = dynamic(
-  () =>
-    import("@/components/test-series/create-test-series-modal").then((mod) => ({
-      default: mod.CreateTestSeriesModal,
-    })),
-  { loading: () => <LoadingSpinner /> }
-);
-
-export const EditTestSeriesModal = dynamic(
-  () =>
-    import("@/components/test-series/edit-test-series-modal").then((mod) => ({
-      default: mod.EditTestSeriesModal,
-    })),
-  { loading: () => <LoadingSpinner /> }
-);
-
-export const CreateTestModal = dynamic(
-  () =>
-    import("@/components/test-series/create-test-modal").then((mod) => ({
-      default: mod.CreateTestModal,
     })),
   { loading: () => <LoadingSpinner /> }
 );
 
 export const TeacherAssignmentModal = dynamic(
   () =>
-    import("@/components/common/teacher-assignment-modal").then((mod) => ({
+    import("@/components/admin/teacher-assignment-modal").then((mod) => ({
       default: mod.TeacherAssignmentModal,
     })),
   { loading: () => <LoadingSpinner /> }
@@ -203,38 +179,8 @@ export const TeacherAssignmentModal = dynamic(
 
 export const EditBatchModal = dynamic(
   () =>
-    import("@/components/common/edit-batch-modal").then((mod) => ({
+    import("@/components/admin/edit-batch-modal").then((mod) => ({
       default: mod.EditBatchModal,
-    })),
-  { loading: () => <LoadingSpinner /> }
-);
-
-// ========================================
-// Test Engine Components
-// ========================================
-
-export const TestEngine = dynamic(
-  () =>
-    import("@/components/test-engine/test-engine").then((mod) => ({
-      default: mod.TestEngine,
-    })),
-  {
-    loading: () => (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <LoadingSpinner />
-          <p className="mt-4 text-muted-foreground">Loading test engine...</p>
-        </div>
-      </div>
-    ),
-    ssr: false, // Test engine should not be SSR'd
-  }
-);
-
-export const QuestionPalette = dynamic(
-  () =>
-    import("@/components/test-engine/question-palette").then((mod) => ({
-      default: mod.QuestionPalette,
     })),
   { loading: () => <LoadingSpinner /> }
 );
@@ -283,14 +229,6 @@ export const SubjectDataTable = dynamic(
   () =>
     import("@/components/courses/subject-data-table").then((mod) => ({
       default: mod.SubjectDataTable,
-    })),
-  { loading: () => <LoadingSpinner /> }
-);
-
-export const TestSeriesDataTable = dynamic(
-  () =>
-    import("@/components/test-series/test-series-data-table").then((mod) => ({
-      default: mod.TestSeriesDataTable,
     })),
   { loading: () => <LoadingSpinner /> }
 );
