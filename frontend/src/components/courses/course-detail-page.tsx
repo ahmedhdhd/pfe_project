@@ -13,7 +13,7 @@ import {
   useDeleteTeacher,
   useDeleteSubject,
 } from "@/hooks";
-import { ROLES } from "@/lib/constants";
+import { useRolePermissions } from "@/hooks/common";
 import { CourseHeader } from "./course-header";
 import { CourseCertificateTab } from "./course-certificate-tab";
 import { CourseEvaluationsTab } from "./course-evaluations-tab";
@@ -42,10 +42,7 @@ export function CourseDetailPage({
   const queryClient = useQueryClient();
   const courseId = params.id as string;
 
-  const currentRole =
-    basePath === ROLES.ADMIN.toLowerCase() ? ROLES.ADMIN : ROLES.TEACHER;
-  const isAdmin = currentRole === ROLES.ADMIN;
-  const isTeacher = currentRole === ROLES.TEACHER;
+  const { isAdmin, isTeacher, canManageTeachers } = useRolePermissions();
   const canManageCourse = isAdmin || isTeacher;
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -286,7 +283,7 @@ export function CourseDetailPage({
           <CourseTeachersTab
             teachers={(teachers?.data as Teacher[]) || []}
             isLoading={teachersLoading}
-            canManageCourse={canManageCourse}
+            canManageCourse={canManageTeachers}
             onAssignTeachers={handleAssignTeachers}
             onCreateTeacher={handleCreateTeacher}
             onEditTeacher={handleEditTeacher}

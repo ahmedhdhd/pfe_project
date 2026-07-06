@@ -66,9 +66,8 @@ export const useLogin = () => {
         const userRole = data.data.user.role?.toUpperCase();
         if (userRole === 'SUPER_ADMIN') {
           router.push('/platform/dashboard');
-        } else if (userRole === 'TEACHER') {
-          router.push('/teacher/dashboard');
         } else {
+          // Admins and teachers share the admin dashboard
           router.push('/admin/dashboard');
         }
       }

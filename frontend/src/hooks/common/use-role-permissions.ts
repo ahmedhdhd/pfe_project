@@ -11,6 +11,7 @@ export interface RolePermissions {
   isStudent: boolean;
   canCreateCourses: boolean;
   canDeleteCourses: boolean;
+  canPublishCourses: boolean;
   canManageUsers: boolean;
   canViewAnalytics: boolean;
   canAccessSettings: boolean;
@@ -33,10 +34,12 @@ export function useRolePermissions(): RolePermissions {
     isStudent,
     canCreateCourses: isAdmin || isTeacher,
     canDeleteCourses: isAdmin || isTeacher,
+    // Publishing and org settings/user management stay admin-only
+    canPublishCourses: isAdmin,
     canManageUsers: isAdmin,
     canViewAnalytics: isAdmin || isTeacher,
-    canAccessSettings: isAdmin || isTeacher,
-    canManageTeachers: isAdmin || isTeacher,
+    canAccessSettings: isAdmin,
+    canManageTeachers: isAdmin,
     canManageSubjects: isAdmin || isTeacher,
     canManageCourseContent: isAdmin || isTeacher,
   };

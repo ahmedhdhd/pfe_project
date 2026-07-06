@@ -209,16 +209,13 @@ export function AssignmentManagementPage({ role }: { role: PortalRole }) {
     }
   };
 
-  const breadcrumbs =
-    role === "admin"
-      ? [
-          { label: "Admin", href: "/admin/dashboard" },
-          { label: "Assignments" },
-        ]
-      : [
-          { label: "Teacher", href: "/teacher/dashboard" },
-          { label: "Assignments" },
-        ];
+  const breadcrumbs = [
+    {
+      label: role === "admin" ? "Admin" : "Teacher",
+      href: "/admin/dashboard",
+    },
+    { label: "Assignments" },
+  ];
 
   return (
     <div className="space-y-6">

@@ -70,44 +70,6 @@ export function SeoAdvancedTab({ formData, setFormData }: SeoAdvancedTabProps) {
           </div>
         </CardContent>
       </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Custom Code</CardTitle>
-          <CardDescription>
-            Add custom CSS or JavaScript snippets. Use carefully.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="customCSS">Custom CSS</Label>
-            <Textarea
-              id="customCSS"
-              value={formData.customCSS || ""}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, customCSS: e.target.value }))
-              }
-              rows={4}
-              spellCheck={false}
-              placeholder="/* Your custom CSS */"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="customJS">Custom JavaScript</Label>
-            <Textarea
-              id="customJS"
-              value={formData.customJS || ""}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, customJS: e.target.value }))
-              }
-              rows={4}
-              spellCheck={false}
-              placeholder="// Your custom JS"
-            />
-          </div>
-        </CardContent>
-      </Card>
     </>
   );
 }

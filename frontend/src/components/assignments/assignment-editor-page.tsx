@@ -455,18 +455,14 @@ export function AssignmentEditorPage({
     return <div className="p-8">Assignment not found.</div>;
   }
 
-  const breadcrumbs =
-    role === "admin"
-      ? [
-          { label: "Admin", href: "/admin/dashboard" },
-          { label: "Assignments", href: "/admin/assignments" },
-          { label: assignment.title },
-        ]
-      : [
-          { label: "Teacher", href: "/teacher/dashboard" },
-          { label: "Assignments", href: "/teacher/assignments" },
-          { label: assignment.title },
-        ];
+  const breadcrumbs = [
+    {
+      label: role === "admin" ? "Admin" : "Teacher",
+      href: "/admin/dashboard",
+    },
+    { label: "Assignments", href: "/admin/assignments" },
+    { label: assignment.title },
+  ];
 
   return (
     <div className="space-y-6">

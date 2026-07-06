@@ -100,9 +100,14 @@ export function InviteUserModal({
 
       // Handle specific error cases
       if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { status?: number } };
+        const axiosError = error as {
+          response?: { status?: number; data?: { message?: string } };
+        };
+        const serverMessage = axiosError.response?.data?.message;
         if (axiosError.response?.status === 409) {
           alert("User with this email already exists in your organization");
+        } else if (serverMessage) {
+          alert(`Failed to send invitation: ${serverMessage}`);
         } else if (axiosError.response?.status === 400) {
           alert("Invalid request. Please check your input and try again");
         } else {

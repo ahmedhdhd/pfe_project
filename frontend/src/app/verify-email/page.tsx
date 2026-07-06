@@ -30,10 +30,9 @@ function VerifyEmailContent() {
 
   useEffect(() => {
     if (!token) {
-      if (!hasProcessedToken.current) {
-        hasProcessedToken.current = true;
-        setError("No verification token found. Please check your email link.");
-      }
+      // No token yet is the normal state right after registration, before
+      // the user opens the verification email — not an error.
+      hasProcessedToken.current = true;
       return;
     }
 

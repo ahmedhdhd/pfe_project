@@ -80,7 +80,8 @@ export default function AdminDashboard() {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const { data: currentUser } = useCurrentUser();
   const { isAdmin } = useRolePermissions();
-  const { data: configData } = useOrganizationConfigAdmin();
+  // Org config endpoint is admin-only; teachers fall back to session data
+  const { data: configData } = useOrganizationConfigAdmin({ enabled: isAdmin });
   const { data: usersResponse, isLoading: usersLoading } = useGetAllUsers();
   const { data: batchesResponse, isLoading: batchesLoading } = useGetAllBatches();
   const { data: teachersResponse, isLoading: teachersLoading } =
@@ -232,20 +233,24 @@ export default function AdminDashboard() {
                 </a>
               </Button>
             )}
-            <Button asChild size="sm">
-              <Link href="/admin/users">
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add User
-              </Link>
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setIsInviteModalOpen(true)}
-            >
-              <UserCheck className="mr-2 h-4 w-4" />
-              Invite
-            </Button>
+            {isAdmin && (
+              <>
+                <Button asChild size="sm">
+                  <Link href="/admin/users">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Add User
+                  </Link>
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setIsInviteModalOpen(true)}
+                >
+                  <UserCheck className="mr-2 h-4 w-4" />
+                  Invite
+                </Button>
+              </>
+            )}
             <Button asChild variant="outline" size="sm">
               <Link href="/admin/courses">
                 <BookPlus className="mr-2 h-4 w-4" />
@@ -410,32 +415,38 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-3">
-                <Button asChild variant="outline" className="justify-start">
-                  <Link href="/admin/users">
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Manage Users
-                  </Link>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="justify-start w-full"
-                  onClick={() => setIsInviteModalOpen(true)}
-                >
-                  <UserCheck className="mr-2 h-4 w-4" />
-                  Invite Teacher
-                </Button>
+                {isAdmin && (
+                  <>
+                    <Button asChild variant="outline" className="justify-start">
+                      <Link href="/admin/users">
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Manage Users
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="justify-start w-full"
+                      onClick={() => setIsInviteModalOpen(true)}
+                    >
+                      <UserCheck className="mr-2 h-4 w-4" />
+                      Invite Teacher
+                    </Button>
+                  </>
+                )}
                 <Button asChild variant="outline" className="justify-start">
                   <Link href="/admin/courses">
                     <BookPlus className="mr-2 h-4 w-4" />
                     Manage Courses
                   </Link>
                 </Button>
-                <Button asChild variant="outline" className="justify-start">
-                  <Link href="/admin/settings">
-                    <Activity className="mr-2 h-4 w-4" />
-                    Platform Settings
-                  </Link>
-                </Button>
+                {isAdmin && (
+                  <Button asChild variant="outline" className="justify-start">
+                    <Link href="/admin/settings">
+                      <Activity className="mr-2 h-4 w-4" />
+                      Platform Settings
+                    </Link>
+                  </Button>
+                )}
                 <Button asChild variant="outline" className="justify-start">
                   <Link href="/admin/analytics">
                     <TrendingUp className="mr-2 h-4 w-4" />

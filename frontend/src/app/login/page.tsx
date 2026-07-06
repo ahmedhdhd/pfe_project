@@ -79,7 +79,7 @@ export default function LoginPage() {
                 router.push("/admin/dashboard");
                 return;
               case "TEACHER":
-                router.push("/teacher/dashboard");
+                router.push("/admin/dashboard");
                 return;
               case "STUDENT":
                 // Redirect students to My Learning page

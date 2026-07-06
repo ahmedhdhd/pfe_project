@@ -151,14 +151,11 @@ export function CourseListPage({
   };
 
   const handleEditCourse = (batchId: string) => {
-    if (basePath === "admin" && isAdmin) {
-      const batch = batches?.data?.find((b: Batch) => b.id === batchId);
-      if (batch) {
-        setSelectedBatchForEdit(batch);
-        setIsEditModalOpen(true);
-      }
-    } else {
-      router.push(`/${basePath}/courses/${batchId}/edit`);
+    if (!canManageCourse) return;
+    const batch = batches?.data?.find((b: Batch) => b.id === batchId);
+    if (batch) {
+      setSelectedBatchForEdit(batch);
+      setIsEditModalOpen(true);
     }
   };
 
@@ -485,8 +482,8 @@ export function CourseListPage({
         }}
       />
 
-      {/* Edit Batch Modal - Only for Admin */}
-      {isAdmin && (
+      {/* Edit Batch Modal - admins and teachers (publishing stays admin-only) */}
+      {canManageCourse && (
         <EditBatchModal
           isOpen={isEditModalOpen}
           onClose={() => {

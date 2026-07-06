@@ -21,6 +21,8 @@ import {
 export const createBatch = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { faq, introVideoUrl, introVideoType, ...rest } = req.body;
+    // Publishing (status) is admin-only; teachers create drafts
+    if (req.user!.role === 'TEACHER') delete rest.status;
     const { paymentMode } = await getOrganizationPaymentMode(
       req.user!.organizationId
     );
@@ -137,6 +139,8 @@ export const getBatch = async (req: AuthRequest, res: Response, next: NextFuncti
 export const updateBatch = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { faq, introVideoUrl, introVideoType, ...rest } = req.body;
+    // Publishing (status) is admin-only; teachers cannot change it
+    if (req.user!.role === 'TEACHER') delete rest.status;
     const hasIntroVideoUrl = Object.prototype.hasOwnProperty.call(req.body, 'introVideoUrl');
     const hasIntroVideoType = Object.prototype.hasOwnProperty.call(req.body, 'introVideoType');
     const { paymentMode } = await getOrganizationPaymentMode(

@@ -143,7 +143,6 @@ function SidebarContent({ className }: { className?: string }) {
     if (href === "/dashboard") {
       return (
         normalizedPath === "/admin/dashboard" ||
-        normalizedPath === "/teacher/dashboard" ||
         normalizedPath === "/student/dashboard"
       );
     }
@@ -167,20 +166,14 @@ function SidebarContent({ className }: { className?: string }) {
     if (href === "/admin/clients") {
       return normalizedPath === "/admin/clients";
     }
-    if (href === "/admin/settings/page-editor") {
-      return normalizedPath.startsWith("/admin/settings/page-editor");
-    }
     if (href === "/admin/settings") {
-      return normalizedPath === "/admin/settings";
+      return normalizedPath.startsWith("/admin/settings");
     }
     if (href === "/admin/billing") {
       return normalizedPath === "/admin/billing";
     }
     if (href === "/admin/assignments") {
       return normalizedPath.startsWith("/admin/assignments");
-    }
-    if (href === "/teacher/assignments") {
-      return normalizedPath.startsWith("/teacher/assignments");
     }
     return normalizedPath.startsWith(href);
   };

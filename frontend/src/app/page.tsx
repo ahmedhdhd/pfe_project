@@ -67,8 +67,8 @@ export default function Home() {
                 router.push("/admin/dashboard");
                 return;
               case "teacher":
-                console.log("Homepage: Redirecting to teacher dashboard");
-                router.push("/teacher/dashboard");
+                console.log("Homepage: Redirecting to admin dashboard");
+                router.push("/admin/dashboard");
                 return;
               case "student":
                 console.log("Homepage: Redirecting to student my-learning");

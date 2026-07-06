@@ -7,13 +7,14 @@ export const ROLES = {
   SUPER_ADMIN: "super_admin" as const,
 } as const;
 
-// Admin navigation items (main domain)
+// Admin + teacher navigation items (main domain).
+// Teachers share the admin dashboard; admin-only entries are filtered out by role.
 export const ADMIN_NAVIGATION_ITEMS: NavigationItem[] = [
   {
     title: "Dashboard",
     href: "/admin/dashboard",
     icon: "LayoutDashboard",
-    roles: ["admin"],
+    roles: ["admin", "teacher"],
   },
   {
     title: "Manage Users",
@@ -22,28 +23,28 @@ export const ADMIN_NAVIGATION_ITEMS: NavigationItem[] = [
     roles: ["admin"],
   },
   {
-    title: "Teachers",
-    href: "/admin/teachers",
-    icon: "GraduationCap",
-    roles: ["admin"],
+    title: "Students",
+    href: "/admin/students",
+    icon: "Users",
+    roles: ["admin", "teacher"],
   },
   {
     title: "All Courses",
     href: "/admin/courses",
     icon: "BookOpen",
-    roles: ["admin"],
+    roles: ["admin", "teacher"],
   },
   {
     title: "Categories",
     href: "/admin/categories",
     icon: "Shapes",
-    roles: ["admin"],
+    roles: ["admin", "teacher"],
   },
   {
     title: "Announcements",
     href: "/admin/announcements",
     icon: "Megaphone",
-    roles: ["admin"],
+    roles: ["admin", "teacher"],
   },
   {
     title: "Orders",
@@ -55,13 +56,13 @@ export const ADMIN_NAVIGATION_ITEMS: NavigationItem[] = [
     title: "Live Sessions",
     href: "/admin/live-sessions",
     icon: "Calendar",
-    roles: ["admin"],
+    roles: ["admin", "teacher"],
   },
   {
     title: "Assignments",
     href: "/admin/assignments",
     icon: "FileText",
-    roles: ["admin"],
+    roles: ["admin", "teacher"],
   },
   {
     title: "Settings",
@@ -69,59 +70,11 @@ export const ADMIN_NAVIGATION_ITEMS: NavigationItem[] = [
     icon: "Settings",
     roles: ["admin"],
   },
-  {
-    title: "Page Editor",
-    href: "/admin/settings/page-editor",
-    icon: "Layout",
-    roles: ["admin"],
-  },
 ];
 
-// Teacher navigation items (main domain)
-export const TEACHER_NAVIGATION_ITEMS: NavigationItem[] = [
-  {
-    title: "Dashboard",
-    href: "/teacher/dashboard",
-    icon: "LayoutDashboard",
-    roles: ["teacher"],
-  },
-  {
-    title: "My Courses",
-    href: "/teacher/courses",
-    icon: "BookOpen",
-    roles: ["teacher"],
-  },
-  {
-    title: "Categories",
-    href: "/teacher/categories",
-    icon: "Shapes",
-    roles: ["teacher"],
-  },
-  {
-    title: "Announcements",
-    href: "/teacher/announcements",
-    icon: "Megaphone",
-    roles: ["teacher"],
-  },
-  {
-    title: "Live Sessions",
-    href: "/teacher/live-sessions",
-    icon: "Calendar",
-    roles: ["teacher"],
-  },
-  {
-    title: "Assignments",
-    href: "/teacher/assignments",
-    icon: "FileText",
-    roles: ["teacher"],
-  },
-  {
-    title: "Students",
-    href: "/teacher/students",
-    icon: "Users",
-    roles: ["teacher"],
-  },
-];
+// Teachers use the admin navigation, filtered by role.
+export const TEACHER_NAVIGATION_ITEMS: NavigationItem[] =
+  ADMIN_NAVIGATION_ITEMS.filter((item) => item.roles.includes("teacher"));
 
 // Student navigation items (subdomain)
 export const STUDENT_NAVIGATION_ITEMS: NavigationItem[] = [

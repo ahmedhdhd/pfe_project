@@ -7,6 +7,15 @@ import { ROLES } from "@/lib/constants";
 
 const PUBLIC_ADMIN_PATHS = ["/admin/forgot-password", "/admin/reset-password"];
 
+// Pages teachers cannot access: org settings/config and user/teacher/order management
+const ADMIN_ONLY_PATHS = [
+  "/admin/settings",
+  "/admin/organization-config",
+  "/admin/users",
+  "/admin/teachers",
+  "/admin/orders",
+];
+
 export default function AdminLayout({
   children,
 }: {
@@ -21,8 +30,15 @@ export default function AdminLayout({
     return <>{children}</>;
   }
 
+  const isAdminOnlyPath = ADMIN_ONLY_PATHS.some((path) =>
+    pathname.startsWith(path)
+  );
+  const allowedRoles = isAdminOnlyPath
+    ? [ROLES.ADMIN]
+    : [ROLES.ADMIN, ROLES.TEACHER];
+
   return (
-    <RouteGuard allowedRoles={[ROLES.ADMIN]}>
+    <RouteGuard allowedRoles={allowedRoles}>
       <AdminTeacherLayout>{children}</AdminTeacherLayout>
     </RouteGuard>
   );

@@ -28,6 +28,9 @@ function SetPasswordContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isPasswordSet, setIsPasswordSet] = useState(false);
+  // Captured at submit time: completeOnboarding() clears the store mid-submit,
+  // which would otherwise hide the checklist for the org-creation flow too.
+  const [showOnboardingChecklist, setShowOnboardingChecklist] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [localUserId, setLocalUserId] = useState<string | null>(null);
 
@@ -44,6 +47,11 @@ function SetPasswordContent() {
   const setPasswordMutation = useSetPassword();
   const createOrganizationConfigMutation = useCreateOrganizationConfig();
   const loginMutation = useLogin();
+
+  // Only the first-time org-creation flow carries organization + admin data in
+  // the onboarding store; invited users (admin/teacher) arrive from the invite
+  // email with just a userId and must not see the onboarding checklist.
+  const isOrgOnboardingFlow = !!organizationData && !!adminData;
 
   // Form validation
   const {
@@ -183,9 +191,13 @@ function SetPasswordContent() {
       return;
     }
 
+    // Capture before completeOnboarding() clears the store below
+    const wasOrgOnboardingFlow = isOrgOnboardingFlow;
+
     try {
       await executeWithLoading(async () => {
-        // Start showing the multi-step loader
+        // Start showing the multi-step loader (org-creation flow only)
+        setShowOnboardingChecklist(wasOrgOnboardingFlow);
         setIsPasswordSet(true);
 
         // We'll handle the actual password setting here
@@ -267,10 +279,15 @@ function SetPasswordContent() {
           }
         }
 
-        // Fallback: redirect to login page if no admin data
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 4000);
+        // Fallback: redirect to login page if no admin data.
+        // The long delay only exists to let the onboarding checklist animation
+        // finish; invited users (no checklist) go straight to login.
+        setTimeout(
+          () => {
+            window.location.href = "/login";
+          },
+          wasOrgOnboardingFlow ? 4000 : 500
+        );
       });
     } catch (error: unknown) {
       setError(getFriendlyErrorMessage(error));
@@ -319,8 +336,8 @@ function SetPasswordContent() {
 
   return (
     <>
-      {/* Multi-step loader - shown during password setup */}
-      {isPasswordSet && !isInitializing && (
+      {/* Multi-step loader - shown only during first-time org onboarding */}
+      {isPasswordSet && !isInitializing && showOnboardingChecklist && (
         <MultiStepLoader
           loadingStates={onboardingSteps}
           loading={isPasswordSet}

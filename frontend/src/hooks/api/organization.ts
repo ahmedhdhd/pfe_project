@@ -66,11 +66,12 @@ export const useCreateOrganizationConfig = () => {
 };
 
 // Get Organization Configuration (Admin endpoint)
-export const useOrganizationConfigAdmin = () => {
+export const useOrganizationConfigAdmin = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["organizationConfig", "admin"],
     queryFn: () => api.getOrganizationConfigAdmin().then((res) => res.data),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: options?.enabled ?? true,
   });
 };
 

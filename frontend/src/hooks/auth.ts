@@ -29,12 +29,17 @@ export const useRequireAuth = () => {
 };
 
 // Require Role Hook
-export const useRequireRole = (
-  requiredRole: "ADMIN" | "TEACHER" | "STUDENT"
-) => {
+export const useRequireRole = (requiredRoles: string | string[]) => {
   const [isMounted, setIsMounted] = useState(false);
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
+
+  const allowedRoles = (
+    Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles]
+  ).map((role) => role.toLowerCase());
+  const userRole = (user as { role?: string } | null)?.role?.toLowerCase();
+  const hasRequiredRole = Boolean(userRole && allowedRoles.includes(userRole));
+  const allowedRolesKey = allowedRoles.join(",");
 
   useEffect(() => {
     setIsMounted(true);
@@ -48,20 +53,12 @@ export const useRequireRole = (
       return;
     }
 
-    if (
-      !isLoading &&
-      isAuthenticated &&
-      user &&
-      (user as { role?: string }).role?.toLowerCase() !==
-        requiredRole.toLowerCase()
-    ) {
+    if (!isLoading && isAuthenticated && user && !hasRequiredRole) {
       // Redirect to appropriate dashboard based on user role
-      switch ((user as { role?: string }).role?.toLowerCase()) {
+      switch (userRole) {
         case "admin":
-          router.push("/admin/dashboard");
-          break;
         case "teacher":
-          router.push("/teacher/dashboard");
+          router.push("/admin/dashboard");
           break;
         case "student":
           router.push("/student/dashboard");
@@ -70,17 +67,22 @@ export const useRequireRole = (
           router.push("/login");
       }
     }
-  }, [isMounted, isLoading, isAuthenticated, user, requiredRole, router]);
+  }, [
+    isMounted,
+    isLoading,
+    isAuthenticated,
+    user,
+    userRole,
+    hasRequiredRole,
+    allowedRolesKey,
+    router,
+  ]);
 
   return {
     user,
     isLoading: !isMounted || isLoading,
     isAuthenticated: isMounted ? isAuthenticated : false,
-    hasRequiredRole:
-      isMounted &&
-      user &&
-      (user as { role?: string }).role?.toLowerCase() ===
-        requiredRole.toLowerCase(),
+    hasRequiredRole: isMounted && hasRequiredRole,
   };
 };
 

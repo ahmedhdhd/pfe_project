@@ -8,11 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ShieldAlert, Gift, CreditCard, Check } from "@/components/icons";
 import { CreateOrganizationConfigData } from "@/lib/types/api";
-import { api } from "@/lib/api/client";
-import { toast } from "sonner";
 
 interface PaymentSettingsTabProps {
   formData: CreateOrganizationConfigData;
@@ -42,25 +39,11 @@ const PAYMENT_MODES = [
   },
 ];
 
-const PAYMENT_GATEWAYS = [
-  {
-    id: "KONNECT" as const,
-    label: "Konnect",
-    description: "Keep the current shared Konnect setup.",
-  },
-  {
-    id: "STRIPE" as const,
-    label: "Stripe Checkout",
-    description: "Use direct Stripe checkout for this organization.",
-  },
-];
-
 export function PaymentSettingsTab({
   formData,
   setFormData,
 }: PaymentSettingsTabProps) {
   const currentMode = formData.paymentMode || "per_course";
-  const currentGateway = formData.paymentGateway || "KONNECT";
   const needsPaidGateway = currentMode === "per_course";
 
 
@@ -170,75 +153,24 @@ export function PaymentSettingsTab({
               <div>
                 <CardTitle className="text-lg">Payment Gateway</CardTitle>
                 <CardDescription className="mt-0.5">
-                  Choose Konnect or let this organization connect its own Stripe account.
+                  Payments are processed through Stripe.
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              {PAYMENT_GATEWAYS.map((gateway) => {
-                const isSelected = currentGateway === gateway.id;
-                return (
-                  <button
-                    key={gateway.id}
-                    type="button"
-                    onClick={() =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        paymentGateway: gateway.id,
-                      }))
-                    }
-                    className={`relative rounded-xl border-2 p-4 text-left transition-all duration-200 hover:shadow-md ${
-                      isSelected
-                        ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                        : "border-border/60 hover:border-border"
-                    }`}
-                  >
-                    {isSelected && (
-                      <div className="absolute right-2 top-2">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
-                          <Check className="h-3 w-3 text-primary-foreground" />
-                        </div>
-                      </div>
-                    )}
-                    <p className="text-sm font-semibold">{gateway.label}</p>
-                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                      {gateway.description}
-                    </p>
-                  </button>
-                );
-              })}
+          <CardContent>
+            <div className="flex gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-950/20">
+              <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <div>
+                <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+                  Stripe Checkout
+                </p>
+                <p className="mt-0.5 text-sm text-emerald-800 dark:text-emerald-200">
+                  Payments will be processed using the platform&apos;s primary Stripe account.
+                </p>
+              </div>
             </div>
-
-            {currentGateway === "KONNECT" ? (
-              <div className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/20">
-                <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
-                <div>
-                  <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
-                    Konnect mode
-                  </p>
-                  <p className="mt-0.5 text-sm text-amber-800 dark:text-amber-200">
-                    The current checkout flow stays on the shared Konnect setup.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-950/20">
-                  <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                  <div>
-                    <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
-                      Stripe Checkout
-                    </p>
-                    <p className="mt-0.5 text-sm text-emerald-800 dark:text-emerald-200">
-                      Payments will be processed using the platform's primary Stripe account.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
       )}

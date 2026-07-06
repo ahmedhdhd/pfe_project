@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import * as c from '../controllers/order.controller';
-import { authenticate, requireTeacher } from '../middleware/auth';
+import { authenticate, requireAdmin } from '../middleware/auth';
 
 const r = Router();
 
-r.use(authenticate, requireTeacher);
+// Orders (payments) are admin-only
+r.use(authenticate, requireAdmin);
 r.get('/', c.listAdminOrders);
 r.get('/:id', c.getAdminOrderById);
 r.post('/:id/approve', c.approveAdminOrder);

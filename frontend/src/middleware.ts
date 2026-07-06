@@ -19,6 +19,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Teachers share the admin dashboard; redirect old /teacher links everywhere
+  if (pathname === "/teacher" || pathname.startsWith("/teacher/")) {
+    const url = new URL(request.url);
+    url.pathname = pathname.replace(/^\/teacher/, "/admin");
+    return NextResponse.redirect(url);
+  }
+
   const hostHeader = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
   const hostname = hostHeader.split(":")?.[0];
 
@@ -44,10 +51,9 @@ export function middleware(request: NextRequest) {
 
   // Handle main domain (e.g., teslaacademy.com or teslaacademy.dedyn.io) - admin and teacher dashboards
   if (isMainDomain) {
-    // Allow admin, teacher, login, and root routes on main domain
+    // Allow admin, login, and root routes on main domain
     if (
       pathname.startsWith("/admin") ||
-      pathname.startsWith("/teacher") ||
       pathname.startsWith("/login") ||
       pathname === "/"
     ) {
@@ -140,7 +146,6 @@ export function middleware(request: NextRequest) {
       !pathParts[0].startsWith("_") &&
       ![
         "admin",
-        "teacher",
         "login",
         "api",
         "register-admin",

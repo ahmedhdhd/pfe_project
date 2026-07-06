@@ -636,6 +636,12 @@ export const generateAssignmentWithAi = async (
       return;
     }
 
+    if (parsed.ragStatus === 'no_chunks') {
+      logger.warn(
+        `Assignment question generation used with no RAG chunks for assignment ${assignment.id}`
+      );
+    }
+
     const questions = normalizeJsonArray(parsed.questions)
       .map((question: any) => {
         const type = normalizeQuestionType(question?.type);
@@ -698,8 +704,8 @@ export const generateAssignmentWithAi = async (
 
     sendSuccess(res, {
       questions: created,
-      ragChunksUsed: 0,
-      ragStatus: 'llm',
+      ragChunksUsed: parsed.ragChunksUsed ?? 0,
+      ragStatus: parsed.ragStatus ?? 'no_chunks',
     }, undefined, 201);
   } catch (e) {
     next(e);

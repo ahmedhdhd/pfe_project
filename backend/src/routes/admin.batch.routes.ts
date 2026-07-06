@@ -8,12 +8,12 @@ import { authenticate, requireAdmin, requireTeacher } from '../middleware/auth';
 const r = Router();
 r.use(authenticate);
 r.get('/', requireTeacher, bc.listBatches);
-r.post('/', requireAdmin, bc.createBatch);
+r.post('/', requireTeacher, bc.createBatch);
 r.get('/:id/reviews', requireTeacher, review.listBatchReviews);
 r.get('/:id', requireTeacher, bc.getBatch);
 r.put('/:id/certificate', requireTeacher, cert.updateBatchCertificateConfig);
-r.put('/:id', requireAdmin, bc.updateBatch);
-r.delete('/:id', requireAdmin, bc.deleteBatch);
+r.put('/:id', requireTeacher, bc.updateBatch);
+r.delete('/:id', requireTeacher, bc.deleteBatch);
 // cache clear lives here for simplicity
 r.post('/cache/clear', requireAdmin, oc.clearCache);
 export default r;

@@ -153,13 +153,17 @@ export const inviteUser = async (req: AuthRequest, res: Response, next: NextFunc
     const token = uuidv4();
     await prisma.emailToken.create({ data: { userId: user.id, token, type: 'INVITE', expiresAt: new Date(Date.now() + 7 * 86400000) } });
     const org = await prisma.organization.findUnique({ where: { id: organizationId } });
-    await sendInviteEmail(
-      email,
-      token,
-      org?.name || 'TeslaAcademy',
-      FRONTEND,
-      organizationId
-    );
+    try {
+      await sendInviteEmail(
+        email,
+        token,
+        org?.name || 'TeslaAcademy',
+        FRONTEND,
+        organizationId
+      );
+    } catch (emailErr) {
+      console.warn('Failed to send invite email (SMTP may not be configured):', emailErr);
+    }
     sendSuccess(res, { id: user.id, email, username, role: 'TEACHER', organizationId, message: 'Invite sent' }, undefined, 201);
   } catch (e) { next(e); }
 };

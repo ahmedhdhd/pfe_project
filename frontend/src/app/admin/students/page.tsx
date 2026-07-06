@@ -25,7 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface TeacherStudentUser {
+interface StudentDirectoryUser {
   id: string;
   email?: string | null;
   username: string;
@@ -34,7 +34,7 @@ interface TeacherStudentUser {
   createdAt: string;
 }
 
-interface TeacherStudentBatch {
+interface StudentDirectoryBatch {
   id: string;
   name: string;
   _count?: {
@@ -42,16 +42,16 @@ interface TeacherStudentBatch {
   };
 }
 
-export default function TeacherStudentsPage() {
+export default function AdminStudentsPage() {
   const [search, setSearch] = useState("");
   const { data: usersResponse, isLoading: isLoadingUsers } = useGetAllUsers();
   const { data: batchesResponse, isLoading: isLoadingBatches } =
     useGetAllBatches();
 
-  const users = ((usersResponse?.data as TeacherStudentUser[] | undefined) ??
-    []) as TeacherStudentUser[];
-  const batches = ((batchesResponse?.data as TeacherStudentBatch[] | undefined) ??
-    []) as TeacherStudentBatch[];
+  const users = ((usersResponse?.data as StudentDirectoryUser[] | undefined) ??
+    []) as StudentDirectoryUser[];
+  const batches = ((batchesResponse?.data as StudentDirectoryBatch[] | undefined) ??
+    []) as StudentDirectoryBatch[];
 
   const students = useMemo(
     () => users.filter((user) => user.role === "STUDENT"),
@@ -93,7 +93,7 @@ export default function TeacherStudentsPage() {
         title="Students"
         description="Review the learners in your organization and quickly search the current student roster."
         breadcrumbs={[
-          { label: "Teacher", href: "/teacher/dashboard" },
+          { label: "Admin", href: "/admin/dashboard" },
           { label: "Students" },
         ]}
       />

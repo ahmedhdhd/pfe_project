@@ -89,16 +89,22 @@ def build_assignment_generation_prompt(
     teacher_prompt: str,
     count: int,
     level: str,
+    rag_chunks: list[dict[str, Any]] | None = None,
 ) -> str:
     scope = course_name or "the course"
     if topic_name:
         scope = f"{topic_name} in {scope}"
 
+    rag_section = _format_rag_section(
+        rag_chunks or [],
+        heading="Relevant lesson content retrieved from the course:",
+    )
+
     return f"""You are an expert instructional designer creating LMS assignment questions.
 
 CRITICAL RULES:
-- Use only the assignment details below and your general instructional design knowledge.
-- Do not depend on indexed course content, embeddings, or retrieval results.
+- Ground questions in the relevant lesson content below when it is available.
+- If no lesson content was retrieved, or it is insufficient, use the assignment details and your general instructional design knowledge instead.
 - Ensure questions are accurate and relevant to the assignment topic.
 - Reference concepts and terminology appropriately.
 - Prefer clear, teachable questions that fit the requested difficulty level.
@@ -110,6 +116,8 @@ Teacher instructions: {teacher_prompt}
 Difficulty: {level}
 Number of questions: {count}
 Difficulty requirement: {_level_instruction(level)}
+
+{rag_section}
 
 Return JSON only:
 {{
@@ -203,6 +211,17 @@ async def generate_assignment_questions_with_llm(
     count: int,
     level: str,
 ) -> dict[str, Any]:
+    query_parts = [assignment_title, assignment_description, teacher_prompt, topic_name]
+    query_text = " ".join(part.strip() for part in query_parts if part and part.strip())
+    rag_chunks = await retrieve_course_chunks(
+        api_key=api_key,
+        batch_id=batch_id,
+        query_text=query_text,
+        topic_id=topic_id,
+        content_ids=content_ids,
+        top_k=settings.rag_assignment_generation_top_k,
+    )
+
     prompt = build_assignment_generation_prompt(
         assignment_title=assignment_title,
         assignment_description=assignment_description,
@@ -211,6 +230,7 @@ async def generate_assignment_questions_with_llm(
         teacher_prompt=teacher_prompt,
         count=count,
         level=level,
+        rag_chunks=rag_chunks,
     )
 
     parsed = await chat_json(
@@ -227,8 +247,8 @@ async def generate_assignment_questions_with_llm(
 
     return {
         "questions": questions,
-        "ragChunksUsed": 0,
-        "ragStatus": "llm",
+        "ragChunksUsed": len(rag_chunks),
+        "ragStatus": "ok" if rag_chunks else "no_chunks",
     }
 
 

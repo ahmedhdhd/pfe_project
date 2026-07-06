@@ -32,7 +32,7 @@ export function RouteGuard({
     hasRequiredRole,
     isLoading: roleLoading,
     user,
-  } = useRequireRole(allowedRoles[0] as "ADMIN" | "TEACHER" | "STUDENT");
+  } = useRequireRole(allowedRoles);
 
   useEffect(() => {
     setIsMounted(true);

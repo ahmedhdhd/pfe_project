@@ -15,14 +15,13 @@ import { CreateOrganizationConfigData } from "@/lib/types/api";
 import {
   Loader2,
   Save,
-  Palette,
   Building2,
   Mail,
   CreditCard,
-  Home,
   CheckCircle2,
   AlertCircle,
   Settings2,
+  Layout,
 } from "@/components/icons";
 import { toast } from "sonner";
 import {
@@ -35,11 +34,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { GeneralSettingsTab } from "./components/GeneralSettingsTab";
-import { ThemeBrandingTab } from "./components/ThemeBrandingTab";
-import { HomepageSettingsTab } from "./components/HomepageSettingsTab";
+import { WebsiteEditorTab } from "./components/WebsiteEditorTab";
 import { PaymentSettingsTab } from "./components/PaymentSettingsTab";
 import { ContactSettingsTab } from "./components/ContactSettingsTab";
 import { SeoAdvancedTab } from "./components/SeoAdvancedTab";
+
+const SETTINGS_TABS = ["general", "website", "payment", "seo", "contact"];
 
 const normalizeCurrency = (currency?: string) => {
   const normalized = currency?.trim().toUpperCase();
@@ -75,13 +75,15 @@ const extractMutationErrorMessage = (error: unknown) => {
 
 export default function AdminSettingsPage() {
   const searchParams = useSearchParams();
+  const requestedTab = searchParams.get("tab") || "";
+  const initialTab = SETTINGS_TABS.includes(requestedTab)
+    ? requestedTab
+    : "general";
   const { data: currentUser } = useCurrentUser();
   const { data: configData, isLoading: configLoading } =
     useOrganizationConfigAdmin();
   const updateMutation = useUpdateOrganizationConfig();
   const generateThemeMutation = useGenerateOrganizationTheme();
-  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
-  const [isUploadingFavicon, setIsUploadingFavicon] = useState(false);
   const [bannerUrls, setBannerUrls] = useState<string[]>([]);
   const [features, setFeatures] = useState<
     Array<{ title: string; description: string; icon?: string }>
@@ -107,7 +109,7 @@ export default function AdminSettingsPage() {
     },
     maintenanceMode: false,
     currency: "TND",
-    paymentGateway: "KONNECT",
+    paymentGateway: "STRIPE",
     supportEmail: "",
     contactEmail: "",
     contactPhone: "",
@@ -155,7 +157,8 @@ export default function AdminSettingsPage() {
         },
         maintenanceMode: config.maintenanceMode || false,
         supportEmail: config.supportEmail || "",
-        paymentGateway: config.paymentGateway || "KONNECT",
+        // Stripe is the only supported gateway now
+        paymentGateway: "STRIPE",
         logoUrl: config.logoUrl,
         faviconUrl: config.faviconUrl,
         heroTitle: config.heroTitle,
@@ -208,32 +211,6 @@ export default function AdminSettingsPage() {
     window.history.replaceState({}, "", url.toString());
   }, [searchParams]);
 
-  const handleLogoUpload = (fileData: {
-    key: string;
-    url: string;
-    bucket: string;
-    originalName: string;
-    size: number;
-    mimeType: string;
-  }) => {
-    setIsUploadingLogo(true);
-    setFormData({ ...formData, logoUrl: fileData.url });
-    setIsUploadingLogo(false);
-  };
-
-  const handleFaviconUpload = (fileData: {
-    key: string;
-    url: string;
-    bucket: string;
-    originalName: string;
-    size: number;
-    mimeType: string;
-  }) => {
-    setIsUploadingFavicon(true);
-    setFormData({ ...formData, faviconUrl: fileData.url });
-    setIsUploadingFavicon(false);
-  };
-
   const handleBannerUpload = (fileData: {
     key: string;
     url: string;
@@ -247,24 +224,6 @@ export default function AdminSettingsPage() {
 
   const handleRemoveBanner = (index: number) => {
     setBannerUrls((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleAddFeature = () => {
-    setFeatures([...features, { title: "", description: "", icon: "" }]);
-  };
-
-  const handleUpdateFeature = (
-    index: number,
-    field: "title" | "description" | "icon",
-    value: string
-  ) => {
-    const updatedFeatures = [...features];
-    updatedFeatures[index] = { ...updatedFeatures[index], [field]: value };
-    setFeatures(updatedFeatures);
-  };
-
-  const handleRemoveFeature = (index: number) => {
-    setFeatures((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleAddTestimonial = () => {
@@ -414,19 +373,15 @@ export default function AdminSettingsPage() {
       />
 
       <form onSubmit={handleSubmit}>
-        <Tabs defaultValue="general" className="space-y-6">
+        <Tabs defaultValue={initialTab} className="space-y-6">
           <TabsList>
             <TabsTrigger value="general">
               <Building2 className="h-4 w-4 mr-2" />
               General
             </TabsTrigger>
-            <TabsTrigger value="theme">
-              <Palette className="h-4 w-4 mr-2" />
-              Theme & Branding
-            </TabsTrigger>
-            <TabsTrigger value="homepage">
-              <Home className="h-4 w-4 mr-2" />
-              Homepage
+            <TabsTrigger value="website">
+              <Layout className="h-4 w-4 mr-2" />
+              Website
             </TabsTrigger>
             <TabsTrigger value="payment">
               <CreditCard className="h-4 w-4 mr-2" />
@@ -434,7 +389,7 @@ export default function AdminSettingsPage() {
             </TabsTrigger>
             <TabsTrigger value="seo">
               <Settings2 className="h-4 w-4 mr-2" />
-              SEO & Advanced
+              SEO
             </TabsTrigger>
             <TabsTrigger value="contact">
               <Mail className="h-4 w-4 mr-2" />
@@ -447,32 +402,14 @@ export default function AdminSettingsPage() {
             <GeneralSettingsTab formData={formData} setFormData={setFormData} />
           </TabsContent>
 
-          {/* Theme & Branding */}
-          <TabsContent value="theme" className="space-y-4">
-            <ThemeBrandingTab
-              formData={formData}
-              setFormData={setFormData}
-              isUploadingLogo={isUploadingLogo}
-              isUploadingFavicon={isUploadingFavicon}
-              onLogoUpload={handleLogoUpload}
-              onFaviconUpload={handleFaviconUpload}
-              isGeneratingAiTheme={generateThemeMutation.isPending}
-              onGenerateAiTheme={handleGenerateAiTheme}
-            />
-          </TabsContent>
-
-          {/* Homepage Settings */}
-          <TabsContent value="homepage" className="space-y-4">
-            <HomepageSettingsTab
+          {/* Website - live homepage editor */}
+          <TabsContent value="website" className="space-y-4">
+            <WebsiteEditorTab
               formData={formData}
               setFormData={setFormData}
               bannerUrls={bannerUrls}
               onBannerUpload={handleBannerUpload}
               onBannerRemove={handleRemoveBanner}
-              features={features}
-              onFeatureAdd={handleAddFeature}
-              onFeatureUpdate={handleUpdateFeature}
-              onFeatureRemove={handleRemoveFeature}
               testimonials={testimonials}
               onTestimonialAdd={handleAddTestimonial}
               onTestimonialUpdate={handleUpdateTestimonial}
@@ -481,6 +418,8 @@ export default function AdminSettingsPage() {
               onFaqAdd={handleAddFaq}
               onFaqUpdate={handleUpdateFaq}
               onFaqRemove={handleRemoveFaq}
+              isGeneratingAiTheme={generateThemeMutation.isPending}
+              onGenerateAiTheme={handleGenerateAiTheme}
             />
           </TabsContent>
 
@@ -501,7 +440,7 @@ export default function AdminSettingsPage() {
             />
           </TabsContent>
 
-          {/* SEO & Advanced */}
+          {/* SEO */}
           <TabsContent value="seo" className="space-y-4">
             <SeoAdvancedTab formData={formData} setFormData={setFormData} />
           </TabsContent>
