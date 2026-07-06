@@ -404,8 +404,11 @@ export const useInviteTeacher = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { email: string; username: string }) =>
-      api.inviteUser(data).then((res) => res.data),
+    mutationFn: (data: {
+      email: string;
+      username: string;
+      role?: "ADMIN" | "TEACHER";
+    }) => api.inviteUser(data).then((res) => res.data),
     onSuccess: (data) => {
       if (data.success) {
         // Invalidate users query to refresh the list

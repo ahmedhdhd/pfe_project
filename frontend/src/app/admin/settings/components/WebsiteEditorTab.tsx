@@ -643,7 +643,7 @@ export function WebsiteEditorTab({
                         onTestimonialUpdate(index, "avatar", fileData.url)
                       }
                       accept="image/*"
-                      maxSize={2}
+                      maxSize={5}
                       folder="organization-testimonial-avatars"
                       className="w-full"
                     />

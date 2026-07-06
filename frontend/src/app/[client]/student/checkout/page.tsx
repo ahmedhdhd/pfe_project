@@ -19,7 +19,11 @@ import {
   useStudentCourseCartItems,
   useStudentCourseCartStore,
 } from "@/lib/store/student-course-cart";
-import { useOrgCurrency, useOrgPaymentMode } from "@/lib/store/organization-config";
+import {
+  useOrgCurrency,
+  useOrgPaymentMode,
+  useOrganizationConfigStore,
+} from "@/lib/store/organization-config";
 import { formatCurrency } from "@/lib/utils/format";
 
 type PaymentMethod = "gateway" | "bank_transfer" | "mandat_minute_poste";
@@ -45,6 +49,9 @@ export default function StudentCheckoutPage() {
   const removeItems = useStudentCourseCartStore((state) => state.removeItems);
   const currency = useOrgCurrency();
   const paymentMode = useOrgPaymentMode();
+  const orgConfig = useOrganizationConfigStore((state) => state.config);
+  const mandatMinuteRecipient = orgConfig?.mandatMinuteRecipient || "";
+  const bankTransferRib = orgConfig?.bankTransferRib || "";
   const checkoutMutation = useCreateCourseOrderCheckout();
   const user = tokenManager.getUser();
   const { data: singleCourseResponse, isLoading: isSingleCourseLoading } =
@@ -430,11 +437,27 @@ export default function StudentCheckoutPage() {
                         value="bank_transfer"
                         id="payment-bank-transfer"
                       />
-                      <div className="space-y-1">
+                      <div className="min-w-0 flex-1 space-y-1">
                         <p className="font-medium">Virement bancaire</p>
                         <p className="text-sm text-muted-foreground">
                           Create the order first, then upload your payment proof.
                         </p>
+                        {paymentMethod === "bank_transfer" &&
+                          (bankTransferRib ? (
+                            <div className="mt-2 rounded-lg bg-muted/60 p-3 text-sm">
+                              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                                Transfer to this RIB
+                              </p>
+                              <p className="mt-1 break-all font-mono font-medium">
+                                {bankTransferRib}
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="mt-2 text-xs text-muted-foreground">
+                              Contact the organization for the bank account
+                              details.
+                            </p>
+                          ))}
                       </div>
                     </label>
                     <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/60 p-4">
@@ -442,12 +465,27 @@ export default function StudentCheckoutPage() {
                         value="mandat_minute_poste"
                         id="payment-mandat"
                       />
-                      <div className="space-y-1">
+                      <div className="min-w-0 flex-1 space-y-1">
                         <p className="font-medium">Mandat minute poste</p>
                         <p className="text-sm text-muted-foreground">
                           Create the order first, then upload the justification
                           image from the orders page.
                         </p>
+                        {paymentMethod === "mandat_minute_poste" &&
+                          (mandatMinuteRecipient ? (
+                            <div className="mt-2 rounded-lg bg-muted/60 p-3 text-sm">
+                              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                                Send the mandat minute to
+                              </p>
+                              <p className="mt-1 font-medium">
+                                {mandatMinuteRecipient}
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="mt-2 text-xs text-muted-foreground">
+                              Contact the organization for the recipient name.
+                            </p>
+                          ))}
                       </div>
                     </label>
                   </RadioGroup>

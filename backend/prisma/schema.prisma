@@ -60,6 +60,9 @@ model OrganizationConfig {
   currency          String? @default("TND")
   taxPercentage     String?
   invoicePrefix     String?
+  // Manual payment methods shown to students at checkout
+  mandatMinuteRecipient String?
+  bankTransferRib       String?
   stripeAccountId   String?  @unique
   stripeChargesEnabled Boolean @default(false)
   stripePayoutsEnabled Boolean @default(false)
@@ -253,10 +256,10 @@ model Batch {
   discountPercentage Float   @default(0)
   status             String   @default("INACTIVE")  // ACTIVE or INACTIVE
   faqJson            Json?   @default("[]")  // Array<{ title, description }>
-  certificateEnabled       Boolean @default(false)
+  certificateEnabled       Boolean @default(true)
   certificateTitle         String?
   certificateHeading       String?
-  certificateTemplateId    String?
+  certificateTemplateId    String? @default("prestige-ivory")
   certificateTemplateUrl   String?
   certificateIssuerName    String?
   certificateSignerName    String?

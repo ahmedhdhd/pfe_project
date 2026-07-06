@@ -166,6 +166,8 @@ export default function AdminSettingsPage() {
         motto: config.motto,
         openRouterApiKey: config.openRouterApiKey || "",
         paymentMode: config.paymentMode === 'subscription' ? 'per_course' : (config.paymentMode || 'per_course'),
+        mandatMinuteRecipient: config.mandatMinuteRecipient || "",
+        bankTransferRib: config.bankTransferRib || "",
         subscriptionPrice: config.subscriptionPrice || 0,
         subscriptionType: config.subscriptionType || 'onetime',
         metaTitle: config.metaTitle,

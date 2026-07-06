@@ -166,7 +166,7 @@ export { MagnifyingGlassIcon as Search } from "@heroicons/react/24/outline";
 export { PaperAirplaneIcon as Send } from "@heroicons/react/24/outline";
 export { Cog6ToothIcon as Settings } from "@heroicons/react/24/outline";
 export { AdjustmentsHorizontalIcon as Settings2 } from "@heroicons/react/24/outline";
-export { Squares2X2Icon as Shapes } from "@heroicons/react/24/outline";
+export { TagIcon as Shapes } from "@heroicons/react/24/outline";
 export { ShareIcon as Share2 } from "@heroicons/react/24/outline";
 export { ShieldCheckIcon as Shield } from "@heroicons/react/24/outline";
 export { ShieldExclamationIcon as ShieldAlert } from "@heroicons/react/24/outline";

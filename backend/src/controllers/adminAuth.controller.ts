@@ -145,11 +145,12 @@ export const resendVerification = async (req: Request, res: Response, next: Next
 
 export const inviteUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { email, username } = req.body;
+    const { email, username, role } = req.body;
+    const invitedRole: 'TEACHER' | 'ADMIN' = role === 'ADMIN' ? 'ADMIN' : 'TEACHER';
     const organizationId = req.user!.organizationId;
     const existing = await prisma.user.findFirst({ where: { email, organizationId } });
     if (existing) { sendError(res, 'User already exists', 409); return; }
-    const user = await prisma.user.create({ data: { organizationId, email, username, role: 'TEACHER', isVerified: false } });
+    const user = await prisma.user.create({ data: { organizationId, email, username, role: invitedRole, isVerified: false } });
     const token = uuidv4();
     await prisma.emailToken.create({ data: { userId: user.id, token, type: 'INVITE', expiresAt: new Date(Date.now() + 7 * 86400000) } });
     const org = await prisma.organization.findUnique({ where: { id: organizationId } });
@@ -159,12 +160,13 @@ export const inviteUser = async (req: AuthRequest, res: Response, next: NextFunc
         token,
         org?.name || 'TeslaAcademy',
         FRONTEND,
-        organizationId
+        organizationId,
+        invitedRole
       );
     } catch (emailErr) {
       console.warn('Failed to send invite email (SMTP may not be configured):', emailErr);
     }
-    sendSuccess(res, { id: user.id, email, username, role: 'TEACHER', organizationId, message: 'Invite sent' }, undefined, 201);
+    sendSuccess(res, { id: user.id, email, username, role: invitedRole, organizationId, message: 'Invite sent' }, undefined, 201);
   } catch (e) { next(e); }
 };
 

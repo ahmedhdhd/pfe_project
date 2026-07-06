@@ -139,10 +139,9 @@ export function CategoryManagement() {
     return categories.reduce(
       (acc, category) => {
         acc.courses += category._count?.batches ?? 0;
-        acc.exams += category._count?.testSeries ?? 0;
         return acc;
       },
-      { courses: 0, exams: 0 }
+      { courses: 0 }
     );
   }, [categories]);
 
@@ -241,7 +240,7 @@ export function CategoryManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border">
         <div className="bg-card px-4 py-3.5">
           <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             Top-level categories
@@ -256,14 +255,6 @@ export function CategoryManagement() {
           </p>
           <p className="mt-1 text-2xl font-semibold tabular-nums">
             {totals.courses}
-          </p>
-        </div>
-        <div className="col-span-2 bg-card px-4 py-3.5 sm:col-span-1">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-            Exams tagged
-          </p>
-          <p className="mt-1 text-2xl font-semibold tabular-nums">
-            {totals.exams}
           </p>
         </div>
       </div>
@@ -419,21 +410,13 @@ export function CategoryManagement() {
                 );
               })()}
 
-              <div className="grid grid-cols-3 divide-x divide-border border-b border-border text-center">
+              <div className="grid grid-cols-2 divide-x divide-border border-b border-border text-center">
                 <div className="py-3">
                   <p className="text-lg font-semibold tabular-nums">
                     {selectedCategory._count?.batches ?? 0}
                   </p>
                   <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
                     Courses
-                  </p>
-                </div>
-                <div className="py-3">
-                  <p className="text-lg font-semibold tabular-nums">
-                    {selectedCategory._count?.testSeries ?? 0}
-                  </p>
-                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                    Exams
                   </p>
                 </div>
                 <div className="py-3">
@@ -467,9 +450,7 @@ export function CategoryManagement() {
                   {subcategories.map((subcategory) => {
                     const SubIcon = getCategoryIcon(subcategory.icon);
                     const subColor = getCategoryColor(subcategory.id);
-                    const assignments =
-                      (subcategory._count?.batches ?? 0) +
-                      (subcategory._count?.testSeries ?? 0);
+                    const assignments = subcategory._count?.batches ?? 0;
 
                     return (
                       <div

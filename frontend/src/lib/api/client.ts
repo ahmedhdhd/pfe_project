@@ -459,7 +459,11 @@ export const api = {
       }>
     >("/api/auth/refresh-token", data),
 
-  inviteUser: (data: { email: string; username: string }) =>
+  inviteUser: (data: {
+    email: string;
+    username: string;
+    role?: "ADMIN" | "TEACHER";
+  }) =>
     apiClient.post<ApiResponse<InviteUserResponse>>(
       "/admin/auth/invite-user",
       data

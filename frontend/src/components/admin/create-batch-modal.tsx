@@ -632,9 +632,13 @@ export function CreateBatchModal({
                     id="totalPrice"
                     type="number"
                     placeholder="0"
+                    min="0"
                     value={formData.totalPrice || ""}
                     onChange={(e) =>
-                      handleInputChange("totalPrice", Number(e.target.value))
+                      handleInputChange(
+                        "totalPrice",
+                        Math.max(0, Number(e.target.value) || 0)
+                      )
                     }
                     className={errors.totalPrice ? "border-red-500" : ""}
                   />
@@ -657,7 +661,7 @@ export function CreateBatchModal({
                     onChange={(e) =>
                       handleInputChange(
                         "discountPercentage",
-                        Number(e.target.value)
+                        Math.min(100, Math.max(0, Number(e.target.value) || 0))
                       )
                     }
                     className={

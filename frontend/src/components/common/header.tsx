@@ -2,7 +2,7 @@
 
 import { User, Settings, Moon, Sun, GraduationCap } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,7 +45,6 @@ export function Header() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
               <Avatar className="h-9 w-9 bg-primary/10">
-                <AvatarImage src="/images/Logo.png" alt="Admin" />
                 <AvatarFallback>
                   <GraduationCap className="h-4 w-4 text-primary" />
                 </AvatarFallback>

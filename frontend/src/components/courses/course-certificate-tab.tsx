@@ -149,10 +149,9 @@ export function CourseCertificateTab({
   };
 
   const isSaving = updateCertificate.isPending;
-  const selectedTemplate = getCertificateTemplate(form.templateId);
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.4fr,1fr]">
+    <div className="grid gap-6">
       <div className="space-y-6">
         <Card>
           <CardHeader>
@@ -403,26 +402,6 @@ export function CourseCertificateTab({
         </Card>
       </div>
 
-      <div className="space-y-6">
-        <Card className="overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-base">Live preview</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <CertificateTemplatePreview
-              templateId={form.templateId}
-              content={previewContent}
-              className="h-56"
-            />
-            <p className="text-sm text-muted-foreground">
-              Previewing <span className="text-foreground">{selectedTemplate.name}</span>{" "}
-              with your current text and colors. The downloaded PDF uses the student&apos;s
-              real name when they claim the certificate.
-            </p>
-          </CardContent>
-        </Card>
-
-      </div>
     </div>
   );
 };

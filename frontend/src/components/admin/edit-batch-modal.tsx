@@ -536,11 +536,12 @@ export function EditBatchModal({
                 id="totalPrice"
                 type="number"
                 placeholder="0"
+                min="0"
                 value={formData.totalPrice}
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    totalPrice: Number(e.target.value),
+                    totalPrice: Math.max(0, Number(e.target.value) || 0),
                   }))
                 }
                 required
@@ -556,7 +557,10 @@ export function EditBatchModal({
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    discountPercentage: Number(e.target.value),
+                    discountPercentage: Math.min(
+                      100,
+                      Math.max(0, Number(e.target.value) || 0)
+                    ),
                   }))
                 }
                 min="0"

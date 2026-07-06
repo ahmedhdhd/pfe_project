@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useInviteTeacher, useInviteAdmin } from "@/hooks";
+import { toast } from "sonner";
+import { useInviteTeacher } from "@/hooks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +20,9 @@ import { UserPlus, Mail, User, Shield, Users } from "@/components/icons";
 interface InviteUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  organizationId: string;
+  // Kept for call-site compatibility; the org is resolved server-side from the
+  // authenticated admin's token.
+  organizationId?: string;
   defaultRole?: "ADMIN" | "TEACHER";
   allowedRoles?: ("ADMIN" | "TEACHER")[];
 }
@@ -27,7 +30,6 @@ interface InviteUserModalProps {
 export function InviteUserModal({
   isOpen,
   onClose,
-  organizationId,
   defaultRole = "ADMIN",
   allowedRoles = ["ADMIN", "TEACHER"],
 }: InviteUserModalProps) {
@@ -37,7 +39,6 @@ export function InviteUserModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const inviteUserMutation = useInviteTeacher();
-  const inviteAdminMutation = useInviteAdmin();
 
   // Auto-suggest username based on email
   useEffect(() => {
@@ -47,48 +48,50 @@ export function InviteUserModal({
     }
   }, [email, username]);
 
-  // Set role when modal opens or allowedRoles changes
+  // Reset the role only when the modal opens (or the allowed roles actually
+  // change). Depending on the `allowedRoles` array itself would re-run this on
+  // every render — the default prop is a new array each time — and instantly
+  // undo the user's selection.
+  const allowedRolesKey = allowedRoles.join(",");
   useEffect(() => {
-    if (isOpen && allowedRoles.length === 1) {
+    if (!isOpen) return;
+    if (allowedRoles.length === 1) {
       setRole(allowedRoles[0]);
-    } else if (isOpen) {
+    } else {
       setRole(defaultRole);
     }
-  }, [isOpen, allowedRoles, defaultRole]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, allowedRolesKey, defaultRole]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email || !username) {
-      alert("Please fill in all required fields");
+      toast.error("Please fill in all required fields");
       return;
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      alert("Please enter a valid email address");
+      toast.error("Please enter a valid email address");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // Use the appropriate hook based on role
-      if (role === "ADMIN") {
-        await inviteAdminMutation.mutateAsync({
-          organizationId,
-          email,
-          username,
-        });
-      } else {
-        await inviteUserMutation.mutateAsync({
-          email,
-          username,
-        });
-      }
+      await inviteUserMutation.mutateAsync({
+        email,
+        username,
+        role,
+      });
 
-      alert(`Invitation sent to ${email} successfully!`);
+      toast.success("Invitation sent", {
+        description: `${email} has been invited as ${
+          role === "ADMIN" ? "an admin" : "a teacher"
+        }.`,
+      });
 
       // Reset form and close modal
       setEmail("");
@@ -105,16 +108,23 @@ export function InviteUserModal({
         };
         const serverMessage = axiosError.response?.data?.message;
         if (axiosError.response?.status === 409) {
-          alert("User with this email already exists in your organization");
+          toast.error("User already exists", {
+            description:
+              "A user with this email already exists in your organization.",
+          });
         } else if (serverMessage) {
-          alert(`Failed to send invitation: ${serverMessage}`);
+          toast.error("Failed to send invitation", {
+            description: serverMessage,
+          });
         } else if (axiosError.response?.status === 400) {
-          alert("Invalid request. Please check your input and try again");
+          toast.error("Invalid request", {
+            description: "Please check your input and try again.",
+          });
         } else {
-          alert("Failed to send invitation. Please try again");
+          toast.error("Failed to send invitation. Please try again.");
         }
       } else {
-        alert("Failed to send invitation. Please try again");
+        toast.error("Failed to send invitation. Please try again.");
       }
     } finally {
       setIsSubmitting(false);
@@ -122,11 +132,7 @@ export function InviteUserModal({
   };
 
   const handleClose = () => {
-    if (
-      !isSubmitting &&
-      !inviteUserMutation.isPending &&
-      !inviteAdminMutation.isPending
-    ) {
+    if (!isSubmitting && !inviteUserMutation.isPending) {
       setEmail("");
       setUsername("");
       setRole(defaultRole);
@@ -238,11 +244,7 @@ export function InviteUserModal({
               type="button"
               variant="outline"
               onClick={handleClose}
-              disabled={
-                isSubmitting ||
-                inviteUserMutation.isPending ||
-                inviteAdminMutation.isPending
-              }
+              disabled={isSubmitting || inviteUserMutation.isPending}
               className="w-full sm:w-auto"
             >
               Cancel
@@ -252,15 +254,12 @@ export function InviteUserModal({
               disabled={
                 isSubmitting ||
                 inviteUserMutation.isPending ||
-                inviteAdminMutation.isPending ||
                 !email ||
                 !username
               }
               className="w-full sm:w-auto"
             >
-              {isSubmitting ||
-              inviteUserMutation.isPending ||
-              inviteAdminMutation.isPending ? (
+              {isSubmitting || inviteUserMutation.isPending ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   Sending Invitation...

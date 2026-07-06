@@ -450,23 +450,26 @@ export const sendInviteEmail = async (
   token: string,
   orgName: string,
   frontendUrl: string,
-  organizationId?: string
+  organizationId?: string,
+  role: 'TEACHER' | 'ADMIN' = 'TEACHER'
 ) => {
   const brand = await getEmailBranding(organizationId);
   const link = `${frontendUrl}/verify-email?token=${token}`;
+  const roleLabel = role === 'ADMIN' ? 'Admin' : 'Teacher';
 
   await sendMail({
     organizationId,
     to,
-    subject: `You're invited to join ${orgName}`,
+    subject: `Invitation to join ${orgName} as ${roleLabel}`,
     html: buildEmailShell({
       brand,
-      preheader: `You've been invited to join ${orgName} as a teacher.`,
+      preheader: `You've been invited to join ${orgName} as ${roleLabel.toLowerCase()}.`,
       eyebrow: 'Invitation',
       title: `Join ${orgName}`,
-      intro: 'You have been invited to join the platform as a teacher.',
+      intro: `You have been invited to join the platform as ${roleLabel.toLowerCase()}.`,
       bodyHtml: `
         <div><strong>Organization:</strong> ${escapeHtml(orgName)}</div>
+        <div><strong>Role:</strong> ${roleLabel}</div>
         <div style="margin-top:10px;">Use the link below to accept the invitation and complete your account setup.</div>
         ${renderActionButton('Accept Invitation', link, brand.primaryColor)}
         ${renderFallbackLink(link, brand.primaryColor)}

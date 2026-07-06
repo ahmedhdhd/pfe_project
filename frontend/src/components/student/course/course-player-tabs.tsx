@@ -118,6 +118,16 @@ export function CoursePlayerTabs({
   const questions = questionsData?.data || [];
   const announcements = announcementsData?.data || [];
 
+  const courseReviews = (course.reviews as Array<{ rating?: number }>) || [];
+  const ratedReviews = courseReviews.filter(
+    (review) => typeof review.rating === "number" && review.rating > 0
+  );
+  const averageRating =
+    ratedReviews.length > 0
+      ? ratedReviews.reduce((sum, review) => sum + (review.rating || 0), 0) /
+        ratedReviews.length
+      : null;
+
   return (
     <div className="mt-6 w-full">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -161,8 +171,18 @@ export function CoursePlayerTabs({
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground mb-4">
                 <div className="inline-flex items-center gap-1.5 rounded-full border bg-muted/30 px-3 py-1">
                   <Star className="h-4 w-4 text-amber-500" />
-                  <span className="font-medium text-foreground">4.5</span>
-                  <span className="text-muted-foreground">avg rating</span>
+                  {averageRating !== null ? (
+                    <>
+                      <span className="font-medium text-foreground">
+                        {averageRating.toFixed(1)}
+                      </span>
+                      <span className="text-muted-foreground">
+                        avg rating ({ratedReviews.length})
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-muted-foreground">No ratings yet</span>
+                  )}
                 </div>
                 <div className="inline-flex items-center gap-1.5 rounded-full border bg-muted/30 px-3 py-1">
                   <span className="font-medium text-foreground">

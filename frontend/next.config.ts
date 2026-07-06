@@ -38,6 +38,24 @@ const nextConfig: NextConfig = {
   },
   // Configure to handle subdomains
   async headers() {
+    // Hosts allowed to embed tenant pages in an iframe (the admin settings
+    // live preview). Must cover the deployed main domain and its subdomains.
+    const mainDomain =
+      process.env.NEXT_PUBLIC_MAIN_DOMAIN || "teslaacademy.dedyn.io";
+    const frameAncestors = Array.from(
+      new Set([
+        "'self'",
+        "http://localhost:3000",
+        "http://*.localhost:3000",
+        "https://teslaacademy.com",
+        "https://www.teslaacademy.com",
+        "https://*.teslaacademy.com",
+        "https://*.teslaacademy.in",
+        `https://${mainDomain}`,
+        `https://*.${mainDomain}`,
+      ])
+    ).join(" ");
+
     const sharedSecurityHeaders = [
       {
         key: "X-Content-Type-Options",
@@ -85,8 +103,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value:
-              "frame-ancestors 'self' http://localhost:3000 http://*.localhost:3000 https://teslaacademy.com https://www.teslaacademy.com https://*.teslaacademy.com https://*.teslaacademy.in",
+            value: `frame-ancestors ${frameAncestors}`,
           },
           ...sharedSecurityHeaders,
         ],

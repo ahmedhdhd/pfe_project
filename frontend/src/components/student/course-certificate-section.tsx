@@ -102,11 +102,7 @@ export function CourseCertificateSection({
         throw new Error("Certificate information is unavailable.");
       }
 
-      const verificationUrl = `${window.location.origin}/certificates/${certificate.credentialId}`;
-      await downloadBatchCertificatePdf({
-        certificate,
-        verificationUrl,
-      });
+      await downloadBatchCertificatePdf({ certificate });
       toast.success("Certificate downloaded.");
     } catch (error) {
       console.error("Certificate download failed:", error);

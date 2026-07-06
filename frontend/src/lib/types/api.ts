@@ -239,6 +239,8 @@ export interface OrganizationConfig {
   currency?: string;
   taxPercentage?: string;
   invoicePrefix?: string;
+  mandatMinuteRecipient?: string;
+  bankTransferRib?: string;
   stripeChargesEnabled?: boolean;
   stripePayoutsEnabled?: boolean;
   stripeDetailsSubmitted?: boolean;
@@ -290,6 +292,8 @@ export interface CreateOrganizationConfigData {
   currency?: string;
   taxPercentage?: string;
   invoicePrefix?: string;
+  mandatMinuteRecipient?: string;
+  bankTransferRib?: string;
   stripeChargesEnabled?: boolean;
   stripePayoutsEnabled?: boolean;
   stripeDetailsSubmitted?: boolean;

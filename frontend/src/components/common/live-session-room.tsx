@@ -386,7 +386,7 @@ export function LiveSessionRoom({
           </Badge>
         </div>
 
-        <div className="mb-6 grid gap-4 md:grid-cols-3">
+        <div className="mb-6 grid gap-4 md:grid-cols-2">
           <Card>
             <CardContent className="flex items-center gap-3 p-4">
               <Calendar className="h-5 w-5 text-muted-foreground" />
@@ -411,17 +411,6 @@ export function LiveSessionRoom({
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="flex items-center gap-3 p-4">
-              <Video className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Room
-                </p>
-                <p className="font-medium">{session?.roomName ?? schedule.roomName}</p>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {schedule.status === "COMPLETED" && (
@@ -434,7 +423,8 @@ export function LiveSessionRoom({
             <CardContent className="space-y-2 p-4">
               {summaryQuery.isLoading || summaryStillPending ? (
                 <p className="text-sm text-muted-foreground">
-                  Generating summary from the uploaded transcript chunks. This can take a few minutes after the host ends the session.
+                  Your session summary is being prepared. It will appear here a
+                  few minutes after the session ends.
                 </p>
               ) : summaryDisplay.text ? (
                 <>
@@ -460,7 +450,7 @@ export function LiveSessionRoom({
                 </>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Summary is not available yet. Join and end the session as host (allow microphone access) so transcript chunks can upload. Configure GROQ_API_KEY and ffmpeg in ai-service, and OpenRouter for your organization.
+                  No summary is available for this session.
                 </p>
               )}
             </CardContent>
@@ -517,7 +507,14 @@ export function LiveSessionRoom({
               )}
             </TabsList>
 
-            <TabsContent value="session" forceMount className="mt-0">
+            {/* forceMount keeps the call/whiteboard alive across tab switches;
+                inactive panels are hidden manually since Radix doesn't hide
+                force-mounted content. */}
+            <TabsContent
+              value="session"
+              forceMount
+              className={cn("mt-0", activeTab !== "session" && "hidden")}
+            >
               <Card className="overflow-hidden border-border/60">
                 <CardHeader className="border-b border-border/60 bg-muted/20">
                   <CardTitle className="text-base font-medium">
@@ -584,12 +581,20 @@ export function LiveSessionRoom({
               </Card>
             </TabsContent>
 
-            <TabsContent value="whiteboard" forceMount className="mt-0">
+            <TabsContent
+              value="whiteboard"
+              forceMount
+              className={cn("mt-0", activeTab !== "whiteboard" && "hidden")}
+            >
               <LiveSessionWhiteboard scheduleId={scheduleId} portal={portal} />
             </TabsContent>
 
             {!isStudentPortal && (
-              <TabsContent value="attendance" forceMount className="mt-0">
+              <TabsContent
+                value="attendance"
+                forceMount
+                className={cn("mt-0", activeTab !== "attendance" && "hidden")}
+              >
                 <Card className="overflow-hidden border-border/60">
                   <CardHeader className="border-b border-border/60 bg-muted/20">
                     <CardTitle className="text-base font-medium">

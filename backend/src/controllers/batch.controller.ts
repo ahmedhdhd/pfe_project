@@ -48,10 +48,10 @@ export const createBatch = async (req: AuthRequest, res: Response, next: NextFun
       certificateSignerTitle: normalizeOptionalString(rest.certificateSignerTitle),
       certificateLinkedInOrgId: normalizeOptionalString(rest.certificateLinkedInOrgId),
       totalPrice:
-        paymentMode === 'per_course' ? Number(rest.totalPrice) || 0 : 0,
+        paymentMode === 'per_course' ? Math.max(0, Number(rest.totalPrice) || 0) : 0,
       discountPercentage:
         paymentMode === 'per_course'
-          ? Number(rest.discountPercentage) || 0
+          ? Math.min(100, Math.max(0, Number(rest.discountPercentage) || 0))
           : 0,
     };
     if (BATCH_SUPPORTS_LEVEL) {
@@ -164,10 +164,10 @@ export const updateBatch = async (req: AuthRequest, res: Response, next: NextFun
       certificateSignerTitle: normalizeOptionalString(rest.certificateSignerTitle) ?? null,
       certificateLinkedInOrgId: normalizeOptionalString(rest.certificateLinkedInOrgId) ?? null,
       totalPrice:
-        paymentMode === 'per_course' ? Number(rest.totalPrice) || 0 : 0,
+        paymentMode === 'per_course' ? Math.max(0, Number(rest.totalPrice) || 0) : 0,
       discountPercentage:
         paymentMode === 'per_course'
-          ? Number(rest.discountPercentage) || 0
+          ? Math.min(100, Math.max(0, Number(rest.discountPercentage) || 0))
           : 0,
     };
     if (BATCH_SUPPORTS_LEVEL) {

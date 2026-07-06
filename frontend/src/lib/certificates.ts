@@ -65,35 +65,50 @@ const loadLogoImage = async (
       return null;
     }
 
-    const arrayBuffer = await response.arrayBuffer();
-    const contentType = response.headers.get("content-type") || "";
+    const blob = await response.blob();
+    const bitmap = await createImageBitmap(blob);
 
-    let image: PDFImage;
-    if (
-      contentType.includes("jpeg") ||
-      contentType.includes("jpg") ||
-      logoUrl.toLowerCase().includes(".jpg") ||
-      logoUrl.toLowerCase().includes(".jpeg")
-    ) {
-      image = await pdfDoc.embedJpg(arrayBuffer);
-    } else {
-      image = await pdfDoc.embedPng(arrayBuffer);
+    // Render the organization logo into a circular canvas so it appears
+    // rounded on the certificate, whatever its original shape.
+    const size = 256;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      return null;
     }
 
-    const imgDims = image.scale(1);
-    const maxWidth = 92;
-    const maxHeight = 58;
-    const scale = Math.min(
-      maxWidth / imgDims.width,
-      maxHeight / imgDims.height,
-      1
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.clip();
+
+    const inner = size * 0.82;
+    const scale = Math.min(inner / bitmap.width, inner / bitmap.height);
+    const drawWidth = bitmap.width * scale;
+    const drawHeight = bitmap.height * scale;
+    ctx.drawImage(
+      bitmap,
+      (size - drawWidth) / 2,
+      (size - drawHeight) / 2,
+      drawWidth,
+      drawHeight
     );
 
-    return {
-      image,
-      width: Math.max(1, Math.round(imgDims.width * scale)),
-      height: Math.max(1, Math.round(imgDims.height * scale)),
-    };
+    const pngBlob = await new Promise<Blob>((resolve, reject) =>
+      canvas.toBlob(
+        (result) =>
+          result ? resolve(result) : reject(new Error("Canvas export failed")),
+        "image/png"
+      )
+    );
+    const image = await pdfDoc.embedPng(await pngBlob.arrayBuffer());
+
+    const displaySize = 60;
+    return { image, width: displaySize, height: displaySize };
   } catch (err) {
     console.error("Failed to load logo for PDF:", err);
     return null;
@@ -316,10 +331,8 @@ const getTemplateTextColors = (templateId: string) => {
 
 export async function downloadBatchCertificatePdf({
   certificate,
-  verificationUrl,
 }: {
   certificate: BatchCertificateIssuePayload;
-  verificationUrl: string;
 }) {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage(A4_LANDSCAPE);
@@ -360,7 +373,7 @@ export async function downloadBatchCertificatePdf({
   if (logo) {
     page.drawImage(logo.image, {
       x: (width - logo.width) / 2,
-      y: height * 0.855,
+      y: height * 0.825,
       width: logo.width,
       height: logo.height,
     });
@@ -503,13 +516,6 @@ export async function downloadBatchCertificatePdf({
     x: 44,
     y: 28,
     size: 9,
-    font: bodyFont,
-    color: mutedColor,
-  });
-  page.drawText(`Verify: ${verificationUrl}`, {
-    x: 44,
-    y: 14,
-    size: 8,
     font: bodyFont,
     color: mutedColor,
   });

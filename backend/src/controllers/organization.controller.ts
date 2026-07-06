@@ -55,6 +55,8 @@ export const getPublicConfig = async (req: Request, res: Response, next: NextFun
         currency: "TND",
         taxPercentage: null,
         invoicePrefix: null,
+        mandatMinuteRecipient: null,
+        bankTransferRib: null,
         logoUrl: null,
         faviconUrl: null,
         bannerUrls: [],
@@ -84,7 +86,12 @@ export const getPublicConfig = async (req: Request, res: Response, next: NextFun
       };
     }
     
-    sendSuccess(res, formatConfig(config));
+    // Never expose credentials on the public endpoint
+    sendSuccess(res, {
+      ...formatConfig(config),
+      smtpConfig: undefined,
+      openRouterApiKey: undefined,
+    });
   } catch (e) { next(e); }
 };
 

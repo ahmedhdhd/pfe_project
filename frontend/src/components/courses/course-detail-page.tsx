@@ -9,8 +9,6 @@ import { ConfirmationDialog } from "@/components/common/confirmation-dialog";
 import {
   useGetBatch,
   useDeleteBatch,
-  useGetTeachersByBatch,
-  useDeleteTeacher,
   useDeleteSubject,
 } from "@/hooks";
 import { useRolePermissions } from "@/hooks/common";
@@ -20,7 +18,6 @@ import { CourseEvaluationsTab } from "./course-evaluations-tab";
 import { CourseOverviewTab } from "./course-overview-tab";
 import { CourseSubjectsTab } from "./course-subjects-tab";
 import { CourseSchedulesTab } from "./course-schedules-tab";
-import { CourseTeachersTab } from "./course-teachers-tab";
 import { CourseQuestionsTab } from "./course-questions-tab";
 import { CourseModals } from "./course-modals";
 import {
@@ -35,14 +32,13 @@ export function CourseDetailPage({
   basePath = "admin",
   showSubjectsTab = true,
   showSchedulesTab = true,
-  showAnalyticsTab = true,
 }: CourseDetailPageProps) {
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
   const courseId = params.id as string;
 
-  const { isAdmin, isTeacher, canManageTeachers } = useRolePermissions();
+  const { isAdmin, isTeacher } = useRolePermissions();
   const canManageCourse = isAdmin || isTeacher;
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -60,16 +56,11 @@ export function CourseDetailPage({
     null
   );
   const [activeTab, setActiveTab] = useState("overview");
-  const [deleteTeacherDialog, setDeleteTeacherDialog] =
-    useState<Teacher | null>(null);
   const [deleteSubjectDialog, setDeleteSubjectDialog] =
     useState<Subject | null>(null);
 
   const { data: batch, isLoading } = useGetBatch(courseId);
-  const { data: teachers, isLoading: teachersLoading } =
-    useGetTeachersByBatch(courseId);
   const deleteBatchMutation = useDeleteBatch();
-  const deleteTeacherMutation = useDeleteTeacher();
   const deleteSubjectMutation = useDeleteSubject();
 
   const handleGoBack = () => router.push(`/${basePath}/courses`);
@@ -81,21 +72,6 @@ export function CourseDetailPage({
     });
   };
 
-  const handleAssignTeachers = () => setIsTeacherAssignmentOpen(true);
-  const handleCreateTeacher = () => setIsCreateTeacherOpen(true);
-  const handleEditTeacher = (teacher: Teacher) => {
-    setSelectedTeacher({
-      ...teacher,
-      highlights:
-        typeof teacher.highlights === "string"
-          ? teacher.highlights
-          : teacher.highlights?.content || "",
-      subjects: teacher.subjects || [],
-      batchIds: teacher.batchIds || [],
-    });
-    setIsEditTeacherOpen(true);
-  };
-
   const handleTeacherCreated = () =>
     queryClient.invalidateQueries({
       queryKey: ["teachers", "batch", courseId],
@@ -104,22 +80,6 @@ export function CourseDetailPage({
     queryClient.invalidateQueries({
       queryKey: ["teachers", "batch", courseId],
     });
-  const handleDeleteTeacher = (teacher: Teacher) => {
-    setDeleteTeacherDialog(teacher);
-  };
-
-  const confirmDeleteTeacher = () => {
-    if (deleteTeacherDialog) {
-      deleteTeacherMutation.mutate(deleteTeacherDialog.id, {
-        onSuccess: () => {
-          queryClient.invalidateQueries({
-            queryKey: ["teachers", "batch", courseId],
-          });
-          setDeleteTeacherDialog(null);
-        },
-      });
-    }
-  };
 
   const handleCreateSubject = () => setIsCreateSubjectOpen(true);
   const handleEditSubject = (subject: Subject) => {
@@ -213,11 +173,7 @@ export function CourseDetailPage({
           className="grid w-full"
           style={{
             gridTemplateColumns: `repeat(${
-                [
-                  showSubjectsTab,
-                  showSchedulesTab,
-                  showAnalyticsTab,
-                ].filter(Boolean).length + 5
+                [showSubjectsTab, showSchedulesTab].filter(Boolean).length + 4
             }, minmax(0, 1fr))`,
           }}
         >
@@ -231,11 +187,6 @@ export function CourseDetailPage({
           <TabsTrigger value="certificate">Certificate</TabsTrigger>
           <TabsTrigger value="questions">Questions</TabsTrigger>
           <TabsTrigger value="evaluations">Evaluations</TabsTrigger>
-          <TabsTrigger value="teachers">Teachers</TabsTrigger>
-          <TabsTrigger value="students">Students</TabsTrigger>
-          {showAnalyticsTab && (
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          )}
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -279,45 +230,6 @@ export function CourseDetailPage({
           <CourseEvaluationsTab courseId={courseId} />
         </TabsContent>
 
-        <TabsContent value="teachers" className="space-y-6">
-          <CourseTeachersTab
-            teachers={(teachers?.data as Teacher[]) || []}
-            isLoading={teachersLoading}
-            canManageCourse={canManageTeachers}
-            onAssignTeachers={handleAssignTeachers}
-            onCreateTeacher={handleCreateTeacher}
-            onEditTeacher={handleEditTeacher}
-            onDeleteTeacher={handleDeleteTeacher}
-          />
-        </TabsContent>
-
-        <TabsContent value="students" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Students</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Student management coming soon...
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {showAnalyticsTab && (
-          <TabsContent value="analytics" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Analytics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Analytics coming soon...
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        )}
       </Tabs>
 
       <CourseModals
@@ -364,18 +276,6 @@ export function CourseDetailPage({
         }}
         selectedSchedule={selectedSchedule}
         onScheduleCreated={handleScheduleCreated}
-      />
-
-      {/* Delete Teacher Confirmation Dialog */}
-      <ConfirmationDialog
-        open={!!deleteTeacherDialog}
-        onOpenChange={(open) => !open && setDeleteTeacherDialog(null)}
-        title="Remove Teacher"
-        description={`Are you sure you want to remove ${deleteTeacherDialog?.name}? This action cannot be undone.`}
-        confirmText="Remove"
-        onConfirm={confirmDeleteTeacher}
-        variant="destructive"
-        isLoading={deleteTeacherMutation.isPending}
       />
 
       {/* Delete Subject Confirmation Dialog */}

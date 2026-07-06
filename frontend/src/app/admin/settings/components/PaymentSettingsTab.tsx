@@ -8,7 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ShieldAlert, Gift, CreditCard, Check } from "@/components/icons";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Gift, CreditCard, Check } from "@/components/icons";
 import { CreateOrganizationConfigData } from "@/lib/types/api";
 
 interface PaymentSettingsTabProps {
@@ -134,42 +136,51 @@ export function PaymentSettingsTab({
       {needsPaidGateway && (
         <Card className="rounded-xl border-border/60">
           <CardHeader className="pb-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                <svg
-                  className="h-5 w-5 text-primary"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <CardTitle className="text-lg">Payment Gateway</CardTitle>
-                <CardDescription className="mt-0.5">
-                  Payments are processed through Stripe.
-                </CardDescription>
-              </div>
-            </div>
+            <CardTitle className="text-lg">Manual Payment Methods</CardTitle>
+            <CardDescription>
+              Shown to students at checkout when they choose to pay by mandat
+              minute or bank transfer.
+            </CardDescription>
           </CardHeader>
 
-          <CardContent>
-            <div className="flex gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-950/20">
-              <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-              <div>
-                <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
-                  Stripe Checkout
-                </p>
-                <p className="mt-0.5 text-sm text-emerald-800 dark:text-emerald-200">
-                  Payments will be processed using the platform&apos;s primary Stripe account.
-                </p>
-              </div>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="mandat-minute-recipient">
+                Mandat minute — recipient name
+              </Label>
+              <Input
+                id="mandat-minute-recipient"
+                value={formData.mandatMinuteRecipient || ""}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    mandatMinuteRecipient: e.target.value,
+                  }))
+                }
+                placeholder="Full name of the person receiving the mandat minute"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="bank-transfer-rib">
+                Bank transfer — RIB
+              </Label>
+              <Input
+                id="bank-transfer-rib"
+                value={formData.bankTransferRib || ""}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    bankTransferRib: e.target.value,
+                  }))
+                }
+                placeholder="e.g. 08 006 0123456789012345 12"
+                className="font-mono"
+              />
+              <p className="text-xs text-muted-foreground">
+                Students will see this account number to make their bank
+                transfer.
+              </p>
             </div>
           </CardContent>
         </Card>

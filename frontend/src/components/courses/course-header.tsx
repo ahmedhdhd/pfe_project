@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   Edit,
@@ -25,25 +24,10 @@ interface CourseHeaderProps {
 export function CourseHeader({
   course,
   canManageCourse,
-  basePath,
   onGoBack,
   onEdit,
   onDelete,
 }: CourseHeaderProps) {
-  const getStatusBadge = (courseData: Batch) => {
-    const now = new Date();
-    const startDate = new Date(courseData.startDate);
-    const endDate = new Date(courseData.endDate);
-
-    if (now < startDate) {
-      return <Badge className="bg-blue-500">Upcoming</Badge>;
-    } else if (now > endDate) {
-      return <Badge className="bg-gray-500">Completed</Badge>;
-    } else {
-      return <Badge className="bg-green-500">Active</Badge>;
-    }
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
@@ -65,7 +49,6 @@ export function CourseHeader({
         <div className="flex-1">
           <div className="flex items-center space-x-4 mb-4">
             <h1 className="text-3xl font-bold tracking-tight">{course.name}</h1>
-            {getStatusBadge(course)}
           </div>
           <div className="flex items-center space-x-6 text-sm text-muted-foreground">
             <div className="flex items-center space-x-2">

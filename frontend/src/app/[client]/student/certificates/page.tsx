@@ -135,11 +135,7 @@ export default function StudentCertificatesPage() {
         throw new Error("Certificate is not ready yet.");
       }
 
-      const verificationUrl = `${window.location.origin}/certificates/${certificate.credentialId}`;
-      await downloadBatchCertificatePdf({
-        certificate,
-        verificationUrl,
-      });
+      await downloadBatchCertificatePdf({ certificate });
       toast.success("Certificate downloaded.");
     } catch (error) {
       const message =

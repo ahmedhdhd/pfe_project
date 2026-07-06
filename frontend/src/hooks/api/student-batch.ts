@@ -142,6 +142,9 @@ export const useCreateBatchReview = () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.batchReviews(variables.batchId),
       });
+      // The course player reads reviews from the purchased-courses query, so
+      // refresh it too — otherwise a new review only shows after a page reload.
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
     },
   });
 };
