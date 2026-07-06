@@ -22,6 +22,7 @@ import { getFriendlyErrorMessage } from "@/lib/utils/error-handling";
 import { ErrorMessage } from "@/components/common/error-message";
 import { generateSubdomain } from "@/lib/utils/validation";
 import { useDebounce } from "@/hooks/common";
+import { MAIN_DOMAIN } from "@/lib/constants";
 
 export default function CreateOrganizationPage() {
   const router = useRouter();
@@ -206,7 +207,7 @@ export default function CreateOrganizationPage() {
                     <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-lg">
                       <Globe className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-mono">
-                        {getFieldValue("subdomain")}.teslaacademy.in
+                        {getFieldValue("subdomain")}.{MAIN_DOMAIN}
                       </span>
                       <div className="ml-auto">
                         {isFieldValidating("subdomain") ? (

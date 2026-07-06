@@ -7,6 +7,24 @@ export const ROLES = {
   SUPER_ADMIN: "super_admin" as const,
 } as const;
 
+// The domain the platform is deployed on. Tenant sites live on
+// <org-slug>.<MAIN_DOMAIN>.
+export const MAIN_DOMAIN =
+  process.env.NEXT_PUBLIC_MAIN_DOMAIN || "teslaacademy.dedyn.io";
+
+// All base domains the platform has been served from. Used to tell a real
+// customer-owned custom domain apart from a generated platform subdomain.
+export const PLATFORM_BASE_DOMAINS = Array.from(
+  new Set(["teslaacademy.com", "teslaacademy.in", "teslaacademy.dedyn.io", MAIN_DOMAIN])
+);
+
+export const isPlatformSubdomain = (domain?: string | null): boolean => {
+  if (!domain) return false;
+  return PLATFORM_BASE_DOMAINS.some(
+    (base) => domain === base || domain.endsWith(`.${base}`)
+  );
+};
+
 // Admin + teacher navigation items (main domain).
 // Teachers share the admin dashboard; admin-only entries are filtered out by role.
 export const ADMIN_NAVIGATION_ITEMS: NavigationItem[] = [

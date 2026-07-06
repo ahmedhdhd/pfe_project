@@ -23,6 +23,7 @@ import { ErrorMessage } from "@/components/common/error-message";
 import { calculatePasswordStrength } from "@/lib/utils/validation";
 import { MultiStepLoader } from "@/components/ui/multi-step-loader";
 import { CreateOrganizationConfigData } from "@/lib/types/api";
+import { MAIN_DOMAIN } from "@/lib/constants";
 
 function SetPasswordContent() {
   const [showPassword, setShowPassword] = useState(false);
@@ -155,9 +156,9 @@ function SetPasswordContent() {
       organizationData.domain ||
       `${organizationData.name
         .toLowerCase()
-        .replace(/\s+/g, "-")}.teslaacademy.in`;
+        .replace(/\s+/g, "-")}.${MAIN_DOMAIN}`;
 
-    // Extract slug from domain (e.g., "mit.teslaacademy.in" -> "mit")
+    // Extract slug from domain (e.g., "mit.teslaacademy.dedyn.io" -> "mit")
     // Handle cases where domain might be malformed
     const domainParts = domain.split(".");
     const slug =

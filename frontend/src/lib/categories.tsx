@@ -1,5 +1,6 @@
 "use client";
 
+import * as OutlineIcons from "@heroicons/react/24/outline";
 import {
   BookOpen,
   Briefcase,
@@ -77,8 +78,39 @@ export const CATEGORY_ICON_OPTIONS: Array<{
   { value: "Tag", label: "General" },
 ];
 
-export const getCategoryIcon = (iconName?: string | null): LucideIcon =>
-  CATEGORY_ICON_MAP[(iconName as CategoryIconName) || "Tag"] || Tag;
+const HERO_ICONS = OutlineIcons as unknown as Record<string, LucideIcon>;
+
+// Every icon in the project's icon library (Heroicons 24/outline), listed for
+// the category icon picker. Values are stored without the "Icon" suffix.
+export const ALL_CATEGORY_ICONS: Array<{
+  value: string;
+  label: string;
+  Icon: LucideIcon;
+}> = Object.keys(HERO_ICONS)
+  .filter((name) => name.endsWith("Icon"))
+  .map((name) => {
+    const value = name.replace(/Icon$/, "");
+    return {
+      value,
+      label: value.replace(/([a-z0-9])([A-Z])/g, "$1 $2"),
+      Icon: HERO_ICONS[name],
+    };
+  })
+  .sort((a, b) => a.label.localeCompare(b.label));
+
+// Resolves both legacy names ("FlaskConical", "PenTool", ...) and any
+// Heroicons outline name stored without its "Icon" suffix ("AcademicCap").
+export const getCategoryIcon = (iconName?: string | null): LucideIcon => {
+  if (!iconName) return Tag;
+  const legacy = CATEGORY_ICON_MAP[iconName as CategoryIconName];
+  if (legacy) return legacy;
+  return HERO_ICONS[`${iconName}Icon`] || HERO_ICONS[iconName] || Tag;
+};
+
+export const getCategoryIconLabel = (iconName?: string | null): string => {
+  if (!iconName) return "Tag";
+  return iconName.replace(/Icon$/, "").replace(/([a-z0-9])([A-Z])/g, "$1 $2");
+};
 
 export const getCategoryBranch = (category?: CategoryOption | null) => {
   if (!category) {

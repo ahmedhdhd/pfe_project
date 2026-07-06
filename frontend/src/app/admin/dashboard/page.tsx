@@ -34,6 +34,7 @@ import {
   useOrganizationConfigAdmin,
 } from "@/hooks/api";
 import { useRolePermissions } from "@/hooks/common/use-role-permissions";
+import { MAIN_DOMAIN, isPlatformSubdomain } from "@/lib/constants";
 import Link from "next/link";
 
 interface DashboardUser {
@@ -99,24 +100,25 @@ export default function AdminDashboard() {
   useEffect(() => {
     const slug = currentUser?.organizationSlug || configData?.data?.slug;
     const customDomain = configData?.data?.domain;
-    
-    if (customDomain) {
+
+    // Only honor a true customer-owned domain; generated platform subdomains
+    // (possibly stored with an old base domain) are rebuilt from the slug.
+    if (customDomain && !isPlatformSubdomain(customDomain)) {
       setOrgUrl(`https://${customDomain}`);
       return;
     }
-    
+
     if (slug && typeof window !== "undefined") {
       const hostname = window.location.hostname;
       const protocol = window.location.protocol;
       const port = window.location.port ? `:${window.location.port}` : "";
-      
+
       if (hostname === "localhost" || hostname === "127.0.0.1") {
         setOrgUrl(`${protocol}//${slug}.localhost${port}`);
       } else if (hostname.includes("vercel.app")) {
         setOrgUrl(`${protocol}//${hostname}${port}/${slug}`);
       } else {
-        const rootDomain = hostname.replace("www.", "").replace("admin.", ""); 
-        setOrgUrl(`${protocol}//${slug}.${rootDomain}${port}`);
+        setOrgUrl(`https://${slug}.${MAIN_DOMAIN}`);
       }
     }
   }, [currentUser, configData]);

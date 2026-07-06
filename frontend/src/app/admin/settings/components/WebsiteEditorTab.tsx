@@ -32,6 +32,7 @@ import {
 } from "@/components/icons";
 import { FileUpload } from "@/components/common/file-upload";
 import { CreateOrganizationConfigData } from "@/lib/types/api";
+import { PLATFORM_BASE_DOMAINS } from "@/lib/constants";
 
 type UploadedFileData = {
   key: string;
@@ -77,12 +78,7 @@ interface WebsiteEditorTabProps {
 
 // Base domains that serve tenant homepages on subdomains. Must stay in sync
 // with the list in frontend/src/middleware.ts.
-const PREVIEW_BASE_DOMAINS = [
-  "teslaacademy.com",
-  "teslaacademy.in",
-  "teslaacademy.dedyn.io",
-  process.env.NEXT_PUBLIC_MAIN_DOMAIN || "",
-].filter(Boolean);
+const PREVIEW_BASE_DOMAINS = PLATFORM_BASE_DOMAINS;
 
 const FONT_OPTIONS = [
   { value: "Inter, sans-serif", label: "Inter" },

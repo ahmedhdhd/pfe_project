@@ -36,9 +36,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ConfirmationDialog } from "@/components/common/confirmation-dialog";
+import { IconPicker } from "@/components/courses/icon-picker";
 import { cn } from "@/lib/utils";
 import {
-  CATEGORY_ICON_OPTIONS,
   CategoryOption,
   getCategoryColor,
   getCategoryIcon,
@@ -597,30 +597,14 @@ export function CategoryManagement() {
             </div>
 
             <div className="space-y-2">
-              <Label>Icon</Label>
-              <Select
+              <Label htmlFor="new-category-icon">Icon</Label>
+              <IconPicker
+                id="new-category-icon"
                 value={rootForm.icon}
-                onValueChange={(value) =>
+                onChange={(value) =>
                   setRootForm((current) => ({ ...current, icon: value }))
                 }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose icon" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORY_ICON_OPTIONS.map((option) => {
-                    const Icon = getCategoryIcon(option.value);
-                    return (
-                      <SelectItem key={option.value} value={option.value}>
-                        <span className="flex items-center gap-2">
-                          <Icon className="h-4 w-4" />
-                          {option.label}
-                        </span>
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">
@@ -690,31 +674,14 @@ export function CategoryManagement() {
 
               <div className="space-y-2">
                 <Label>Icon</Label>
-                <Select
+                <IconPicker
                   value={editingCategory.icon}
-                  onValueChange={(value) =>
+                  onChange={(value) =>
                     setEditingCategory((current) =>
                       current ? { ...current, icon: value } : current
                     )
                   }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose icon" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORY_ICON_OPTIONS.map((option) => {
-                      const Icon = getCategoryIcon(option.value);
-                      return (
-                        <SelectItem key={option.value} value={option.value}>
-                          <span className="flex items-center gap-2">
-                            <Icon className="h-4 w-4" />
-                            {option.label}
-                          </span>
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
+                />
               </div>
 
               <div className="space-y-2">
