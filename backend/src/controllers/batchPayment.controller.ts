@@ -159,7 +159,10 @@ export const verifyBatchPayment = async (req: AuthRequest, res: Response, next: 
       where: { organizationId: order.organizationId },
       select: { paymentGateway: true, stripeAccountId: true } as any,
     }) as any;
-    const useStripe = order.paymentProvider === 'STRIPE_CONNECT';
+    const useStripe =
+      order.paymentProvider === 'STRIPE_CONNECT' ||
+      order.paymentProvider === 'STRIPE' ||
+      order.providerOrderId.startsWith('cs_');
 
     if (useStripe) {
       const payment = await retrieveStripeCheckoutSession(order.providerOrderId);
@@ -193,7 +196,6 @@ export const verifyBatchPayment = async (req: AuthRequest, res: Response, next: 
       await prisma.order.update({
         where: { id: orderId },
         data: {
-          paymentProvider: 'STRIPE_CONNECT',
           paymentStatus: 'SUCCESS',
           providerPaymentId: payment.payment_intent || null,
           failureReason: null,
@@ -397,7 +399,10 @@ export const konnectVerifyBatchPayment = async (req: AuthRequest, res: Response,
       where: { organizationId: order.organizationId },
       select: { paymentGateway: true, stripeAccountId: true } as any,
     }) as any;
-    const useStripe = order.paymentProvider === 'STRIPE_CONNECT';
+    const useStripe =
+      order.paymentProvider === 'STRIPE_CONNECT' ||
+      order.paymentProvider === 'STRIPE' ||
+      paymentRef.startsWith('cs_');
 
     if (useStripe) {
       const payment = await retrieveStripeCheckoutSession(paymentRef);
@@ -427,7 +432,6 @@ export const konnectVerifyBatchPayment = async (req: AuthRequest, res: Response,
       await prisma.order.update({
         where: { id: order.id },
         data: {
-          paymentProvider: 'STRIPE_CONNECT',
           paymentStatus: 'SUCCESS',
           providerPaymentId: payment.payment_intent || null,
           failureReason: null,
