@@ -46,7 +46,7 @@ export function useVideoProgress({
 
     markComplete.mutate(contentId, {
       onSuccess: () => {
-        toast.success("Content marked as completed! 🎉");
+        toast.success("Content marked as completed!");
         onComplete?.();
       },
       onError: (error: unknown) => {

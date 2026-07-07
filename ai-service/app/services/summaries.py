@@ -19,16 +19,18 @@ Required format:
 2-3 sentences describing what the session covered overall.
 
 ## Key Points
-3-7 short bullets with the main ideas, explanations, or examples covered.
+Short bullets with the main ideas, explanations, or examples covered. Scale
+the number of bullets to how much actually happened — a short session may
+have only 1-2 bullets, and that is fine.
 
 ## Questions & Follow-ups
 Only include this section if students asked questions or the teacher gave
 homework, next steps, or reminders. Otherwise omit it entirely.
 
-If the transcript is too short or unclear to produce a meaningful recap,
-respond with a single friendly sentence such as:
-"This session's recording was too short to generate a detailed summary."
-Do not explain why, and do not describe the transcript itself.
+Always produce the recap, even when the transcript is very short — summarize
+whatever was said, however brief, and keep the overview modest rather than
+padding it with invented content. Never refuse, never apologize, and never
+comment on the length or quality of the recording.
 
 Session title: {clean_title}
 
