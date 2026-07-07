@@ -415,7 +415,7 @@ export default function StudentCheckoutPage() {
                 <Separator />
 
                 <div className="space-y-3">
-                  <Label>Payment way</Label>
+                  <Label>Payment method</Label>
                   <RadioGroup
                     value={paymentMethod}
                     onValueChange={(value) =>
@@ -426,9 +426,9 @@ export default function StudentCheckoutPage() {
                     <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/60 p-4">
                       <RadioGroupItem value="gateway" id="payment-gateway" />
                       <div className="space-y-1">
-                        <p className="font-medium">Gateway</p>
+                        <p className="font-medium">Stripe</p>
                         <p className="text-sm text-muted-foreground">
-                          Pay directly using the organization payment gateway.
+                          Pay securely online by card via Stripe.
                         </p>
                       </div>
                     </label>
@@ -438,26 +438,26 @@ export default function StudentCheckoutPage() {
                         id="payment-bank-transfer"
                       />
                       <div className="min-w-0 flex-1 space-y-1">
-                        <p className="font-medium">Virement bancaire</p>
+                        <p className="font-medium">Bank transfer</p>
                         <p className="text-sm text-muted-foreground">
-                          Create the order first, then upload your payment proof.
+                          Place the order, make the transfer, then upload your
+                          payment proof from the orders page.
                         </p>
-                        {paymentMethod === "bank_transfer" &&
-                          (bankTransferRib ? (
-                            <div className="mt-2 rounded-lg bg-muted/60 p-3 text-sm">
-                              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                                Transfer to this RIB
-                              </p>
-                              <p className="mt-1 break-all font-mono font-medium">
-                                {bankTransferRib}
-                              </p>
-                            </div>
-                          ) : (
-                            <p className="mt-2 text-xs text-muted-foreground">
-                              Contact the organization for the bank account
-                              details.
+                        {bankTransferRib ? (
+                          <div className="mt-2 rounded-lg bg-muted/60 p-3 text-sm">
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                              Transfer to this RIB
                             </p>
-                          ))}
+                            <p className="mt-1 break-all font-mono font-medium">
+                              {bankTransferRib}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            Contact the organization for the bank account
+                            details.
+                          </p>
+                        )}
                       </div>
                     </label>
                     <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/60 p-4">
@@ -466,26 +466,25 @@ export default function StudentCheckoutPage() {
                         id="payment-mandat"
                       />
                       <div className="min-w-0 flex-1 space-y-1">
-                        <p className="font-medium">Mandat minute poste</p>
+                        <p className="font-medium">Mandat minute</p>
                         <p className="text-sm text-muted-foreground">
-                          Create the order first, then upload the justification
-                          image from the orders page.
+                          Place the order, send the mandat minute, then upload
+                          the receipt from the orders page.
                         </p>
-                        {paymentMethod === "mandat_minute_poste" &&
-                          (mandatMinuteRecipient ? (
-                            <div className="mt-2 rounded-lg bg-muted/60 p-3 text-sm">
-                              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                                Send the mandat minute to
-                              </p>
-                              <p className="mt-1 font-medium">
-                                {mandatMinuteRecipient}
-                              </p>
-                            </div>
-                          ) : (
-                            <p className="mt-2 text-xs text-muted-foreground">
-                              Contact the organization for the recipient name.
+                        {mandatMinuteRecipient ? (
+                          <div className="mt-2 rounded-lg bg-muted/60 p-3 text-sm">
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                              Send the mandat minute to
                             </p>
-                          ))}
+                            <p className="mt-1 font-medium">
+                              {mandatMinuteRecipient}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            Contact the organization for the recipient name.
+                          </p>
+                        )}
                       </div>
                     </label>
                   </RadioGroup>
